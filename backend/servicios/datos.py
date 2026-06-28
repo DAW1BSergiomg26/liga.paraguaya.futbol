@@ -24,3 +24,35 @@ def obtener_clubes():
 
 def obtener_partidos():
     return cargar_json("partidos_demo.json")
+
+
+def buscar_club_por_id(club_id: str):
+    clubes = obtener_clubes()
+
+    if isinstance(clubes, dict) and clubes.get("error"):
+        return clubes
+
+    for club in clubes:
+        if club["id"] == club_id:
+            return club
+
+    return {
+        "error": True,
+        "mensaje": f"No se encontró el club con id: {club_id}"
+    }
+
+
+def buscar_partido_por_id(partido_id: str):
+    partidos = obtener_partidos()
+
+    if isinstance(partidos, dict) and partidos.get("error"):
+        return partidos
+
+    for partido in partidos:
+        if partido["id"] == partido_id:
+            return partido
+
+    return {
+        "error": True,
+        "mensaje": f"No se encontró el partido con id: {partido_id}"
+    }
