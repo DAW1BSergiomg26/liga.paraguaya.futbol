@@ -1,0 +1,34 @@
+﻿[
+  {
+    "id": "olimpia",
+    "nombre": "Club Olimpia",
+    "ciudad": "Asunción",
+    "apodo": "El Decano",
+    "colores": ["blanco", "negro"],
+    "estadio": "Manuel Ferreira"
+  },
+  {
+    "id": "cerro-porteno",
+    "nombre": "Club Cerro Porteño",
+    "ciudad": "Asunción",
+    "apodo": "El Ciclón",
+    "colores": ["azul", "rojo"],
+    "estadio": "General Pablo Rojas"
+  },
+  {
+    "id": "libertad",
+    "nombre": "Club Libertad",
+    "ciudad": "Asunción",
+    "apodo": "El Gumarelo",
+    "colores": ["blanco", "negro"],
+    "estadio": "La Huerta"
+  },
+  {
+    "id": "guarani",
+    "nombre": "Club Guaraní",
+    "ciudad": "Asunción",
+    "apodo": "El Aborigen",
+    "colores": ["amarillo", "negro"],
+    "estadio": "Rogelio Silvino Livieres"
+  }
+]

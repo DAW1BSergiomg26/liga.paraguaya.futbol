@@ -1,0 +1,38 @@
+﻿# Entornos virtuales
+.venv/
+venv/
+env/
+
+# Laboratorio externo local
+soccerdata-base/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+
+# Cachés y temporales
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.cache/
+tmp/
+temp/
+
+# Node / Frontend
+node_modules/
+.next/
+dist/
+build/
+
+# Sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Variables privadas
+.env
+.env.local
+.env.*.local

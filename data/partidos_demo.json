@@ -1,0 +1,22 @@
+﻿[
+  {
+    "id": "apertura-2026-001",
+    "torneo": "Apertura 2026",
+    "fecha": "2026-02-01",
+    "local": "olimpia",
+    "visitante": "cerro-porteno",
+    "goles_local": null,
+    "goles_visitante": null,
+    "estado": "programado"
+  },
+  {
+    "id": "apertura-2026-002",
+    "torneo": "Apertura 2026",
+    "fecha": "2026-02-02",
+    "local": "libertad",
+    "visitante": "guarani",
+    "goles_local": null,
+    "goles_visitante": null,
+    "estado": "programado"
+  }
+]
