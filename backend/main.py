@@ -2,14 +2,15 @@
 from backend.servicios.datos import (
     obtener_clubes,
     obtener_partidos,
+    obtener_tabla,
     buscar_club_por_id,
     buscar_partido_por_id,
 )
 
 app = FastAPI(
     title="liga.paraguaya.futbol API",
-    description="API inicial para clubes, partidos y datos base de la Liga Paraguaya de Fútbol.",
-    version="0.4.0"
+    description="API inicial para clubes, partidos, tabla y datos base de la Liga Paraguaya de Fútbol.",
+    version="0.5.0"
 )
 
 
@@ -28,13 +29,14 @@ def inicio():
     return {
         "proyecto": "liga.paraguaya.futbol",
         "estado": "API funcionando",
-        "version": "0.4.0",
+        "version": "0.5.0",
         "endpoints": [
             "/health",
             "/clubes",
             "/clubes/{club_id}",
             "/partidos",
-            "/partidos/{partido_id}"
+            "/partidos/{partido_id}",
+            "/tabla"
         ]
     }
 
@@ -67,3 +69,8 @@ def listar_partidos():
 def detalle_partido(partido_id: str):
     resultado = buscar_partido_por_id(partido_id)
     return validar_respuesta(resultado)
+
+
+@app.get("/tabla")
+def tabla_posiciones():
+    return obtener_tabla()

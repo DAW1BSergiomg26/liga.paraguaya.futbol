@@ -26,6 +26,10 @@ def obtener_partidos():
     return cargar_json("partidos_demo.json")
 
 
+def obtener_tabla():
+    return cargar_json("tabla_posiciones_demo.json")
+
+
 def buscar_club_por_id(club_id: str):
     clubes = obtener_clubes()
 

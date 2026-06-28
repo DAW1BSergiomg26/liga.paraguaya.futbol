@@ -1,0 +1,54 @@
+﻿[
+  {
+    "posicion": 1,
+    "club_id": "olimpia",
+    "club": "Club Olimpia",
+    "pj": 2,
+    "pg": 2,
+    "pe": 0,
+    "pp": 0,
+    "gf": 5,
+    "gc": 1,
+    "dg": 4,
+    "puntos": 6
+  },
+  {
+    "posicion": 2,
+    "club_id": "cerro-porteno",
+    "club": "Club Cerro Porteño",
+    "pj": 2,
+    "pg": 1,
+    "pe": 1,
+    "pp": 0,
+    "gf": 3,
+    "gc": 1,
+    "dg": 2,
+    "puntos": 4
+  },
+  {
+    "posicion": 3,
+    "club_id": "libertad",
+    "club": "Club Libertad",
+    "pj": 2,
+    "pg": 1,
+    "pe": 0,
+    "pp": 1,
+    "gf": 2,
+    "gc": 2,
+    "dg": 0,
+    "puntos": 3
+  },
+  {
+    "posicion": 4,
+    "club_id": "guarani",
+    "club": "Club Guaraní",
+    "pj": 2,
+    "pg": 0,
+    "pe": 1,
+    "pp": 1,
+    "gf": 1,
+    "gc": 3,
+    "dg": -2,
+    "puntos": 1
+  }
+]
