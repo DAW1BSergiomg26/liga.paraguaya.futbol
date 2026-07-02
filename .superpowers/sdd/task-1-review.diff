@@ -1,0 +1,106 @@
+0085030 feat(backend): core config, database and dependencies
+ backend/app/__init__.py          |  0
+ backend/app/core/__init__.py     |  0
+ backend/app/core/config.py       | 21 +++++++++++++++++++++
+ backend/app/core/database.py     | 22 ++++++++++++++++++++++
+ backend/app/core/dependencies.py | 15 +++++++++++++++
+ backend/requirements.txt         | 10 ++++++++++
+ 6 files changed, 68 insertions(+)
+diff --git a/backend/app/__init__.py b/backend/app/__init__.py
+new file mode 100644
+index 0000000..e69de29
+diff --git a/backend/app/core/__init__.py b/backend/app/core/__init__.py
+new file mode 100644
+index 0000000..e69de29
+diff --git a/backend/app/core/config.py b/backend/app/core/config.py
+new file mode 100644
+index 0000000..81a6432
+--- /dev/null
++++ b/backend/app/core/config.py
+@@ -0,0 +1,21 @@
++from pydantic_settings import BaseSettings
++
++
++class Settings(BaseSettings):
++    app_name: str = "liga.paraguaya.futbol API"
++    app_version: str = "0.6.0"
++    debug: bool = True
++
++    database_url: str = "sqlite+aiosqlite:///./data/liga.db"
++    cors_origins: str = "http://localhost:3000,http://localhost:5173"
++
++    api_football_key: str = ""
++
++    @property
++    def cors_origin_list(self) -> list[str]:
++        return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
++
++    model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
++
++
++settings = Settings()
+diff --git a/backend/app/core/database.py b/backend/app/core/database.py
+new file mode 100644
+index 0000000..1f70b85
+--- /dev/null
++++ b/backend/app/core/database.py
+@@ -0,0 +1,22 @@
++from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
++from sqlalchemy.orm import DeclarativeBase
++
++from backend.app.core.config import settings
++
++engine = create_async_engine(settings.database_url, echo=settings.debug)
++async_session = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
++
++
++class Base(DeclarativeBase):
++    pass
++
++
++async def get_connection():
++    async with engine.begin() as conn:
++        yield conn
++
++
++async def init_db():
++    async with engine.begin() as conn:
++        from backend.app.models import club, partido, tabla
++        await conn.run_sync(Base.metadata.create_all)
+diff --git a/backend/app/core/dependencies.py b/backend/app/core/dependencies.py
+new file mode 100644
+index 0000000..2ee461d
+--- /dev/null
++++ b/backend/app/core/dependencies.py
+@@ -0,0 +1,15 @@
++from collections.abc import AsyncIterator
++
++from sqlalchemy.ext.asyncio import AsyncSession
++
++from backend.app.core.database import async_session
++
++
++async def get_db() -> AsyncIterator[AsyncSession]:
++    async with async_session() as session:
++        try:
++            yield session
++            await session.commit()
++        except Exception:
++            await session.rollback()
++            raise
+diff --git a/backend/requirements.txt b/backend/requirements.txt
+new file mode 100644
+index 0000000..2a99a54
+--- /dev/null
++++ b/backend/requirements.txt
+@@ -0,0 +1,10 @@
++fastapi>=0.115.0
++uvicorn[standard]>=0.30.0
++sqlalchemy[asyncio]>=2.0.0
++aiosqlite>=0.20.0
++pydantic>=2.0.0
++pydantic-settings>=2.0.0
++alembic>=1.13.0
++httpx>=0.27.0
++pytest>=8.0.0
++pytest-asyncio>=0.24.0
