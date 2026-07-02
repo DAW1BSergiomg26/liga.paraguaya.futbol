@@ -1,5 +1,5 @@
 from sqlalchemy import ForeignKey, Integer, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from backend.app.core.database import Base
 
@@ -11,6 +11,7 @@ class TablaPosicion(Base):
     torneo: Mapped[str] = mapped_column(String(100))
     jornada: Mapped[int] = mapped_column(Integer, default=1)
     club_id: Mapped[str] = mapped_column(ForeignKey("clubes.id"))
+    club_rel = relationship("Club")
     posicion: Mapped[int] = mapped_column(Integer)
     pj: Mapped[int] = mapped_column(Integer, default=0)
     pg: Mapped[int] = mapped_column(Integer, default=0)
