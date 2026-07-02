@@ -1,65 +1,99 @@
-import Image from "next/image";
+import { getClubes, getPartidos, getTabla } from "@/lib/api";
+import Link from "next/link";
 
-export default function Home() {
+export default async function HomePage() {
+  const [clubes, partidos, tabla] = await Promise.all([
+    getClubes().catch(() => []),
+    getPartidos().catch(() => []),
+    getTabla().catch(() => []),
+  ]);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="max-w-6xl mx-auto px-4 py-12">
+      {/* Hero */}
+      <section className="mb-12 p-8 rounded-2xl border border-white/10 bg-[#0a1628]/80 shadow-xl">
+        <p className="text-[#76e4f7] text-sm font-bold uppercase tracking-widest mb-3">
+          Proyecto DAW · Next.js + FastAPI
+        </p>
+        <h1 className="text-4xl sm:text-6xl font-bold leading-tight mb-4">
+          Liga Paraguaya de Fútbol
+        </h1>
+        <p className="text-gray-400 max-w-xl text-lg">
+          Plataforma de datos, clubes, partidos y tabla de posiciones del fútbol paraguayo.
+        </p>
+        <div className="inline-flex items-center gap-2 mt-6 px-4 py-2 rounded-full bg-green-900/30 text-green-300 border border-green-500/30 text-sm">
+          <span className="w-2.5 h-2.5 rounded-full bg-green-400 shadow-lg shadow-green-400/50" />
+          Backend activo correctamente
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      {/* Quick Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-12">
+        <div className="p-6 rounded-xl bg-[#0a1628]/60 border border-white/5 text-center">
+          <p className="text-3xl font-bold text-[#76e4f7]">{clubes.length}</p>
+          <p className="text-gray-400 mt-1">Clubes</p>
         </div>
-      </main>
+        <div className="p-6 rounded-xl bg-[#0a1628]/60 border border-white/5 text-center">
+          <p className="text-3xl font-bold text-[#76e4f7]">{partidos.length}</p>
+          <p className="text-gray-400 mt-1">Partidos</p>
+        </div>
+        <div className="p-6 rounded-xl bg-[#0a1628]/60 border border-white/5 text-center">
+          <p className="text-3xl font-bold text-[#76e4f7]">{tabla.length}</p>
+          <p className="text-gray-400 mt-1">Equipos en tabla</p>
+        </div>
+      </div>
+
+      {/* Top Table */}
+      {tabla.length > 0 && (
+        <section className="mb-12">
+          <h2 className="text-2xl font-bold mb-4">Tabla de Posiciones</h2>
+          <div className="overflow-x-auto rounded-xl border border-white/10 bg-[#0a1628]/60">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-white/10 text-gray-400 uppercase text-xs">
+                  <th className="p-4 text-left">Pos</th>
+                  <th className="p-4 text-left">Club</th>
+                  <th className="p-4">PJ</th>
+                  <th className="p-4">PG</th>
+                  <th className="p-4">PE</th>
+                  <th className="p-4">PP</th>
+                  <th className="p-4">DG</th>
+                  <th className="p-4">Pts</th>
+                </tr>
+              </thead>
+              <tbody>
+                {tabla.slice(0, 4).map((row) => (
+                  <tr key={row.club_id} className="border-b border-white/5 hover:bg-white/5">
+                    <td className="p-4 font-bold">{row.posicion}</td>
+                    <td className="p-4">{row.club}</td>
+                    <td className="p-4 text-center">{row.pj}</td>
+                    <td className="p-4 text-center">{row.pg}</td>
+                    <td className="p-4 text-center">{row.pe}</td>
+                    <td className="p-4 text-center">{row.pp}</td>
+                    <td className="p-4 text-center">{row.dg}</td>
+                    <td className="p-4 text-center font-bold text-[#76e4f7]">{row.puntos}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="mt-3 text-right">
+            <Link href="/tabla" className="text-sm text-[#76e4f7] hover:underline">Ver tabla completa →</Link>
+          </div>
+        </section>
+      )}
+
+      {/* Quick Links */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <Link href="/clubes" className="p-6 rounded-xl border border-white/10 bg-[#0a1628]/60 hover:bg-[#0a1628] transition">
+          <h3 className="text-lg font-bold mb-2">Clubes</h3>
+          <p className="text-gray-400 text-sm">Explora todos los clubes de la liga paraguaya</p>
+        </Link>
+        <Link href="/partidos" className="p-6 rounded-xl border border-white/10 bg-[#0a1628]/60 hover:bg-[#0a1628] transition">
+          <h3 className="text-lg font-bold mb-2">Partidos</h3>
+          <p className="text-gray-400 text-sm">Calendario y resultados de la temporada</p>
+        </Link>
+      </div>
     </div>
   );
 }
