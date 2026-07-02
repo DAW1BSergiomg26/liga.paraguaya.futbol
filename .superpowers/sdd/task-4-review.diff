@@ -1,0 +1,126 @@
+a73bff5 feat(backend): services layer
+ backend/app/services/__init__.py        |  0
+ backend/app/services/club_service.py    | 25 ++++++++++++++++
+ backend/app/services/partido_service.py | 52 +++++++++++++++++++++++++++++++++
+ backend/app/services/tabla_service.py   | 22 ++++++++++++++
+ 4 files changed, 99 insertions(+)
+diff --git a/backend/app/services/__init__.py b/backend/app/services/__init__.py
+new file mode 100644
+index 0000000..e69de29
+diff --git a/backend/app/services/club_service.py b/backend/app/services/club_service.py
+new file mode 100644
+index 0000000..8b91275
+--- /dev/null
++++ b/backend/app/services/club_service.py
+@@ -0,0 +1,25 @@
++from typing import Optional
++
++from sqlalchemy import select
++from sqlalchemy.ext.asyncio import AsyncSession
++
++from backend.app.models.club import Club
++from backend.app.schemas.club import ClubOut
++
++
++class ClubService:
++
++    @staticmethod
++    async def get_all(db: AsyncSession, ciudad: Optional[str] = None) -> list[ClubOut]:
++        stmt = select(Club)
++        if ciudad:
++            stmt = stmt.where(Club.ciudad == ciudad)
++        result = await db.execute(stmt)
++        clubs = result.scalars().all()
++        return [ClubOut.model_validate(c) for c in clubs]
++
++    @staticmethod
++    async def get_by_id(db: AsyncSession, club_id: str) -> Optional[ClubOut]:
++        result = await db.execute(select(Club).where(Club.id == club_id))
++        club = result.scalar_one_or_none()
++        return ClubOut.model_validate(club) if club else None
+diff --git a/backend/app/services/partido_service.py b/backend/app/services/partido_service.py
+new file mode 100644
+index 0000000..ceb19b7
+--- /dev/null
++++ b/backend/app/services/partido_service.py
+@@ -0,0 +1,52 @@
++from typing import Optional
++
++from sqlalchemy import select
++from sqlalchemy.ext.asyncio import AsyncSession
++from sqlalchemy.orm import selectinload
++
++from backend.app.models.partido import Partido
++from backend.app.schemas.partido import PartidoDetailOut, PartidoOut
++
++
++class PartidoService:
++
++    @staticmethod
++    async def get_all(
++        db: AsyncSession,
++        torneo: Optional[str] = None,
++        estado: Optional[str] = None,
++    ) -> list[PartidoOut]:
++        stmt = select(Partido)
++        if torneo:
++            stmt = stmt.where(Partido.torneo == torneo)
++        if estado:
++            stmt = stmt.where(Partido.estado == estado)
++        stmt = stmt.order_by(Partido.fecha.desc())
++        result = await db.execute(stmt)
++        partidos = result.scalars().all()
++        return [PartidoOut.model_validate(p) for p in partidos]
++
++    @staticmethod
++    async def get_by_id(db: AsyncSession, partido_id: str) -> Optional[PartidoDetailOut]:
++        stmt = (
++            select(Partido)
++            .where(Partido.id == partido_id)
++            .options(selectinload(Partido.local), selectinload(Partido.visitante))
++        )
++        result = await db.execute(stmt)
++        partido = result.scalar_one_or_none()
++        if not partido:
++            return None
++        return PartidoDetailOut(
++            id=partido.id,
++            torneo=partido.torneo,
++            fecha=partido.fecha,
++            jornada=partido.jornada,
++            local_id=partido.local_id,
++            visitante_id=partido.visitante_id,
++            goles_local=partido.goles_local,
++            goles_visitante=partido.goles_visitante,
++            estado=partido.estado,
++            local_nombre=partido.local.nombre if partido.local else "",
++            visitante_nombre=partido.visitante.nombre if partido.visitante else "",
++        )
+diff --git a/backend/app/services/tabla_service.py b/backend/app/services/tabla_service.py
+new file mode 100644
+index 0000000..7c350ca
+--- /dev/null
++++ b/backend/app/services/tabla_service.py
+@@ -0,0 +1,22 @@
++from typing import Optional
++
++from sqlalchemy import select
++from sqlalchemy.ext.asyncio import AsyncSession
++
++from backend.app.models.tabla import TablaPosicion
++from backend.app.schemas.tabla import TablaRowOut
++
++
++class TablaService:
++
++    @staticmethod
++    async def get_table(
++        db: AsyncSession,
++        torneo: Optional[str] = None,
++    ) -> list[TablaRowOut]:
++        stmt = select(TablaPosicion).order_by(TablaPosicion.posicion)
++        if torneo:
++            stmt = stmt.where(TablaPosicion.torneo == torneo)
++        result = await db.execute(stmt)
++        rows = result.scalars().all()
++        return [TablaRowOut.model_validate(r) for r in rows]
