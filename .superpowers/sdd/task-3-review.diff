@@ -1,0 +1,83 @@
+0f2ce9d feat(backend): Pydantic schemas
+ backend/app/schemas/__init__.py |  0
+ backend/app/schemas/club.py     | 16 ++++++++++++++++
+ backend/app/schemas/partido.py  | 23 +++++++++++++++++++++++
+ backend/app/schemas/tabla.py    | 17 +++++++++++++++++
+ 4 files changed, 56 insertions(+)
+diff --git a/backend/app/schemas/__init__.py b/backend/app/schemas/__init__.py
+new file mode 100644
+index 0000000..e69de29
+diff --git a/backend/app/schemas/club.py b/backend/app/schemas/club.py
+new file mode 100644
+index 0000000..033474b
+--- /dev/null
++++ b/backend/app/schemas/club.py
+@@ -0,0 +1,16 @@
++from pydantic import BaseModel
++
++
++class ClubOut(BaseModel):
++    id: str
++    nombre: str
++    ciudad: str
++    apodo: str
++    colores: list[str]
++    estadio: str
++
++    model_config = {"from_attributes": True}
++
++
++class ClubDetailOut(ClubOut):
++    pass
+diff --git a/backend/app/schemas/partido.py b/backend/app/schemas/partido.py
+new file mode 100644
+index 0000000..f8255cc
+--- /dev/null
++++ b/backend/app/schemas/partido.py
+@@ -0,0 +1,23 @@
++from datetime import date
++from typing import Optional
++
++from pydantic import BaseModel
++
++
++class PartidoOut(BaseModel):
++    id: str
++    torneo: str
++    fecha: date
++    jornada: int
++    local_id: str
++    visitante_id: str
++    goles_local: Optional[int] = None
++    goles_visitante: Optional[int] = None
++    estado: str
++
++    model_config = {"from_attributes": True}
++
++
++class PartidoDetailOut(PartidoOut):
++    local_nombre: str = ""
++    visitante_nombre: str = ""
+diff --git a/backend/app/schemas/tabla.py b/backend/app/schemas/tabla.py
+new file mode 100644
+index 0000000..ebc44bb
+--- /dev/null
++++ b/backend/app/schemas/tabla.py
+@@ -0,0 +1,17 @@
++from pydantic import BaseModel
++
++
++class TablaRowOut(BaseModel):
++    posicion: int
++    club_id: str
++    club: str
++    pj: int
++    pg: int
++    pe: int
++    pp: int
++    gf: int
++    gc: int
++    dg: int
++    puntos: int
++
++    model_config = {"from_attributes": True}
