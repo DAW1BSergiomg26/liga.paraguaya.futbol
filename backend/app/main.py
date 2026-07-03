@@ -2,15 +2,25 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import select
 
 from backend.app.api import clubes, health, partidos, tabla
 from backend.app.core.config import settings
-from backend.app.core.database import init_db
+from backend.app.core.database import async_session, init_db
+from backend.app.models.club import Club
+from backend.app.scripts.seed import seed_clubes, seed_partidos, seed_tabla
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
+    async with async_session() as db:
+        result = await db.execute(select(Club).limit(1))
+        if result.scalar_one_or_none() is None:
+            await seed_clubes(db)
+            await seed_partidos(db)
+            await seed_tabla(db)
+            await db.commit()
     yield
 
 
