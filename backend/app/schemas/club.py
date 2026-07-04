@@ -8,9 +8,13 @@ class ClubOut(BaseModel):
     apodo: str
     colores: list[str]
     estadio: str
+    capacidad: int
+    fundacion: int
+    escudo: str
 
     model_config = {"from_attributes": True}
 
 
 class ClubDetailOut(ClubOut):
-    pass
+    direccion: str
+    camiseta: str

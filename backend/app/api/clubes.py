@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.app.core.dependencies import get_db
-from backend.app.schemas.club import ClubOut
+from backend.app.schemas.club import ClubDetailOut, ClubOut
 from backend.app.services.club_service import ClubService
 
 router = APIRouter(prefix="/api/v1/clubes", tags=["clubes"])
@@ -18,7 +18,7 @@ async def listar_clubes(
     return await ClubService.get_all(db, ciudad=ciudad)
 
 
-@router.get("/{club_id}", response_model=ClubOut)
+@router.get("/{club_id}", response_model=ClubDetailOut)
 async def detalle_club(
     club_id: str,
     db: AsyncSession = Depends(get_db),

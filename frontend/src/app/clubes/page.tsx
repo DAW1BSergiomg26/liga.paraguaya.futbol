@@ -1,0 +1,70 @@
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
+import { getClubes } from "@/lib/api";
+import type { Club } from "@/types";
+import Link from "next/link";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import ErrorMessage from "@/components/ui/ErrorMessage";
+
+export default function ClubesPage() {
+  const { data: clubes, isLoading, error } = useQuery<Club[]>({
+    queryKey: ["clubes"],
+    queryFn: () => getClubes(),
+  });
+
+  if (isLoading) return <LoadingSpinner text="Cargando clubes..." />;
+
+  if (error) return <ErrorMessage message="Error al cargar los clubes" />;
+
+  if (!clubes || clubes.length === 0) {
+    return (
+      <div className="max-w-6xl mx-auto px-4 py-12">
+        <h1 className="text-3xl font-bold mb-8">Club de la Liga Paraguaya</h1>
+        <div className="text-center py-16 text-gray-400">
+          <p>No hay clubes registrados actualmente.</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-6xl mx-auto px-4 py-12">
+      <h1 className="text-3xl font-bold mb-8">Club de la Liga Paraguaya</h1>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {clubes.map((club) => (
+          <Link
+            key={club.id}
+            href={`/clubes/${club.id}`}
+            className="p-6 rounded-xl border border-white/10 bg-[#0a1628]/60 hover:bg-[#0a1628] transition block"
+          >
+            <div className="flex items-center gap-4 mb-3">
+              {club.escudo && (
+                <img src={club.escudo} alt={club.nombre} className="w-12 h-12 object-contain" />
+              )}
+              <h2 className="text-xl font-bold">{club.nombre}</h2>
+            </div>
+            <div className="space-y-2 text-sm text-gray-400">
+              <p><span className="text-gray-500">Ciudad:</span> {club.ciudad}</p>
+              <p><span className="text-gray-500">Apodo:</span> {club.apodo}</p>
+              <p><span className="text-gray-500">Estadio:</span> {club.estadio}</p>
+              <p><span className="text-gray-500">Capacidad:</span> {club.capacidad.toLocaleString()} espectadores</p>
+              <p><span className="text-gray-500">Fundación:</span> {club.fundacion}</p>
+              <div className="flex items-center gap-2 pt-2">
+                <span className="text-gray-500">Colores:</span>
+                {(club.colores || []).map((color, i) => (
+                  <span
+                    key={i}
+                    className="w-5 h-5 rounded-full border border-white/20 inline-block"
+                    style={{ backgroundColor: color }}
+                    title={color}
+                  />
+                ))}
+              </div>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}

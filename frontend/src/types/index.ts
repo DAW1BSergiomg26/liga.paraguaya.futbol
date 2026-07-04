@@ -5,6 +5,14 @@ export interface Club {
   apodo: string;
   colores: string[];
   estadio: string;
+  capacidad: number;
+  fundacion: number;
+  escudo: string;
+}
+
+export interface ClubDetail extends Club {
+  direccion: string;
+  camiseta: string;
 }
 
 export interface Partido {
