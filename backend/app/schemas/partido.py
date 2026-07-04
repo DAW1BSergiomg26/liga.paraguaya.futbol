@@ -21,3 +21,9 @@ class PartidoOut(BaseModel):
 class PartidoDetailOut(PartidoOut):
     local_nombre: str = ""
     visitante_nombre: str = ""
+
+
+class PartidoUpdate(BaseModel):
+    goles_local: Optional[int] = None
+    goles_visitante: Optional[int] = None
+    estado: Optional[str] = None

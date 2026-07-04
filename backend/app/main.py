@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import select
 
-from backend.app.api import clubes, health, partidos, tabla
+from backend.app.api import admin, clubes, health, partidos, tabla
 from backend.app.core.config import settings
 from backend.app.core.database import async_session, init_db
 from backend.app.models.club import Club
@@ -43,6 +43,7 @@ app.include_router(health.router)
 app.include_router(clubes.router)
 app.include_router(partidos.router)
 app.include_router(tabla.router)
+app.include_router(admin.router)
 
 
 @app.get("/")

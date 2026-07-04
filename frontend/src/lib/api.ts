@@ -35,3 +35,23 @@ export async function getTabla(torneo?: string): Promise<TablaRow[]> {
   const params = torneo ? `?torneo=${encodeURIComponent(torneo)}` : "";
   return fetchJSON<TablaRow[]>(`/api/v1/tabla${params}`);
 }
+
+export async function updatePartido(
+  id: string,
+  data: { goles_local?: number | null; goles_visitante?: number | null; estado?: string },
+  apiKey: string
+): Promise<PartidoDetail> {
+  const res = await fetch(`${API_URL}/api/v1/admin/partidos/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      "X-API-Key": apiKey,
+    },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: "Error desconocido" }));
+    throw new Error(err.detail || `Error ${res.status}`);
+  }
+  return res.json();
+}
