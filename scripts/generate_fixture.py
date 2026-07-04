@@ -218,11 +218,29 @@ for jornada_idx, ronda in enumerate(ronda_vuelta):
         match_id += 1
 
 clausura_start = date(2026, 7, 18)
-c_rounds = round_robin(clubes[:])
 
-for jornada_idx, ronda in enumerate(c_rounds[:5]):
+c_rounds_ida = round_robin(clubes[:])
+for jornada_idx, ronda in enumerate(c_rounds_ida):
     jornada = jornada_idx + 1
     fecha = clausura_start + timedelta(weeks=jornada_idx)
+    for local, visitante in ronda:
+        partidos.append({
+            "id": f"clausura-2026-{match_id:03d}",
+            "torneo": "Clausura 2026",
+            "fecha": fecha.isoformat(),
+            "jornada": jornada,
+            "local": local,
+            "visitante": visitante,
+            "goles_local": None,
+            "goles_visitante": None,
+            "estado": "programado"
+        })
+        match_id += 1
+
+c_rounds_vuelta = round_robin(clubes_rev)
+for jornada_idx, ronda in enumerate(c_rounds_vuelta):
+    jornada = jornada_idx + 12
+    fecha = clausura_start + timedelta(weeks=jornada_idx + 11)
     for local, visitante in ronda:
         partidos.append({
             "id": f"clausura-2026-{match_id:03d}",
