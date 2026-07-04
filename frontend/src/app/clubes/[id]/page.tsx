@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { getClub, getPartidos } from "@/lib/api";
-import type { Club, ClubDetail, Partido } from "@/types";
+import type { Club, ClubDetail, Partido, PartidoPage } from "@/types";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
@@ -17,10 +17,11 @@ export default function ClubDetailPage() {
     queryFn: () => getClub(id),
   });
 
-  const { data: partidos } = useQuery<Partido[]>({
+  const { data: partidosPage } = useQuery<PartidoPage>({
     queryKey: ["partidos"],
     queryFn: () => getPartidos(),
   });
+  const partidos = partidosPage?.data;
 
   if (isLoading) return <LoadingSpinner text="Cargando club..." />;
 

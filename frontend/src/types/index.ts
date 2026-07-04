@@ -32,6 +32,14 @@ export interface PartidoDetail extends Partido {
   visitante_nombre: string;
 }
 
+export interface PartidoPage {
+  data: Partido[];
+  total: number;
+  page: number;
+  per_page: number;
+  total_pages: number;
+}
+
 export interface TablaRow {
   posicion: number;
   club_id: string;

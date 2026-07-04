@@ -8,7 +8,7 @@ async function fetchJSON<T>(path: string): Promise<T> {
   return res.json();
 }
 
-import type { Club, ClubDetail, Partido, PartidoDetail, TablaRow } from "@/types";
+import type { Club, ClubDetail, Partido, PartidoDetail, PartidoPage, TablaRow } from "@/types";
 
 export async function getClubes(ciudad?: string): Promise<Club[]> {
   const params = ciudad ? `?ciudad=${encodeURIComponent(ciudad)}` : "";
@@ -19,12 +19,19 @@ export async function getClub(id: string): Promise<ClubDetail> {
   return fetchJSON<ClubDetail>(`/api/v1/clubes/${id}`);
 }
 
-export async function getPartidos(torneo?: string, estado?: string): Promise<Partido[]> {
+export async function getPartidos(
+  torneo?: string,
+  estado?: string,
+  page?: number,
+  per_page?: number
+): Promise<PartidoPage> {
   const params = new URLSearchParams();
   if (torneo) params.set("torneo", torneo);
   if (estado) params.set("estado", estado);
+  if (page) params.set("page", page.toString());
+  if (per_page) params.set("per_page", per_page.toString());
   const qs = params.toString();
-  return fetchJSON<Partido[]>(`/api/v1/partidos${qs ? `?${qs}` : ""}`);
+  return fetchJSON<PartidoPage>(`/api/v1/partidos${qs ? `?${qs}` : ""}`);
 }
 
 export async function getPartido(id: string): Promise<PartidoDetail> {

@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { getPartidos, getClubes } from "@/lib/api";
-import type { Partido, Club } from "@/types";
+import type { Partido, PartidoPage, Club } from "@/types";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense, useCallback } from "react";
@@ -34,10 +34,11 @@ function PartidosContent() {
   const torneo = searchParams.get("torneo") || "";
   const estado = searchParams.get("estado") || "";
 
-  const { data: partidos, isLoading, error } = useQuery<Partido[]>({
+  const { data: partidosPage, isLoading, error } = useQuery<PartidoPage>({
     queryKey: ["partidos", torneo, estado],
     queryFn: () => getPartidos(torneo || undefined, estado || undefined),
   });
+  const partidos = partidosPage?.data;
 
   const { data: clubes } = useQuery<Club[]>({
     queryKey: ["clubes"],
