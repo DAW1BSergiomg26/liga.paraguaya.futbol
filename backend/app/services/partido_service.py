@@ -1,6 +1,6 @@
 from typing import Optional
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -50,3 +50,25 @@ class PartidoService:
             local_nombre=partido.local.nombre if partido.local else "",
             visitante_nombre=partido.visitante.nombre if partido.visitante else "",
         )
+
+    @staticmethod
+    async def get_all_paginated(
+        db: AsyncSession,
+        torneo: Optional[str] = None,
+        estado: Optional[str] = None,
+        page: int = 1,
+        per_page: int = 25,
+    ) -> tuple[list[PartidoOut], int]:
+        base = select(Partido)
+        if torneo:
+            base = base.where(Partido.torneo == torneo)
+        if estado:
+            base = base.where(Partido.estado == estado)
+
+        count_stmt = select(func.count()).select_from(base.subquery())
+        total = (await db.execute(count_stmt)).scalar() or 0
+
+        stmt = base.order_by(Partido.fecha.desc()).offset((page - 1) * per_page).limit(per_page)
+        result = await db.execute(stmt)
+        partidos = result.scalars().all()
+        return [PartidoOut.model_validate(p) for p in partidos], total

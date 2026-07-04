@@ -23,6 +23,14 @@ class PartidoDetailOut(PartidoOut):
     visitante_nombre: str = ""
 
 
+class PartidoPage(BaseModel):
+    data: list[PartidoOut]
+    total: int
+    page: int
+    per_page: int
+    total_pages: int
+
+
 class PartidoUpdate(BaseModel):
     goles_local: Optional[int] = None
     goles_visitante: Optional[int] = None
