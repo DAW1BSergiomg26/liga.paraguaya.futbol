@@ -1,0 +1,144 @@
+ frontend/src/app/partidos/[id]/page.tsx | 39 ++++++++++++++++++++++++++++++++
+ frontend/src/app/partidos/page.tsx      | 40 +++++++++++++++++++++++++++++++++
+ 2 files changed, 79 insertions(+)
+diff --git a/frontend/src/app/partidos/[id]/page.tsx b/frontend/src/app/partidos/[id]/page.tsx
+index 3a2f344..aee9916 100644
+--- a/frontend/src/app/partidos/[id]/page.tsx
++++ b/frontend/src/app/partidos/[id]/page.tsx
+@@ -7,11 +7,29 @@ import { useParams } from "next/navigation";
+ import Link from "next/link";
+ import LoadingSpinner from "@/components/ui/LoadingSpinner";
+ import ErrorMessage from "@/components/ui/ErrorMessage";
++import { useEffect, useState } from "react";
++import { getSavedToken, setAuthToken, misPredicciones } from "@/lib/api";
++import type { PredictionDetail } from "@/types";
+ 
+ export default function PartidoDetailPage() {
+   const params = useParams();
+   const id = params.id as string;
+ 
++  const [prediction, setPrediction] = useState<PredictionDetail | null>(null);
++  const [loggedIn, setLoggedIn] = useState(false);
++
++  useEffect(() => {
++    const token = getSavedToken();
++    if (token) {
++      setAuthToken(token);
++      setLoggedIn(true);
++      misPredicciones().then((preds) => {
++        const found = preds.find((p) => p.partido_id === id);
++        if (found) setPrediction(found);
++      }).catch(() => {});
++    }
++  }, [id]);
++
+   const { data: partido, isLoading, error } = useQuery<PartidoDetail>({
+     queryKey: ["partido", id],
+     queryFn: () => getPartido(id),
+@@ -107,6 +125,27 @@ export default function PartidoDetailPage() {
+             </div>
+           </div>
+         </div>
++
++      {prediction && (
++        <section className="mt-10">
++          <h2 className="text-2xl font-bold mb-4">🔮 Tu predicción</h2>
++          <div className={`p-4 rounded-xl border ${
++            prediction.puntos === 3 ? "border-green-500/50 bg-green-900/20" :
++            prediction.puntos === 2 ? "border-yellow-500/50 bg-yellow-900/20" :
++            prediction.puntos === 0 && prediction.estado === "finalizado" ? "border-red-500/50 bg-red-900/20" :
++            "border-white/10 bg-[#0a1628]/60"
++          }`}>
++            <div className="flex items-center justify-center gap-4 text-2xl font-bold">
++              <span>{partido.local_nombre}</span>
++              <span className="text-[#76e4f7]">{prediction.goles_local} - {prediction.goles_visitante}</span>
++              <span>{prediction.visitante_nombre}</span>
++            </div>
++            {prediction.puntos > 0 && (
++              <p className="text-center mt-2 font-semibold text-green-400">+{prediction.puntos} pts</p>
++            )}
++          </div>
++        </section>
++      )}
+       </div>
+     </div>
+   );
+diff --git a/frontend/src/app/partidos/page.tsx b/frontend/src/app/partidos/page.tsx
+index cab3a7a..4e8fa74 100644
+--- a/frontend/src/app/partidos/page.tsx
++++ b/frontend/src/app/partidos/page.tsx
+@@ -8,6 +8,10 @@ import { useSearchParams, useRouter } from "next/navigation";
+ import { Suspense, useCallback } from "react";
+ import LoadingSpinner from "@/components/ui/LoadingSpinner";
+ import ErrorMessage from "@/components/ui/ErrorMessage";
++import { useState, useEffect } from "react";
++import { getSavedToken, setAuthToken } from "@/lib/api";
++import { useQueryClient } from "@tanstack/react-query";
++import PredictionModal from "@/components/PredictionModal";
+ 
+ function EstadoBadge({ estado }: { estado: string }) {
+   const styles: Record<string, string> = {
+@@ -50,6 +54,18 @@ function PartidosContent() {
+     clubes.forEach((c) => clubMap.set(c.id, c.nombre));
+   }
+ 
++  const queryClient = useQueryClient();
++  const [userToken, setUserToken] = useState<string | null>(null);
++  const [predictionPartido, setPredictionPartido] = useState<Partido | null>(null);
++
++  useEffect(() => {
++    const token = getSavedToken();
++    if (token) {
++      setAuthToken(token);
++      setUserToken(token);
++    }
++  }, []);
++
+   const setFilter = useCallback(
+     (key: string, value: string) => {
+       const params = new URLSearchParams(searchParams.toString());
+@@ -111,6 +127,7 @@ function PartidosContent() {
+                 <th className="text-center py-3 px-2">Resultado</th>
+                 <th className="text-left py-3 px-2">Visitante</th>
+                 <th className="text-center py-3 px-2">Estado</th>
++                <th className="text-center py-3 px-2">Pronóstico</th>
+                 <th className="text-center py-3 px-2">Jornada</th>
+               </tr>
+             </thead>
+@@ -157,6 +174,16 @@ function PartidosContent() {
+                     <td className="py-3 px-2 text-center">
+                       <EstadoBadge estado={p.estado} />
+                     </td>
++                    <td className="py-3 px-2 text-center">
++                      {userToken && p.estado === "programado" && (
++                        <button
++                          onClick={() => setPredictionPartido(p)}
++                          className="text-xs px-2 py-1 rounded-lg bg-[#1a2a3a] border border-white/10 text-[#76e4f7] hover:bg-[#76e4f7] hover:text-black transition"
++                        >
++                          🔮 Predecir
++                        </button>
++                      )}
++                    </td>
+                     <td className="py-3 px-2 text-center text-gray-400">
+                       {p.jornada}
+                     </td>
+@@ -167,6 +194,19 @@ function PartidosContent() {
+           </table>
+         </div>
+       )}
++
++      {predictionPartido && (
++        <PredictionModal
++          partido={predictionPartido}
++          clubLocal={clubMap.get(predictionPartido.local_id) || predictionPartido.local_id}
++          clubVisitante={clubMap.get(predictionPartido.visitante_id) || predictionPartido.visitante_id}
++          onClose={() => setPredictionPartido(null)}
++          onSuccess={() => {
++            setPredictionPartido(null);
++            queryClient.invalidateQueries({ queryKey: ["predicciones"] });
++          }}
++        />
++      )}
+     </div>
+   );
+ }

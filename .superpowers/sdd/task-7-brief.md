@@ -1,206 +1,224 @@
-### Task 7: Backend — Tests
+# Task 7: Frontend predictions + leaderboard pages
 
 **Files:**
-- Create: `backend/tests/__init__.py`
-- Create: `backend/tests/conftest.py`
-- Create: `backend/tests/test_clubes.py`
-- Create: `backend/tests/test_partidos.py`
-- Create: `backend/tests/test_tabla.py`
+- Create: `frontend/src/app/predicciones/page.tsx`
+- Create: `frontend/src/app/leaderboard/page.tsx`
 
-**Interfaces:**
-- Consumes: FastAPI `app`, services, models
-- Produces: Test suite (pytest)
+## Steps
 
-- [ ] **Step 1: Create `backend/tests/__init__.py`** (empty)
+- [ ] **Create `frontend/src/app/predicciones/page.tsx`**
 
-- [ ] **Step 2: Create `backend/tests/conftest.py`**
+```tsx
+"use client";
 
-```python
-import pytest
-from httpx import AsyncClient, ASGITransport
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { misPredicciones, getLeaderboard, getSavedToken, setAuthToken } from "@/lib/api";
+import type { PredictionDetail, LeaderboardEntry } from "@/types";
+import Link from "next/link";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import ErrorMessage from "@/components/ui/ErrorMessage";
 
-from backend.app.core.database import Base, get_db
-from backend.app.main import app
+export default function PrediccionesPage() {
+  const [loggedIn, setLoggedIn] = useState(false);
 
-TEST_DB_URL = "sqlite+aiosqlite://"
+  useEffect(() => {
+    const token = getSavedToken();
+    if (token) {
+      setAuthToken(token);
+      setLoggedIn(true);
+    }
+  }, []);
 
+  const { data: predicciones, isLoading, error } = useQuery<PredictionDetail[]>({
+    queryKey: ["predicciones"],
+    queryFn: () => misPredicciones(),
+    enabled: loggedIn,
+  });
 
-@pytest.fixture(scope="session")
-def engine():
-    return create_async_engine(TEST_DB_URL, echo=False)
+  const { data: leaderboard } = useQuery<LeaderboardEntry[]>({
+    queryKey: ["leaderboard"],
+    queryFn: () => getLeaderboard(),
+  });
 
+  if (!loggedIn) {
+    return (
+      <div className="max-w-6xl mx-auto px-4 py-12 text-center">
+        <h1 className="text-3xl font-bold mb-4">Mis Predicciones</h1>
+        <div className="p-8 rounded-xl border border-white/10 bg-[#0a1628]/60">
+          <p className="text-gray-400 mb-4">Iniciá sesión para ver tus predicciones</p>
+          <Link href="/login" className="inline-block px-6 py-3 rounded-xl bg-[#76e4f7] text-black font-semibold">
+            Iniciar sesión
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
-@pytest.fixture(scope="function")
-async def db_session(engine):
-    session_local = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-    async with session_local() as session:
-        yield session
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
+  if (isLoading) return <LoadingSpinner text="Cargando predicciones..." />;
+  if (error) return <ErrorMessage message="Error al cargar predicciones" />;
 
+  return (
+    <div className="max-w-6xl mx-auto px-4 py-12">
+      <h1 className="text-3xl font-bold mb-8">Mis Predicciones</h1>
 
-@pytest.fixture
-async def client(db_session):
-    async def override_get_db():
-        yield db_session
+      {(!predicciones || predicciones.length === 0) ? (
+        <div className="p-8 rounded-xl border border-white/10 bg-[#0a1628]/60 text-center mb-8">
+          <p className="text-gray-400">Todavía no hiciste predicciones.</p>
+          <Link href="/partidos" className="text-[#76e4f7] hover:underline mt-2 inline-block">
+            Ir a partidos →
+          </Link>
+        </div>
+      ) : (
+        <div className="space-y-3 mb-12">
+          {predicciones.map((p) => (
+            <Link key={p.id} href={`/partidos/${p.partido_id}`}
+              className="block p-4 rounded-xl border border-white/10 bg-[#0a1628]/60 hover:bg-[#0a1628] transition">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-400">{p.torneo} · J{p.jornada}</p>
+                  <p className="text-white font-medium mt-1">
+                    {p.local_nombre} {p.goles_local}-{p.goles_visitante} {p.visitante_nombre}
+                  </p>
+                </div>
+                <div className="text-right">
+                  {p.estado === "finalizado" ? (
+                    <span className={`text-sm font-bold ${p.puntos === 3 ? "text-green-400" : p.puntos === 2 ? "text-yellow-400" : "text-gray-500"}`}>
+                      +{p.puntos} pts
+                    </span>
+                  ) : (
+                    <span className="text-xs text-gray-500">Pendiente</span>
+                  )}
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
 
-    app.dependency_overrides[get_db] = override_get_db
-    transport = ASGITransport(app=app)
-    async with AsyncClient(transport=transport, base_url="http://test") as ac:
-        yield ac
-    app.dependency_overrides.clear()
+      {/* Leaderboard */}
+      <h2 className="text-2xl font-bold mb-4">🏆 Leaderboard</h2>
+      {leaderboard && leaderboard.length > 0 ? (
+        <div className="overflow-x-auto rounded-xl border border-white/10 bg-[#0a1628]/60">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-white/10 text-gray-400 uppercase text-xs">
+                <th className="p-4 text-left">#</th>
+                <th className="p-4 text-left">Usuario</th>
+                <th className="p-4 text-center">Pts</th>
+                <th className="p-4 text-center">Aciertos</th>
+                <th className="p-4 text-center">Predicciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {leaderboard.map((entry, i) => (
+                <tr key={entry.username} className="border-b border-white/5 hover:bg-white/5">
+                  <td className="p-4 font-bold">{i + 1}</td>
+                  <td className="p-4">
+                    <div className="flex items-center gap-3">
+                      {entry.image && (
+                        <img src={entry.image} alt="" className="w-8 h-8 rounded-full" />
+                      )}
+                      <span className="text-white font-medium">{entry.name}</span>
+                      <span className="text-gray-500 text-xs">@{entry.username}</span>
+                    </div>
+                  </td>
+                  <td className="p-4 text-center font-bold text-[#76e4f7]">{entry.puntos}</td>
+                  <td className="p-4 text-center text-green-400">{entry.aciertos}</td>
+                  <td className="p-4 text-center text-gray-400">{entry.predicciones}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div className="p-8 rounded-xl border border-white/10 bg-[#0a1628]/60 text-center">
+          <p className="text-gray-500">Todavía no hay participantes.</p>
+        </div>
+      )}
+    </div>
+  );
+}
 ```
 
-- [ ] **Step 3: Create seed helper — add to conftest.py**
+- [ ] **Create `frontend/src/app/leaderboard/page.tsx`**
 
-Append to `backend/tests/conftest.py`:
+```tsx
+"use client";
 
-```python
-import json
+import { useQuery } from "@tanstack/react-query";
+import { getLeaderboard } from "@/lib/api";
+import type { LeaderboardEntry } from "@/types";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import ErrorMessage from "@/components/ui/ErrorMessage";
 
-from backend.app.models.club import Club
-from backend.app.models.partido import Partido
-from backend.app.models.tabla import TablaPosicion
+export default function LeaderboardPage() {
+  const { data: leaderboard, isLoading, error } = useQuery<LeaderboardEntry[]>({
+    queryKey: ["leaderboard"],
+    queryFn: () => getLeaderboard(),
+  });
 
+  if (isLoading) return <LoadingSpinner text="Cargando leaderboard..." />;
+  if (error) return <ErrorMessage message="Error al cargar leaderboard" />;
 
-async def seed_test_data(db: AsyncSession):
-    clubs = [
-        Club(id="olimpia", nombre="Club Olimpia", ciudad="Asunción", apodo="El Decano", colores=["blanco", "negro"], estadio="Manuel Ferreira"),
-        Club(id="cerro-porteno", nombre="Club Cerro Porteño", ciudad="Asunción", apodo="El Ciclón", colores=["azul", "rojo"], estadio="General Pablo Rojas"),
-    ]
-    for c in clubs:
-        db.add(c)
-    await db.flush()
+  return (
+    <div className="max-w-4xl mx-auto px-4 py-12">
+      <h1 className="text-3xl font-bold mb-8">🏆 Leaderboard</h1>
 
-    partidos = [
-        Partido(id="p001", torneo="Apertura 2026", fecha=date(2026, 2, 1), jornada=1, local_id="olimpia", visitante_id="cerro-porteno", estado="programado"),
-    ]
-    for p in partidos:
-        db.add(p)
-    await db.flush()
-
-    tabla = [
-        TablaPosicion(torneo="Apertura 2026", jornada=1, club_id="olimpia", posicion=1, pj=1, pg=1, pe=0, pp=0, gf=2, gc=0, dg=2, puntos=3),
-    ]
-    for t in tabla:
-        db.add(t)
-    await db.flush()
+      {!leaderboard || leaderboard.length === 0 ? (
+        <div className="p-8 rounded-xl border border-white/10 bg-[#0a1628]/60 text-center">
+          <p className="text-gray-500">Todavía no hay participantes.</p>
+        </div>
+      ) : (
+        <div className="overflow-x-auto rounded-xl border border-white/10 bg-[#0a1628]/60">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-white/10 text-gray-400 uppercase text-xs">
+                <th className="p-4 text-left">#</th>
+                <th className="p-4 text-left">Usuario</th>
+                <th className="p-4 text-center">Pts</th>
+                <th className="p-4 text-center">Aciertos</th>
+                <th className="p-4 text-center">Predicciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {leaderboard.map((entry, i) => (
+                <tr key={entry.username} className="border-b border-white/5 hover:bg-white/5">
+                  <td className="p-4 font-bold">{i + 1}</td>
+                  <td className="p-4">
+                    <div className="flex items-center gap-3">
+                      {entry.image && (
+                        <img src={entry.image} alt="" className="w-8 h-8 rounded-full" />
+                      )}
+                      <span className="text-white font-medium">{entry.name}</span>
+                      <span className="text-gray-500 text-xs">@{entry.username}</span>
+                    </div>
+                  </td>
+                  <td className="p-4 text-center font-bold text-[#76e4f7]">{entry.puntos}</td>
+                  <td className="p-4 text-center text-green-400">{entry.aciertos}</td>
+                  <td className="p-4 text-center text-gray-400">{entry.predicciones}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
 ```
 
-- [ ] **Step 4: Create `backend/tests/test_clubes.py`**
-
-```python
-import pytest
-
-from backend.tests.conftest import seed_test_data
-
-
-@pytest.mark.asyncio
-async def test_listar_clubes(client):
-    response = await client.get("/api/v1/clubes")
-    assert response.status_code == 200
-    assert isinstance(response.json(), list)
-
-
-@pytest.mark.asyncio
-async def test_listar_clubes_con_datos(client, db_session):
-    await seed_test_data(db_session)
-    response = await client.get("/api/v1/clubes")
-    data = response.json()
-    assert len(data) == 2
-    assert data[0]["nombre"] == "Club Olimpia"
-
-
-@pytest.mark.asyncio
-async def test_detalle_club_existente(client, db_session):
-    await seed_test_data(db_session)
-    response = await client.get("/api/v1/clubes/olimpia")
-    assert response.status_code == 200
-    assert response.json()["nombre"] == "Club Olimpia"
-
-
-@pytest.mark.asyncio
-async def test_detalle_club_no_existente(client):
-    response = await client.get("/api/v1/clubes/no-existe")
-    assert response.status_code == 404
-
-
-@pytest.mark.asyncio
-async def test_filtrar_por_ciudad(client, db_session):
-    await seed_test_data(db_session)
-    response = await client.get("/api/v1/clubes?ciudad=Asunción")
-    assert response.status_code == 200
-    assert len(response.json()) == 2
-```
-
-- [ ] **Step 5: Create `backend/tests/test_partidos.py`**
-
-```python
-import pytest
-
-from backend.tests.conftest import seed_test_data
-
-
-@pytest.mark.asyncio
-async def test_listar_partidos(client, db_session):
-    await seed_test_data(db_session)
-    response = await client.get("/api/v1/partidos")
-    assert response.status_code == 200
-    data = response.json()
-    assert len(data) == 1
-
-
-@pytest.mark.asyncio
-async def test_detalle_partido(client, db_session):
-    await seed_test_data(db_session)
-    response = await client.get("/api/v1/partidos/p001")
-    assert response.status_code == 200
-    data = response.json()
-    assert data["local_id"] == "olimpia"
-
-
-@pytest.mark.asyncio
-async def test_detalle_partido_no_existente(client):
-    response = await client.get("/api/v1/partidos/no-existe")
-    assert response.status_code == 404
-```
-
-- [ ] **Step 6: Create `backend/tests/test_tabla.py`**
-
-```python
-import pytest
-
-from backend.tests.conftest import seed_test_data
-
-
-@pytest.mark.asyncio
-async def test_obtener_tabla(client, db_session):
-    await seed_test_data(db_session)
-    response = await client.get("/api/v1/tabla")
-    assert response.status_code == 200
-    data = response.json()
-    assert len(data) == 1
-    assert data[0]["club_id"] == "olimpia"
-```
-
-- [ ] **Step 7: Run tests**
+- [ ] **Verify TypeScript compiles**
 
 ```powershell
-cd backend
-pytest tests/ -v
+cd C:\Users\astur\Desktop\liga.paraguaya.futbol\frontend && npx tsc --noEmit 2>&1
 ```
+Expected: no errors
 
-Expected: All tests pass.
+- [ ] **Commit**
 
-- [ ] **Step 8: Commit**
-
-```bash
-git add -A && git commit -m "feat(backend): test suite"
+```powershell
+cd C:\Users\astur\Desktop\liga.paraguaya.futbol
+git add frontend/src/app/predicciones/page.tsx frontend/src/app/leaderboard/page.tsx
+git commit -m "feat: add predicciones and leaderboard pages"
 ```
-
----
-
-

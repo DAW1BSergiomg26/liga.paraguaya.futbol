@@ -16,13 +16,11 @@ export default function PartidoDetailPage() {
   const id = params.id as string;
 
   const [prediction, setPrediction] = useState<PredictionDetail | null>(null);
-  const [loggedIn, setLoggedIn] = useState(false);
 
   useEffect(() => {
     const token = getSavedToken();
     if (token) {
       setAuthToken(token);
-      setLoggedIn(true);
       misPredicciones().then((preds) => {
         const found = preds.find((p) => p.partido_id === id);
         if (found) setPrediction(found);
