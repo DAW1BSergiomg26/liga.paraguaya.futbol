@@ -36,6 +36,20 @@ async def actualizar_partido(
     if data.estado is not None:
         partido.estado = data.estado
 
+    was_finalized = partido.estado == "finalizado"
+
     await db.commit()
+
+    if was_finalized:
+        from backend.app.services.prediction_service import PredictionService
+        await PredictionService.calcular_puntos(db, partido_id)
+        from backend.app.models.prediction import Prediction
+        result = await db.execute(
+            select(Prediction.user_id).where(Prediction.partido_id == partido_id).distinct()
+        )
+        user_ids = [r[0] for r in result.all()]
+        for uid in user_ids:
+            await PredictionService.recalcular_totales_usuario(db, uid)
+        await db.commit()
     await db.refresh(partido)
     return await PartidoService.get_by_id(db, partido_id)
