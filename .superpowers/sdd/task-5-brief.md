@@ -1,204 +1,140 @@
-### Task 5: Backend — API Routes + Main App
+# Task 5: Frontend types + API functions
 
 **Files:**
-- Create: `backend/app/api/__init__.py`
-- Create: `backend/app/api/clubes.py`
-- Create: `backend/app/api/partidos.py`
-- Create: `backend/app/api/tabla.py`
-- Create: `backend/app/api/health.py`
-- Create: `backend/app/main.py`
+- Modify: `frontend/src/types/index.ts`
+- Modify: `frontend/src/lib/api.ts`
 
-**Interfaces:**
-- Consumes: `ClubService`, `PartidoService`, `TablaService`; `get_db` dependency; schemas
-- Produces: FastAPI app with CORS, routers, lifespan (init DB on startup)
+## Steps
 
-- [ ] **Step 1: Create `backend/app/api/__init__.py`** (empty)
+- [ ] **Add types to `frontend/src/types/index.ts`**
 
-- [ ] **Step 2: Create `backend/app/api/health.py`**
+Append after the `TablaRow` interface:
 
-```python
-from fastapi import APIRouter
+```typescript
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  image: string;
+  username: string;
+  puntos: number;
+  token: string;
+}
 
-router = APIRouter(tags=["health"])
+export interface PredictionCreate {
+  partido_id: string;
+  goles_local: number;
+  goles_visitante: number;
+}
 
+export interface PredictionDetail {
+  id: string;
+  user_id: string;
+  partido_id: string;
+  goles_local: number;
+  goles_visitante: number;
+  puntos: number;
+  created_at: string;
+  torneo: string;
+  jornada: number;
+  local_id: string;
+  visitante_id: string;
+  local_nombre: string;
+  visitante_nombre: string;
+  goles_real_local: number | null;
+  goles_real_visitante: number | null;
+  estado: string;
+}
 
-@router.get("/health")
-async def health():
-    return {"status": "ok", "mensaje": "Backend activo correctamente"}
+export interface LeaderboardEntry {
+  username: string;
+  name: string;
+  image: string;
+  puntos: number;
+  aciertos: number;
+  predicciones: number;
+}
 ```
 
-- [ ] **Step 3: Create `backend/app/api/clubes.py`**
+- [ ] **Add API functions to `frontend/src/lib/api.ts`**
 
-```python
-from typing import Optional
-
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from backend.app.core.dependencies import get_db
-from backend.app.schemas.club import ClubOut
-from backend.app.services.club_service import ClubService
-
-router = APIRouter(prefix="/api/v1/clubes", tags=["clubes"])
-
-
-@router.get("", response_model=list[ClubOut])
-async def listar_clubes(
-    ciudad: Optional[str] = None,
-    db: AsyncSession = Depends(get_db),
-):
-    return await ClubService.get_all(db, ciudad=ciudad)
-
-
-@router.get("/{club_id}", response_model=ClubOut)
-async def detalle_club(
-    club_id: str,
-    db: AsyncSession = Depends(get_db),
-):
-    club = await ClubService.get_by_id(db, club_id)
-    if not club:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"No se encontró el club con id: {club_id}",
-        )
-    return club
+Update the import line to include new types:
+```typescript
+import type { Club, ClubDetail, Partido, PartidoDetail, PartidoPage, TablaRow, User, PredictionCreate, PredictionDetail, LeaderboardEntry } from "@/types";
 ```
 
-- [ ] **Step 4: Create `backend/app/api/partidos.py`**
+Add before `updatePartido` function:
 
-```python
-from typing import Optional
+```typescript
+let authToken: string | null = null;
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
+export function setAuthToken(token: string | null) {
+  authToken = token;
+  if (token) localStorage.setItem("user_token", token);
+  else localStorage.removeItem("user_token");
+}
 
-from backend.app.core.dependencies import get_db
-from backend.app.schemas.partido import PartidoDetailOut, PartidoOut
-from backend.app.services.partido_service import PartidoService
+export function getSavedToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem("user_token");
+}
 
-router = APIRouter(prefix="/api/v1/partidos", tags=["partidos"])
+async function authFetchJSON<T>(path: string, options?: RequestInit): Promise<T> {
+  const token = authToken || getSavedToken();
+  const headers: Record<string, string> = {
+    ...(options?.headers as Record<string, string>),
+  };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+  const res = await fetch(`${API_URL}${path}`, { ...options, headers });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: "Error desconocido" }));
+    throw new Error(err.detail || `Error ${res.status}`);
+  }
+  return res.json();
+}
 
+export async function loginWithProvider(data: {
+  email: string;
+  name: string;
+  image?: string;
+  provider: string;
+  provider_id: string;
+}): Promise<User> {
+  return authFetchJSON<User>("/api/v1/auth/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+}
 
-@router.get("", response_model=list[PartidoOut])
-async def listar_partidos(
-    torneo: Optional[str] = None,
-    estado: Optional[str] = None,
-    db: AsyncSession = Depends(get_db),
-):
-    return await PartidoService.get_all(db, torneo=torneo, estado=estado)
+export async function crearPrediccion(data: PredictionCreate): Promise<PredictionDetail> {
+  return authFetchJSON<PredictionDetail>("/api/v1/predicciones", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+}
 
+export async function misPredicciones(): Promise<PredictionDetail[]> {
+  return authFetchJSON<PredictionDetail[]>("/api/v1/predicciones/mis");
+}
 
-@router.get("/{partido_id}", response_model=PartidoDetailOut)
-async def detalle_partido(
-    partido_id: str,
-    db: AsyncSession = Depends(get_db),
-):
-    partido = await PartidoService.get_by_id(db, partido_id)
-    if not partido:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"No se encontró el partido con id: {partido_id}",
-        )
-    return partido
+export async function getLeaderboard(): Promise<LeaderboardEntry[]> {
+  return fetchJSON<LeaderboardEntry[]>("/api/v1/leaderboard");
+}
 ```
 
-- [ ] **Step 5: Create `backend/app/api/tabla.py`**
-
-```python
-from typing import Optional
-
-from fastapi import APIRouter, Depends
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from backend.app.core.dependencies import get_db
-from backend.app.schemas.tabla import TablaRowOut
-from backend.app.services.tabla_service import TablaService
-
-router = APIRouter(prefix="/api/v1/tabla", tags=["tabla"])
-
-
-@router.get("", response_model=list[TablaRowOut])
-async def obtener_tabla(
-    torneo: Optional[str] = None,
-    db: AsyncSession = Depends(get_db),
-):
-    return await TablaService.get_table(db, torneo=torneo)
-```
-
-- [ ] **Step 6: Create `backend/app/main.py`**
-
-```python
-from contextlib import asynccontextmanager
-
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-
-from backend.app.api import clubes, health, partidos, tabla
-from backend.app.core.config import settings
-from backend.app.core.database import init_db
-
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    await init_db()
-    yield
-
-
-app = FastAPI(
-    title=settings.app_name,
-    description="API para clubes, partidos, tabla y datos base de la Liga Paraguaya de Fútbol.",
-    version=settings.app_version,
-    lifespan=lifespan,
-)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.cors_origin_list,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-app.include_router(health.router)
-app.include_router(clubes.router)
-app.include_router(partidos.router)
-app.include_router(tabla.router)
-
-
-@app.get("/")
-async def root():
-    return {
-        "proyecto": "liga.paraguaya.futbol",
-        "estado": "API funcionando",
-        "version": settings.app_version,
-        "endpoints": [
-            "/health",
-            "/api/v1/clubes",
-            "/api/v1/clubes/{club_id}",
-            "/api/v1/partidos",
-            "/api/v1/partidos/{partido_id}",
-            "/api/v1/tabla",
-        ],
-    }
-```
-
-- [ ] **Step 7: Run the server to verify it starts**
+- [ ] **Verify TypeScript compiles**
 
 ```powershell
-cd backend
-uvicorn backend.app.main:app --reload --port 8001
+cd C:\Users\astur\Desktop\liga.paraguaya.futbol\frontend && npx tsc --noEmit 2>&1
 ```
+Expected: no errors
 
-Then open `http://localhost:8001/docs` and verify Swagger loads with all endpoints.
+- [ ] **Commit**
 
-Stop the server with Ctrl+C.
-
-- [ ] **Step 8: Commit**
-
-```bash
-git add -A && git commit -m "feat(backend): API routes and main FastAPI app"
+```powershell
+cd C:\Users\astur\Desktop\liga.paraguaya.futbol
+git add frontend/src/types/index.ts frontend/src/lib/api.ts
+git commit -m "feat: add user, prediction types and API functions"
 ```
-
----
-
-
