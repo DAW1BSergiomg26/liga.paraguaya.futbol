@@ -1,154 +1,197 @@
-### Task 4: Backend — Services Layer
+# Task 4: Backend tests for predictions
 
 **Files:**
-- Create: `backend/app/services/__init__.py`
-- Create: `backend/app/services/club_service.py`
-- Create: `backend/app/services/partido_service.py`
-- Create: `backend/app/services/tabla_service.py`
+- Create: `backend/tests/test_predicciones.py`
+- Modify: `backend/tests/conftest.py`
 
-**Interfaces:**
-- Consumes: `Club`, `Partido`, `TablaPosicion` ORM models; `AsyncSession` from `core.dependencies`; `ClubOut`, `PartidoOut`, `PartidoDetailOut`, `TablaRowOut` schemas
-- Produces:
-  - `ClubService.get_all(db, ciudad)` -> `list[ClubOut]`
-  - `ClubService.get_by_id(db, club_id)` -> `ClubOut | None`
-  - `PartidoService.get_all(db, torneo, estado)` -> `list[PartidoOut]`
-  - `PartidoService.get_by_id(db, partido_id)` -> `PartidoDetailOut | None`
-  - `TablaService.get_table(db, torneo)` -> `list[TablaRowOut]`
+## Steps
 
-- [ ] **Step 1: Create `backend/app/services/__init__.py`** (empty)
+- [ ] **Modify `backend/tests/conftest.py`** — add `seed_test_user` helper
 
-- [ ] **Step 2: Create `backend/app/services/club_service.py`**
-
+Add at the bottom of the file (before the test fixtures if any, or at the end):
 ```python
-from typing import Optional
-
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from backend.app.models.club import Club
-from backend.app.schemas.club import ClubOut
-
-
-class ClubService:
-
-    @staticmethod
-    async def get_all(db: AsyncSession, ciudad: Optional[str] = None) -> list[ClubOut]:
-        stmt = select(Club)
-        if ciudad:
-            stmt = stmt.where(Club.ciudad == ciudad)
-        result = await db.execute(stmt)
-        clubs = result.scalars().all()
-        return [ClubOut.model_validate(c) for c in clubs]
-
-    @staticmethod
-    async def get_by_id(db: AsyncSession, club_id: str) -> Optional[ClubOut]:
-        result = await db.execute(select(Club).where(Club.id == club_id))
-        club = result.scalar_one_or_none()
-        return ClubOut.model_validate(club) if club else None
+async def seed_test_user(db: AsyncSession):
+    from backend.app.models.user import User
+    user = User(
+        id="test_user",
+        email="test@test.com",
+        name="Test",
+        username="tester",
+        token="test_token_123",
+    )
+    db.add(user)
+    await db.flush()
 ```
 
-- [ ] **Step 3: Create `backend/app/services/partido_service.py`**
-
+Also ensure the file has these imports at the top (check first; `select` may already be imported, also check for `Partido` and `Prediction`):
 ```python
-from typing import Optional
-
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
-
 from backend.app.models.partido import Partido
-from backend.app.schemas.partido import PartidoDetailOut, PartidoOut
-
-
-class PartidoService:
-
-    @staticmethod
-    async def get_all(
-        db: AsyncSession,
-        torneo: Optional[str] = None,
-        estado: Optional[str] = None,
-    ) -> list[PartidoOut]:
-        stmt = select(Partido)
-        if torneo:
-            stmt = stmt.where(Partido.torneo == torneo)
-        if estado:
-            stmt = stmt.where(Partido.estado == estado)
-        stmt = stmt.order_by(Partido.fecha.desc())
-        result = await db.execute(stmt)
-        partidos = result.scalars().all()
-        return [PartidoOut.model_validate(p) for p in partidos]
-
-    @staticmethod
-    async def get_by_id(db: AsyncSession, partido_id: str) -> Optional[PartidoDetailOut]:
-        stmt = (
-            select(Partido)
-            .where(Partido.id == partido_id)
-            .options(selectinload(Partido.local), selectinload(Partido.visitante))
-        )
-        result = await db.execute(stmt)
-        partido = result.scalar_one_or_none()
-        if not partido:
-            return None
-        return PartidoDetailOut(
-            id=partido.id,
-            torneo=partido.torneo,
-            fecha=partido.fecha,
-            jornada=partido.jornada,
-            local_id=partido.local_id,
-            visitante_id=partido.visitante_id,
-            goles_local=partido.goles_local,
-            goles_visitante=partido.goles_visitante,
-            estado=partido.estado,
-            local_nombre=partido.local.nombre if partido.local else "",
-            visitante_nombre=partido.visitante.nombre if partido.visitante else "",
-        )
+from backend.app.models.prediction import Prediction
 ```
 
-- [ ] **Step 4: Create `backend/app/services/tabla_service.py`**
+- [ ] **Create `backend/tests/test_predicciones.py`**
 
 ```python
-from typing import Optional
+import pytest
 
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from backend.app.models.tabla import TablaPosicion
-from backend.app.schemas.tabla import TablaRowOut
+from backend.tests.conftest import seed_test_data, seed_test_user
 
 
-class TablaService:
+@pytest.mark.asyncio
+async def test_login_creates_user(client, db_session):
+    response = await client.post("/api/v1/auth/login", json={
+        "email": "test@example.com",
+        "name": "Test User",
+        "provider": "google",
+        "provider_id": "google_123",
+    })
+    assert response.status_code == 200
+    data = response.json()
+    assert data["email"] == "test@example.com"
+    assert data["token"] != ""
+    assert data["username"] != ""
 
-    @staticmethod
-    async def get_table(
-        db: AsyncSession,
-        torneo: Optional[str] = None,
-    ) -> list[TablaRowOut]:
-        stmt = select(TablaPosicion).order_by(TablaPosicion.posicion)
-        if torneo:
-            stmt = stmt.where(TablaPosicion.torneo == torneo)
-        result = await db.execute(stmt)
-        rows = result.scalars().all()
-        return [TablaRowOut.model_validate(r) for r in rows]
+
+@pytest.mark.asyncio
+async def test_login_returns_same_user(client, db_session):
+    r1 = await client.post("/api/v1/auth/login", json={
+        "email": "same@example.com", "name": "User", "provider": "google", "provider_id": "g1",
+    })
+    token1 = r1.json()["token"]
+    r2 = await client.post("/api/v1/auth/login", json={
+        "email": "same@example.com", "name": "User Updated", "provider": "google", "provider_id": "g1",
+    })
+    assert r2.status_code == 200
+    assert r2.json()["token"] != token1  # new token each time
+
+
+@pytest.mark.asyncio
+async def test_crear_prediccion(client, db_session):
+    await seed_test_data(db_session)
+    await seed_test_user(db_session)
+
+    r = await client.post("/api/v1/auth/login", json={
+        "email": "pred@test.com", "name": "Pred User", "provider": "google", "provider_id": "gp1",
+    })
+    token = r.json()["token"]
+
+    response = await client.post(
+        "/api/v1/predicciones",
+        json={"partido_id": "p001", "goles_local": 2, "goles_visitante": 1},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == 201
+    data = response.json()
+    assert data["partido_id"] == "p001"
+    assert data["goles_local"] == 2
+
+
+@pytest.mark.asyncio
+async def test_mis_predicciones(client, db_session):
+    await seed_test_data(db_session)
+    await seed_test_user(db_session)
+
+    r = await client.post("/api/v1/auth/login", json={
+        "email": "list@test.com", "name": "List User", "provider": "google", "provider_id": "gl1",
+    })
+    token = r.json()["token"]
+
+    await client.post(
+        "/api/v1/predicciones",
+        json={"partido_id": "p001", "goles_local": 1, "goles_visitante": 1},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    response = await client.get(
+        "/api/v1/predicciones/mis",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data) >= 1
+
+
+@pytest.mark.asyncio
+async def test_leaderboard(client, db_session):
+    await seed_test_data(db_session)
+    await seed_test_user(db_session)
+
+    r = await client.post("/api/v1/auth/login", json={
+        "email": "lb@test.com", "name": "LB User", "provider": "google", "provider_id": "glb1",
+    })
+    token = r.json()["token"]
+
+    await client.post(
+        "/api/v1/predicciones",
+        json={"partido_id": "p001", "goles_local": 0, "goles_visitante": 0},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    response = await client.get("/api/v1/leaderboard")
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data) >= 1
+
+
+@pytest.mark.asyncio
+async def test_prediccion_sin_auth(client, db_session):
+    await seed_test_data(db_session)
+    response = await client.post(
+        "/api/v1/predicciones",
+        json={"partido_id": "p001", "goles_local": 2, "goles_visitante": 1},
+    )
+    assert response.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_calcular_puntos_exacto(client, db_session):
+    from sqlalchemy import select
+    from backend.app.models.partido import Partido
+    from backend.app.models.prediction import Prediction
+    from backend.app.services.prediction_service import PredictionService
+
+    await seed_test_data(db_session)
+    await seed_test_user(db_session)
+
+    r = await client.post("/api/v1/auth/login", json={
+        "email": "exact@test.com", "name": "Exact", "provider": "google", "provider_id": "ge1",
+    })
+    token = r.json()["token"]
+
+    await client.post(
+        "/api/v1/predicciones",
+        json={"partido_id": "p001", "goles_local": 2, "goles_visitante": 1},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    partido_result = await db_session.execute(
+        select(Partido).where(Partido.id == "p001")
+    )
+    partido = partido_result.scalar_one()
+    partido.goles_local = 2
+    partido.goles_visitante = 1
+    partido.estado = "finalizado"
+    await db_session.flush()
+
+    await PredictionService.calcular_puntos(db_session, "p001")
+    result = await db_session.execute(
+        select(Prediction).where(Prediction.partido_id == "p001")
+    )
+    pred = result.scalar_one()
+    assert pred.puntos == 3
 ```
 
-- [ ] **Step 5: Verify imports**
+- [ ] **Run all tests**
 
 ```powershell
-cd backend
-python -c "
-from backend.app.services.club_service import ClubService
-from backend.app.services.partido_service import PartidoService
-from backend.app.services.tabla_service import TablaService
-print('Services OK')
-"
+$env:PYTHONPATH="C:\Users\astur\Desktop\liga.paraguaya.futbol"; cd C:\Users\astur\Desktop\liga.paraguaya.futbol; python -m pytest backend/tests/ -v
 ```
+Expected: 11 existing + 7 new = 18 pass
 
-- [ ] **Step 6: Commit**
+- [ ] **Commit**
 
-```bash
-git add -A && git commit -m "feat(backend): services layer"
+```powershell
+git add backend/tests/test_predicciones.py backend/tests/conftest.py
+git commit -m "feat: add prediction tests"
 ```
-
----
-
-
