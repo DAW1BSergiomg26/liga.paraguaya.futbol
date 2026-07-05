@@ -7,10 +7,28 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import ErrorMessage from "@/components/ui/ErrorMessage";
+import { useEffect, useState } from "react";
+import { getSavedToken, setAuthToken, misPredicciones } from "@/lib/api";
+import type { PredictionDetail } from "@/types";
 
 export default function PartidoDetailPage() {
   const params = useParams();
   const id = params.id as string;
+
+  const [prediction, setPrediction] = useState<PredictionDetail | null>(null);
+  const [loggedIn, setLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const token = getSavedToken();
+    if (token) {
+      setAuthToken(token);
+      setLoggedIn(true);
+      misPredicciones().then((preds) => {
+        const found = preds.find((p) => p.partido_id === id);
+        if (found) setPrediction(found);
+      }).catch(() => {});
+    }
+  }, [id]);
 
   const { data: partido, isLoading, error } = useQuery<PartidoDetail>({
     queryKey: ["partido", id],
@@ -107,6 +125,27 @@ export default function PartidoDetailPage() {
             </div>
           </div>
         </div>
+
+      {prediction && (
+        <section className="mt-10">
+          <h2 className="text-2xl font-bold mb-4">🔮 Tu predicción</h2>
+          <div className={`p-4 rounded-xl border ${
+            prediction.puntos === 3 ? "border-green-500/50 bg-green-900/20" :
+            prediction.puntos === 2 ? "border-yellow-500/50 bg-yellow-900/20" :
+            prediction.puntos === 0 && prediction.estado === "finalizado" ? "border-red-500/50 bg-red-900/20" :
+            "border-white/10 bg-[#0a1628]/60"
+          }`}>
+            <div className="flex items-center justify-center gap-4 text-2xl font-bold">
+              <span>{partido.local_nombre}</span>
+              <span className="text-[#76e4f7]">{prediction.goles_local} - {prediction.goles_visitante}</span>
+              <span>{prediction.visitante_nombre}</span>
+            </div>
+            {prediction.puntos > 0 && (
+              <p className="text-center mt-2 font-semibold text-green-400">+{prediction.puntos} pts</p>
+            )}
+          </div>
+        </section>
+      )}
       </div>
     </div>
   );

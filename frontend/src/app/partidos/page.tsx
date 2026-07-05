@@ -8,6 +8,10 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense, useCallback } from "react";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import ErrorMessage from "@/components/ui/ErrorMessage";
+import { useState, useEffect } from "react";
+import { getSavedToken, setAuthToken } from "@/lib/api";
+import { useQueryClient } from "@tanstack/react-query";
+import PredictionModal from "@/components/PredictionModal";
 
 function EstadoBadge({ estado }: { estado: string }) {
   const styles: Record<string, string> = {
@@ -49,6 +53,18 @@ function PartidosContent() {
   if (clubes) {
     clubes.forEach((c) => clubMap.set(c.id, c.nombre));
   }
+
+  const queryClient = useQueryClient();
+  const [userToken, setUserToken] = useState<string | null>(null);
+  const [predictionPartido, setPredictionPartido] = useState<Partido | null>(null);
+
+  useEffect(() => {
+    const token = getSavedToken();
+    if (token) {
+      setAuthToken(token);
+      setUserToken(token);
+    }
+  }, []);
 
   const setFilter = useCallback(
     (key: string, value: string) => {
@@ -111,6 +127,7 @@ function PartidosContent() {
                 <th className="text-center py-3 px-2">Resultado</th>
                 <th className="text-left py-3 px-2">Visitante</th>
                 <th className="text-center py-3 px-2">Estado</th>
+                <th className="text-center py-3 px-2">Pronóstico</th>
                 <th className="text-center py-3 px-2">Jornada</th>
               </tr>
             </thead>
@@ -157,6 +174,16 @@ function PartidosContent() {
                     <td className="py-3 px-2 text-center">
                       <EstadoBadge estado={p.estado} />
                     </td>
+                    <td className="py-3 px-2 text-center">
+                      {userToken && p.estado === "programado" && (
+                        <button
+                          onClick={() => setPredictionPartido(p)}
+                          className="text-xs px-2 py-1 rounded-lg bg-[#1a2a3a] border border-white/10 text-[#76e4f7] hover:bg-[#76e4f7] hover:text-black transition"
+                        >
+                          🔮 Predecir
+                        </button>
+                      )}
+                    </td>
                     <td className="py-3 px-2 text-center text-gray-400">
                       {p.jornada}
                     </td>
@@ -166,6 +193,19 @@ function PartidosContent() {
             </tbody>
           </table>
         </div>
+      )}
+
+      {predictionPartido && (
+        <PredictionModal
+          partido={predictionPartido}
+          clubLocal={clubMap.get(predictionPartido.local_id) || predictionPartido.local_id}
+          clubVisitante={clubMap.get(predictionPartido.visitante_id) || predictionPartido.visitante_id}
+          onClose={() => setPredictionPartido(null)}
+          onSuccess={() => {
+            setPredictionPartido(null);
+            queryClient.invalidateQueries({ queryKey: ["predicciones"] });
+          }}
+        />
       )}
     </div>
   );
