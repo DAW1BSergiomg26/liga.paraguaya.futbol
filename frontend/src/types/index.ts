@@ -53,3 +53,47 @@ export interface TablaRow {
   dg: number;
   puntos: number;
 }
+
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  image: string;
+  username: string;
+  puntos: number;
+  token: string;
+}
+
+export interface PredictionCreate {
+  partido_id: string;
+  goles_local: number;
+  goles_visitante: number;
+}
+
+export interface PredictionDetail {
+  id: string;
+  user_id: string;
+  partido_id: string;
+  goles_local: number;
+  goles_visitante: number;
+  puntos: number;
+  created_at: string;
+  torneo: string;
+  jornada: number;
+  local_id: string;
+  visitante_id: string;
+  local_nombre: string;
+  visitante_nombre: string;
+  goles_real_local: number | null;
+  goles_real_visitante: number | null;
+  estado: string;
+}
+
+export interface LeaderboardEntry {
+  username: string;
+  name: string;
+  image: string;
+  puntos: number;
+  aciertos: number;
+  predicciones: number;
+}
