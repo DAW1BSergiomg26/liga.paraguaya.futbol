@@ -25,6 +25,6 @@ async def get_connection():
 
 async def init_db():
     async with engine.begin() as conn:
-        from backend.app.models import club, partido, tabla
+        from backend.app.models import club, partido, tabla, user
         await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
