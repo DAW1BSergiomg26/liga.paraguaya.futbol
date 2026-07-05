@@ -41,7 +41,10 @@ class PredictionService:
         stmt = (
             select(Prediction)
             .where(Prediction.user_id == user_id)
-            .options(selectinload(Prediction.partido))
+            .options(
+                selectinload(Prediction.partido).selectinload(Partido.local),
+                selectinload(Prediction.partido).selectinload(Partido.visitante),
+            )
             .order_by(Prediction.created_at.desc())
         )
         result = await db.execute(stmt)
