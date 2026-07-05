@@ -1,0 +1,295 @@
+ backend/app/core/database.py               |   2 +-
+ backend/app/models/__init__.py             |   3 +-
+ backend/app/models/partido.py              |   1 +
+ backend/app/models/prediction.py           |  23 +++++
+ backend/app/models/user.py                 |   4 +-
+ backend/app/schemas/prediction.py          |  43 +++++++++
+ backend/app/services/prediction_service.py | 147 +++++++++++++++++++++++++++++
+ 7 files changed, 220 insertions(+), 3 deletions(-)
+diff --git a/backend/app/core/database.py b/backend/app/core/database.py
+index d09c9df..4b331c8 100644
+--- a/backend/app/core/database.py
++++ b/backend/app/core/database.py
+@@ -25,6 +25,6 @@ async def get_connection():
+ 
+ async def init_db():
+     async with engine.begin() as conn:
+-        from backend.app.models import club, partido, tabla, user
++        from backend.app.models import club, partido, prediction, tabla, user
+         await conn.run_sync(Base.metadata.drop_all)
+         await conn.run_sync(Base.metadata.create_all)
+diff --git a/backend/app/models/__init__.py b/backend/app/models/__init__.py
+index a378152..c124597 100644
+--- a/backend/app/models/__init__.py
++++ b/backend/app/models/__init__.py
+@@ -1,6 +1,7 @@
+ from backend.app.models.club import Club
+ from backend.app.models.partido import Partido
++from backend.app.models.prediction import Prediction
+ from backend.app.models.tabla import TablaPosicion
+ from backend.app.models.user import User
+ 
+-__all__ = ["Club", "Partido", "TablaPosicion", "User"]
++__all__ = ["Club", "Partido", "Prediction", "TablaPosicion", "User"]
+diff --git a/backend/app/models/partido.py b/backend/app/models/partido.py
+index 90a8ad2..4d7b16e 100644
+--- a/backend/app/models/partido.py
++++ b/backend/app/models/partido.py
+@@ -22,3 +22,4 @@ class Partido(Base):
+ 
+     local = relationship("Club", foreign_keys=[local_id])
+     visitante = relationship("Club", foreign_keys=[visitante_id])
++    predicciones = relationship("Prediction", back_populates="partido", lazy="selectin")
+diff --git a/backend/app/models/prediction.py b/backend/app/models/prediction.py
+new file mode 100644
+index 0000000..d911ccd
+--- /dev/null
++++ b/backend/app/models/prediction.py
+@@ -0,0 +1,23 @@
++from datetime import datetime
++
++from sqlalchemy import DateTime, ForeignKey, Integer, String, UniqueConstraint
++from sqlalchemy.orm import Mapped, mapped_column, relationship
++
++from backend.app.core.database import Base
++
++
++class Prediction(Base):
++    __tablename__ = "predictions"
++
++    id: Mapped[str] = mapped_column(String(50), primary_key=True)
++    user_id: Mapped[str] = mapped_column(String(50), ForeignKey("users.id"))
++    partido_id: Mapped[str] = mapped_column(String(50), ForeignKey("partidos.id"))
++    goles_local: Mapped[int] = mapped_column(Integer)
++    goles_visitante: Mapped[int] = mapped_column(Integer)
++    puntos: Mapped[int] = mapped_column(Integer, default=0)
++    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
++
++    user = relationship("User", back_populates="predicciones")
++    partido = relationship("Partido", back_populates="predicciones", lazy="selectin")
++
++    __table_args__ = (UniqueConstraint("user_id", "partido_id", name="uq_user_partido"),)
+diff --git a/backend/app/models/user.py b/backend/app/models/user.py
+index 1d2cffc..0a494c1 100644
+--- a/backend/app/models/user.py
++++ b/backend/app/models/user.py
+@@ -2,7 +2,7 @@ import secrets
+ from datetime import datetime
+ 
+ from sqlalchemy import DateTime, Integer, String
+-from sqlalchemy.orm import Mapped, mapped_column
++from sqlalchemy.orm import Mapped, mapped_column, relationship
+ 
+ from backend.app.core.database import Base
+ 
+@@ -21,6 +21,8 @@ class User(Base):
+     puntos: Mapped[int] = mapped_column(Integer, default=0)
+     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+ 
++    predicciones = relationship("Prediction", back_populates="user", lazy="selectin")
++
+     def generate_token(self):
+         self.token = secrets.token_urlsafe(48)
+ 
+diff --git a/backend/app/schemas/prediction.py b/backend/app/schemas/prediction.py
+new file mode 100644
+index 0000000..0c00cae
+--- /dev/null
++++ b/backend/app/schemas/prediction.py
+@@ -0,0 +1,43 @@
++from datetime import datetime
++from typing import Optional
++
++from pydantic import BaseModel
++
++
++class PredictionCreate(BaseModel):
++    partido_id: str
++    goles_local: int
++    goles_visitante: int
++
++
++class PredictionOut(BaseModel):
++    id: str
++    user_id: str
++    partido_id: str
++    goles_local: int
++    goles_visitante: int
++    puntos: int
++    created_at: datetime
++
++    model_config = {"from_attributes": True}
++
++
++class PredictionDetail(PredictionOut):
++    torneo: str = ""
++    jornada: int = 0
++    local_id: str = ""
++    visitante_id: str = ""
++    local_nombre: str = ""
++    visitante_nombre: str = ""
++    goles_real_local: Optional[int] = None
++    goles_real_visitante: Optional[int] = None
++    estado: str = ""
++
++
++class LeaderboardEntry(BaseModel):
++    username: str
++    name: str
++    image: str
++    puntos: int
++    aciertos: int
++    predicciones: int
+diff --git a/backend/app/services/prediction_service.py b/backend/app/services/prediction_service.py
+new file mode 100644
+index 0000000..8263e45
+--- /dev/null
++++ b/backend/app/services/prediction_service.py
+@@ -0,0 +1,147 @@
++import uuid
++from typing import Optional
++
++from sqlalchemy import func, select
++from sqlalchemy.ext.asyncio import AsyncSession
++from sqlalchemy.orm import selectinload
++
++from backend.app.models.partido import Partido
++from backend.app.models.prediction import Prediction
++from backend.app.models.user import User
++from backend.app.schemas.prediction import (
++    LeaderboardEntry,
++    PredictionCreate,
++    PredictionDetail,
++    PredictionOut,
++)
++
++
++class PredictionService:
++
++    @staticmethod
++    async def crear(
++        db: AsyncSession, user_id: str, data: PredictionCreate
++    ) -> PredictionOut:
++        pred_id = f"pred_{uuid.uuid4().hex[:12]}"
++        pred = Prediction(
++            id=pred_id,
++            user_id=user_id,
++            partido_id=data.partido_id,
++            goles_local=data.goles_local,
++            goles_visitante=data.goles_visitante,
++        )
++        db.add(pred)
++        await db.flush()
++        return PredictionOut.model_validate(pred)
++
++    @staticmethod
++    async def mis_predicciones(
++        db: AsyncSession, user_id: str
++    ) -> list[PredictionDetail]:
++        stmt = (
++            select(Prediction)
++            .where(Prediction.user_id == user_id)
++            .options(selectinload(Prediction.partido))
++            .order_by(Prediction.created_at.desc())
++        )
++        result = await db.execute(stmt)
++        preds = result.scalars().all()
++        out = []
++        for p in preds:
++            partido = p.partido
++            out.append(
++                PredictionDetail(
++                    id=p.id,
++                    user_id=p.user_id,
++                    partido_id=p.partido_id,
++                    goles_local=p.goles_local,
++                    goles_visitante=p.goles_visitante,
++                    puntos=p.puntos,
++                    created_at=p.created_at,
++                    torneo=partido.torneo if partido else "",
++                    jornada=partido.jornada if partido else 0,
++                    local_id=partido.local_id if partido else "",
++                    visitante_id=partido.visitante_id if partido else "",
++                    local_nombre=partido.local.nombre if partido and partido.local else "",
++                    visitante_nombre=partido.visitante.nombre if partido and partido.visitante else "",
++                    goles_real_local=partido.goles_local if partido else None,
++                    goles_real_visitante=partido.goles_visitante if partido else None,
++                    estado=partido.estado if partido else "",
++                )
++            )
++        return out
++
++    @staticmethod
++    async def calcular_puntos(db: AsyncSession, partido_id: str):
++        result = await db.execute(
++            select(Prediction).where(Prediction.partido_id == partido_id)
++        )
++        preds = result.scalars().all()
++        if not preds:
++            return
++
++        result = await db.execute(select(Partido).where(Partido.id == partido_id))
++        partido = result.scalar_one_or_none()
++        if not partido or partido.estado != "finalizado":
++            return
++
++        for pred in preds:
++            puntos = 1
++            if (pred.goles_local == partido.goles_local and
++                pred.goles_visitante == partido.goles_visitante):
++                puntos = 3
++            elif ((pred.goles_local - pred.goles_visitante) *
++                  (partido.goles_local - partido.goles_visitante) > 0):
++                puntos = 2
++            elif pred.goles_local == pred.goles_visitante and partido.goles_local == partido.goles_visitante:
++                puntos = 2
++            pred.puntos = puntos
++            await db.flush()
++
++    @staticmethod
++    async def recalcular_totales_usuario(db: AsyncSession, user_id: str):
++        result = await db.execute(
++            select(func.coalesce(func.sum(Prediction.puntos), 0)).where(
++                Prediction.user_id == user_id
++            )
++        )
++        total = result.scalar() or 0
++        result = await db.execute(select(User).where(User.id == user_id))
++        user = result.scalar_one_or_none()
++        if user:
++            user.puntos = total
++            await db.flush()
++
++    @staticmethod
++    async def leaderboard(
++        db: AsyncSession, limit: int = 50
++    ) -> list[LeaderboardEntry]:
++        stmt = (
++            select(
++                User.username,
++                User.name,
++                User.image,
++                User.puntos,
++                func.count(Prediction.id).label("predicciones"),
++                func.sum(
++                    Prediction.puntos == 3
++                ).label("aciertos"),
++            )
++            .outerjoin(Prediction, Prediction.user_id == User.id)
++            .group_by(User.id)
++            .order_by(User.puntos.desc())
++            .limit(limit)
++        )
++        result = await db.execute(stmt)
++        rows = result.all()
++        return [
++            LeaderboardEntry(
++                username=row.username,
++                name=row.name,
++                image=row.image,
++                puntos=row.puntos or 0,
++                predicciones=row.predicciones or 0,
++                aciertos=row.aciertos or 0,
++            )
++            for row in rows
++        ]
