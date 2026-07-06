@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8001";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://backend-production-0b7d.up.railway.app";
 
 async function fetchJSON<T>(path: string): Promise<T> {
   const res = await fetch(`${API_URL}${path}`);
