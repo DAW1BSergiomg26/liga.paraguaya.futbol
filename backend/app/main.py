@@ -5,6 +5,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import select
 
 from backend.app.api import admin, auth, clubes, health, leaderboard, partidos, predicciones, tabla
+from backend.app.api.chat import router as chat_router
+from backend.app.api.notificaciones import router as notificaciones_router
+from backend.app.api.cron import router as cron_router
 from backend.app.core.config import settings
 from backend.app.core.database import async_session, init_db
 from backend.app.models.club import Club
@@ -47,6 +50,9 @@ app.include_router(auth.router)
 app.include_router(predicciones.router)
 app.include_router(leaderboard.router)
 app.include_router(admin.router)
+app.include_router(chat_router)
+app.include_router(notificaciones_router)
+app.include_router(cron_router)
 
 
 @app.get("/")
