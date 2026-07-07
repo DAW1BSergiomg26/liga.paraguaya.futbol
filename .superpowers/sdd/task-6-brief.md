@@ -1,185 +1,130 @@
-### Task 6: Backend — Seed Script
+# Task 6: Frontend PredictionModal component
 
 **Files:**
-- Create: `backend/app/scripts/__init__.py`
-- Create: `backend/app/scripts/seed.py`
+- Create: `frontend/src/components/PredictionModal.tsx`
 
-**Interfaces:**
-- Consumes: `Club`, `Partido`, `TablaPosicion` ORM; `engine`, `async_session` from core
-- Produces: Loads JSON seed data into database tables
+## Steps
 
-- [ ] **Step 1: Create directories**
+- [ ] **Create `frontend/src/components/PredictionModal.tsx`**
+
+```tsx
+"use client";
+
+import { useState } from "react";
+import { crearPrediccion } from "@/lib/api";
+import type { Partido } from "@/types";
+
+interface PredictionModalProps {
+  partido: Partido;
+  clubLocal: string;
+  clubVisitante: string;
+  onClose: () => void;
+  onSuccess: () => void;
+}
+
+export default function PredictionModal({
+  partido,
+  clubLocal,
+  clubVisitante,
+  onClose,
+  onSuccess,
+}: PredictionModalProps) {
+  const [golesLocal, setGolesLocal] = useState("");
+  const [golesVisitante, setGolesVisitante] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  async function handleSubmit() {
+    const gl = Number(golesLocal);
+    const gv = Number(golesVisitante);
+    if (!Number.isInteger(gl) || !Number.isInteger(gv) || gl < 0 || gv < 0) {
+      setError("Los goles deben ser números enteros no negativos");
+      return;
+    }
+    setSaving(true);
+    setError("");
+    try {
+      await crearPrediccion({
+        partido_id: partido.id,
+        goles_local: gl,
+        goles_visitante: gv,
+      });
+      onSuccess();
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Error al guardar");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+      <div className="bg-[#0a1628] border border-white/10 rounded-2xl p-8 w-full max-w-md mx-4">
+        <h3 className="text-xl font-bold mb-2">🔮 Tu predicción</h3>
+        <p className="text-sm text-gray-400 mb-6">
+          {partido.torneo} · Jornada {partido.jornada}
+        </p>
+
+        <div className="flex items-center justify-center gap-4 mb-6">
+          <div className="text-right">
+            <p className="text-white font-medium text-lg">{clubLocal}</p>
+          </div>
+          <input
+            type="number"
+            min="0"
+            value={golesLocal}
+            onChange={(e) => setGolesLocal(e.target.value)}
+            className="w-16 px-3 py-2 rounded-lg bg-[#1a2a3a] border border-white/10 text-white text-center text-xl font-bold"
+          />
+          <span className="text-gray-400 text-lg">vs</span>
+          <input
+            type="number"
+            min="0"
+            value={golesVisitante}
+            onChange={(e) => setGolesVisitante(e.target.value)}
+            className="w-16 px-3 py-2 rounded-lg bg-[#1a2a3a] border border-white/10 text-white text-center text-xl font-bold"
+          />
+          <div className="text-left">
+            <p className="text-white font-medium text-lg">{clubVisitante}</p>
+          </div>
+        </div>
+
+        {error && (
+          <div className="mb-4 p-3 rounded-lg bg-red-900/30 text-red-300 text-sm">{error}</div>
+        )}
+
+        <div className="flex gap-3">
+          <button
+            onClick={handleSubmit}
+            disabled={saving}
+            className="flex-1 px-4 py-3 rounded-xl bg-[#76e4f7] text-black font-semibold hover:bg-[#5ac8df] transition disabled:opacity-50"
+          >
+            {saving ? "Guardando..." : "Guardar predicción"}
+          </button>
+          <button
+            onClick={onClose}
+            className="px-4 py-3 rounded-xl border border-white/10 text-gray-400 hover:text-white transition"
+          >
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+- [ ] **Verify TypeScript compiles**
 
 ```powershell
-New-Item -ItemType Directory -Path "backend/app/scripts" -Force
+cd C:\Users\astur\Desktop\liga.paraguaya.futbol\frontend && npx tsc --noEmit 2>&1
 ```
+Expected: no errors
 
-- [ ] **Step 2: Create `backend/app/scripts/__init__.py`** (empty)
-
-- [ ] **Step 3: Create `backend/app/scripts/seed.py`**
-
-```python
-import json
-from datetime import date
-from pathlib import Path
-
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from backend.app.core.database import async_session, init_db
-from backend.app.models.club import Club
-from backend.app.models.partido import Partido
-from backend.app.models.tabla import TablaPosicion
-
-DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
-
-
-def load_json(name: str) -> list:
-    path = DATA_DIR / name
-    if not path.exists():
-        print(f"  File not found: {path}")
-        return []
-    with open(path, "r", encoding="utf-8-sig") as f:
-        return json.load(f)
-
-
-async def seed_clubes(db: AsyncSession):
-    data = load_json("clubes_paraguay.json")
-    count = 0
-    for item in data:
-        existing = await db.execute(select(Club).where(Club.id == item["id"]))
-        if existing.scalar_one_or_none():
-            continue
-        club = Club(
-            id=item["id"],
-            nombre=item["nombre"],
-            ciudad=item["ciudad"],
-            apodo=item["apodo"],
-            colores=item["colores"],
-            estadio=item["estadio"],
-        )
-        db.add(club)
-        count += 1
-    await db.flush()
-    print(f"  Clubes: {count} nuevos")
-    return count
-
-
-async def seed_partidos(db: AsyncSession):
-    data = load_json("partidos_demo.json")
-    count = 0
-    for item in data:
-        existing = await db.execute(select(Partido).where(Partido.id == item["id"]))
-        if existing.scalar_one_or_none():
-            continue
-        partido = Partido(
-            id=item["id"],
-            torneo=item["torneo"],
-            fecha=date.fromisoformat(item["fecha"]),
-            jornada=item.get("jornada", 1),
-            local_id=item["local"],
-            visitante_id=item["visitante"],
-            goles_local=item.get("goles_local"),
-            goles_visitante=item.get("goles_visitante"),
-            estado=item["estado"],
-        )
-        db.add(partido)
-        count += 1
-    await db.flush()
-    print(f"  Partidos: {count} nuevos")
-    return count
-
-
-async def seed_tabla(db: AsyncSession):
-    data = load_json("tabla_posiciones_demo.json")
-    count = 0
-    for item in data:
-        tabla_row = TablaPosicion(
-            torneo=item.get("torneo", "Apertura 2026"),
-            jornada=item.get("jornada", 1),
-            club_id=item["club_id"],
-            posicion=item["posicion"],
-            pj=item["pj"],
-            pg=item["pg"],
-            pe=item["pe"],
-            pp=item["pp"],
-            gf=item["gf"],
-            gc=item["gc"],
-            dg=item["dg"],
-            puntos=item["puntos"],
-        )
-        db.add(tabla_row)
-        count += 1
-    await db.flush()
-    print(f"  Tabla: {count} filas nuevas")
-    return count
-
-
-async def main():
-    print("Inicializando base de datos...")
-    await init_db()
-    print("Ejecutando seed...")
-    async with async_session() as db:
-        await seed_clubes(db)
-        await seed_partidos(db)
-        await seed_tabla(db)
-        await db.commit()
-    print("Seed completado.")
-
-
-if __name__ == "__main__":
-    import asyncio
-    asyncio.run(main())
-```
-
-- [ ] **Step 4: Run seed script**
+- [ ] **Commit**
 
 ```powershell
-cd backend
-python -m backend.app.scripts.seed
+cd C:\Users\astur\Desktop\liga.paraguaya.futbol
+git add frontend/src/components/PredictionModal.tsx
+git commit -m "feat: add PredictionModal component"
 ```
-
-Expected output:
-```
-Inicializando base de datos...
-Ejecutando seed...
-  Clubes: 4 nuevos
-  Partidos: 2 nuevos
-  Tabla: 4 filas nuevas
-Seed completado.
-```
-
-- [ ] **Step 5: Run seed again (idempotent)**
-
-```powershell
-cd backend && python -m backend.app.scripts.seed
-```
-
-Expected: `Clubes: 0 nuevos, Partidos: 0 nuevos, Tabla: 0 filas nuevas`
-
-- [ ] **Step 6: Verify API returns data**
-
-```powershell
-# In another terminal, start server
-cd backend && uvicorn backend.app.main:app --reload --port 8001
-
-# Then test
-curl http://localhost:8001/api/v1/clubes
-```
-
-Expected: JSON array with 4 clubs.
-
-```powershell
-curl http://localhost:8001/api/v1/partidos
-curl http://localhost:8001/api/v1/tabla
-```
-
-- [ ] **Step 7: Commit**
-
-```bash
-git add -A && git commit -m "feat(backend): seed script for initial data"
-```
-
----
-
-

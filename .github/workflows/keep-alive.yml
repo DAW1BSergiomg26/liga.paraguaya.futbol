@@ -1,0 +1,12 @@
+name: Keep Railway Alive
+on:
+  schedule:
+    - cron: '*/14 * * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Railway backend
+        run: curl -sSf https://backend-production-0b7d.up.railway.app/health > /dev/null

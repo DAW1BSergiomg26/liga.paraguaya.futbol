@@ -35,7 +35,12 @@ async def seed_clubes(db: AsyncSession):
             ciudad=item["ciudad"],
             apodo=item["apodo"],
             colores=item["colores"],
-            estadio=item["estadio"],
+            estadio=item.get("estadio", ""),
+            capacidad=item.get("capacidad", 0),
+            fundacion=item.get("fundacion", 1900),
+            direccion=item.get("direccion", ""),
+            escudo=item.get("escudo", ""),
+            camiseta=item.get("camiseta", ""),
         )
         db.add(club)
         count += 1

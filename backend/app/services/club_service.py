@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.app.models.club import Club
-from backend.app.schemas.club import ClubOut
+from backend.app.schemas.club import ClubDetailOut, ClubOut
 
 
 class ClubService:
@@ -19,7 +19,7 @@ class ClubService:
         return [ClubOut.model_validate(c) for c in clubs]
 
     @staticmethod
-    async def get_by_id(db: AsyncSession, club_id: str) -> Optional[ClubOut]:
+    async def get_by_id(db: AsyncSession, club_id: str) -> Optional[ClubDetailOut]:
         result = await db.execute(select(Club).where(Club.id == club_id))
         club = result.scalar_one_or_none()
-        return ClubOut.model_validate(club) if club else None
+        return ClubDetailOut.model_validate(club) if club else None

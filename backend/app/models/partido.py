@@ -22,3 +22,4 @@ class Partido(Base):
 
     local = relationship("Club", foreign_keys=[local_id])
     visitante = relationship("Club", foreign_keys=[visitante_id])
+    predicciones = relationship("Prediction", back_populates="partido", lazy="selectin")

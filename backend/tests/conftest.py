@@ -2,6 +2,7 @@ from datetime import date
 
 import pytest
 from httpx import ASGITransport, AsyncClient
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from backend.app.core.database import Base
@@ -41,6 +42,7 @@ async def client(db_session):
 
 from backend.app.models.club import Club
 from backend.app.models.partido import Partido
+from backend.app.models.prediction import Prediction
 from backend.app.models.tabla import TablaPosicion
 
 
@@ -65,4 +67,17 @@ async def seed_test_data(db: AsyncSession):
     ]
     for t in tabla:
         db.add(t)
+    await db.flush()
+
+
+async def seed_test_user(db: AsyncSession):
+    from backend.app.models.user import User
+    user = User(
+        id="test_user",
+        email="test@test.com",
+        name="Test",
+        username="tester",
+        token="test_token_123",
+    )
+    db.add(user)
     await db.flush()

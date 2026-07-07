@@ -7,9 +7,11 @@ class Settings(BaseSettings):
     debug: bool = True
 
     database_url: str = "sqlite+aiosqlite:///./data/liga.db"
-    cors_origins: str = "http://localhost:3000,http://localhost:5173"
+    cors_origins: str = "http://localhost:3000,http://localhost:5173,https://frontend-ten-swart-85.vercel.app"
 
     api_football_key: str = ""
+
+    admin_api_key: str = "admin123"
 
     @property
     def cors_origin_list(self) -> list[str]:

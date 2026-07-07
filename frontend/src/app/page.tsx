@@ -1,10 +1,11 @@
 import { getClubes, getPartidos, getTabla } from "@/lib/api";
+import type { PartidoPage } from "@/types";
 import Link from "next/link";
 
 export default async function HomePage() {
-  const [clubes, partidos, tabla] = await Promise.all([
+  const [clubes, partidosData, tabla] = await Promise.all([
     getClubes().catch(() => []),
-    getPartidos().catch(() => []),
+    getPartidos().catch(() => ({ data: [], total: 0, page: 1, per_page: 25, total_pages: 1 } satisfies PartidoPage)),
     getTabla().catch(() => []),
   ]);
 
@@ -34,7 +35,7 @@ export default async function HomePage() {
           <p className="text-gray-400 mt-1">Clubes</p>
         </div>
         <div className="p-6 rounded-xl bg-[#0a1628]/60 border border-white/5 text-center">
-          <p className="text-3xl font-bold text-[#76e4f7]">{partidos.length}</p>
+          <p className="text-3xl font-bold text-[#76e4f7]">{partidosData.total}</p>
           <p className="text-gray-400 mt-1">Partidos</p>
         </div>
         <div className="p-6 rounded-xl bg-[#0a1628]/60 border border-white/5 text-center">

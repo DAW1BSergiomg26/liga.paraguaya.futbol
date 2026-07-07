@@ -1,86 +1,138 @@
-### Task 8: Frontend — Scaffold Next.js + TypeScript + Tailwind
+# Task 8: Frontend partidos pages — prediction integration
 
 **Files:**
-- Create: `frontend/` (new Next.js project replacing old React app)
+- Modify: `frontend/src/app/partidos/page.tsx`
+- Modify: `frontend/src/app/partidos/[id]/page.tsx`
 
-- [ ] **Step 1: Remove old frontend and create new Next.js project**
+## Steps
 
-```powershell
-# Backup the old frontend vite.config proxy change if needed
-Remove-Item -Recurse -Force frontend -ErrorAction SilentlyContinue
+- [ ] **Modify `frontend/src/app/partidos/page.tsx`** — add "Predecir" button and PredictionModal
 
-npx create-next-app@latest frontend --typescript --tailwind --eslint --app --src-dir --import-alias "@/*" --no-turbopack --use-npm
-```
-
-When prompted, say "Yes" to all defaults.
-
-- [ ] **Step 2: Install additional dependencies**
-
-```powershell
-cd frontend
-npm install @tanstack/react-query@5
-```
-
-- [ ] **Step 3: Configure Next.js to allow backend API images (if needed later)**
-
-No changes needed for now. Next.js default config is fine.
-
-- [ ] **Step 4: Update `frontend/src/app/layout.tsx`**
-
-Read the generated file first, then replace content:
-
+Add these imports after the existing ones (add after line 10):
 ```tsx
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
-
-const inter = Inter({ subsets: ["latin"] });
-
-export const metadata: Metadata = {
-  title: "Liga Paraguaya de Fútbol",
-  description: "Clubes, partidos, tabla de posiciones y datos base del fútbol paraguayo.",
-};
-
-export default function RootLayout({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
-  return (
-    <html lang="es">
-      <body className={`${inter.className} bg-[#07111f] text-[#f8fafc] min-h-screen`}>
-        {children}
-      </body>
-    </html>
-  );
-}
+import { useState, useEffect } from "react";
+import { getSavedToken, setAuthToken } from "@/lib/api";
+import { useQueryClient } from "@tanstack/react-query";
+import PredictionModal from "@/components/PredictionModal";
 ```
 
-- [ ] **Step 5: Add favicon** — replace `frontend/public/` with a simple SVG shield or keep default
+In the `PartidosContent` function, add state after `const clubMap...` block (after line 51):
+```tsx
+const queryClient = useQueryClient();
+const [userToken, setUserToken] = useState<string | null>(null);
+const [predictionPartido, setPredictionPartido] = useState<Partido | null>(null);
+
+useEffect(() => {
+  const token = getSavedToken();
+  if (token) {
+    setAuthToken(token);
+    setUserToken(token);
+  }
+}, []);
+```
+
+In the table header row, add a new `<th>` after the Estado column:
+```tsx
+<th className="text-center py-3 px-2">Estado</th>
+<th className="text-center py-3 px-2">Pronóstico</th>
+<th className="text-center py-3 px-2">Jornada</th>
+```
+
+In the table body, add a new `<td>` after the EstadoBadge column:
+```tsx
+<td className="py-3 px-2 text-center">
+  <EstadoBadge estado={p.estado} />
+</td>
+<td className="py-3 px-2 text-center">
+  {userToken && p.estado === "programado" && (
+    <button
+      onClick={() => setPredictionPartido(p)}
+      className="text-xs px-2 py-1 rounded-lg bg-[#1a2a3a] border border-white/10 text-[#76e4f7] hover:bg-[#76e4f7] hover:text-black transition"
+    >
+      🔮 Predecir
+    </button>
+  )}
+</td>
+```
+
+Before the closing `</div>` of the table section and after the table, add the modal:
+```tsx
+      {predictionPartido && (
+        <PredictionModal
+          partido={predictionPartido}
+          clubLocal={clubMap.get(predictionPartido.local_id) || predictionPartido.local_id}
+          clubVisitante={clubMap.get(predictionPartido.visitante_id) || predictionPartido.visitante_id}
+          onClose={() => setPredictionPartido(null)}
+          onSuccess={() => {
+            setPredictionPartido(null);
+            queryClient.invalidateQueries({ queryKey: ["predicciones"] });
+          }}
+        />
+      )}
+```
+
+- [ ] **Modify `frontend/src/app/partidos/[id]/page.tsx`** — show user's prediction
+
+Add imports after existing ones (after line 9):
+```tsx
+import { useEffect, useState } from "react";
+import { getSavedToken, setAuthToken, misPredicciones } from "@/lib/api";
+import type { PredictionDetail } from "@/types";
+```
+
+Add state after `const id = params.id as string;` (after line 13):
+```tsx
+const [prediction, setPrediction] = useState<PredictionDetail | null>(null);
+const [loggedIn, setLoggedIn] = useState(false);
+
+useEffect(() => {
+  const token = getSavedToken();
+  if (token) {
+    setAuthToken(token);
+    setLoggedIn(true);
+    misPredicciones().then((preds) => {
+      const found = preds.find((p) => p.partido_id === id);
+      if (found) setPrediction(found);
+    }).catch(() => {});
+  }
+}, [id]);
+```
+
+After the main detail card (after line 111), add the prediction section:
+```tsx
+      {prediction && (
+        <section className="mt-10">
+          <h2 className="text-2xl font-bold mb-4">🔮 Tu predicción</h2>
+          <div className={`p-4 rounded-xl border ${
+            prediction.puntos === 3 ? "border-green-500/50 bg-green-900/20" :
+            prediction.puntos === 2 ? "border-yellow-500/50 bg-yellow-900/20" :
+            prediction.puntos === 0 && prediction.estado === "finalizado" ? "border-red-500/50 bg-red-900/20" :
+            "border-white/10 bg-[#0a1628]/60"
+          }`}>
+            <div className="flex items-center justify-center gap-4 text-2xl font-bold">
+              <span>{partido.local_nombre}</span>
+              <span className="text-[#76e4f7]">{prediction.goles_local} - {prediction.goles_visitante}</span>
+              <span>{prediction.visitante_nombre}</span>
+            </div>
+            {prediction.puntos > 0 && (
+              <p className="text-center mt-2 font-semibold text-green-400">+{prediction.puntos} pts</p>
+            )}
+          </div>
+        </section>
+      )}
+```
+
+- [ ] **Verify TypeScript compiles**
 
 ```powershell
-# Create a simple SVG favicon
-New-Item -ItemType Directory -Path "frontend/public/images" -Force
+cd C:\Users\astur\Desktop\liga.paraguaya.futbol\frontend && npx tsc --noEmit 2>&1
 ```
+Expected: no errors
 
-Create `frontend/public/favicon.svg`:
-
-```svg
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">⚽</text></svg>
-```
-
-- [ ] **Step 6: Verify dev server starts**
+- [ ] **Commit**
 
 ```powershell
-cd frontend && npm run dev
+cd C:\Users\astur\Desktop\liga.paraguaya.futbol
+git add frontend/src/app/partidos/page.tsx frontend/src/app/partidos/[id]/page.tsx
+git commit -m "feat: integrate prediction button and display in partidos"
 ```
-
-Open `http://localhost:3000` — should see the default Next.js page with "Liga Paraguaya de Fútbol" title.
-
-- [ ] **Step 7: Commit**
-
-```bash
-git add -A && git commit -m "feat(frontend): scaffold Next.js project"
-```
-
----
-
-
