@@ -1,101 +1,67 @@
-### Task 10: Frontend — Layout Components (Navbar + Footer)
+# Task 10: Tests Backend para Chat y Push
 
-**Files:**
-- Create: `frontend/src/components/layout/Navbar.tsx`
-- Create: `frontend/src/components/layout/Footer.tsx`
-- Modify: `frontend/src/app/layout.tsx`
+## Files
+- Create: `backend/tests/test_chat_push.py`
 
-- [ ] **Step 1: Create `frontend/src/components/layout/Navbar.tsx`**
+## Test Coverage
 
-```tsx
-import Link from "next/link";
+### Chat REST (`GET /api/v1/partidos/{id}/chat`)
+- Sin autenticación → 200 (endpoint público, no usa auth)
+- Partido no existe → 200 con lista vacía
+- Chat vacío para partido existente → lista vacía
+- Con mensajes guardados → devuelve mensajes ordenados DESC por created_at
+- Paginación (limit, offset)
 
-export default function Navbar() {
-  return (
-    <nav className="border-b border-white/10 bg-[#0a1628]/80 backdrop-blur-sm">
-      <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-        <Link href="/" className="text-xl font-bold tracking-tight">
-          ⚽ Liga PY
-        </Link>
-        <div className="flex gap-6 text-sm font-medium text-gray-300">
-          <Link href="/clubes" className="hover:text-white transition">Clubes</Link>
-          <Link href="/partidos" className="hover:text-white transition">Partidos</Link>
-          <Link href="/tabla" className="hover:text-white transition">Tabla</Link>
-        </div>
-      </div>
-    </nav>
-  );
-}
+### Chat WebSocket (`ws /api/v1/ws/partidos/{id}?token=...`)
+- Token inválido → close code 4001
+- Partido no existe → close code 4004
+- Token válido + partido existe → conexión exitosa, envía mensaje, recibe broadcast
+- Test with `pytest-asyncio` + `httpx` WS transport (the test infra already uses `httpx.AsyncClient`)
+
+**Note**: WebSocket tests with httpx + pytest-asyncio require careful setup. Use `client.ws_connect()`. The existing `client` fixture creates an AsyncClient — we need to use `httpx.AsyncClient` directly for WS tests or use the `app` to create WS connections.
+
+Actually, httpx AsyncClient doesn't support websocket connect directly in the same way. For FastAPI WebSocket tests:
+```python
+from fastapi.testclient import TestClient
+# OR
+from httpx import AsyncClient, ASGITransport
 ```
+But httpx's AsyncClient with ASGITransport should support websocket via the `upgrade` mechanism. Let's use `httpx`'s WS support or fall back to FastAPI's TestClient for WS tests.
 
-- [ ] **Step 2: Create `frontend/src/components/layout/Footer.tsx`**
+Actually for simplicity, let's test Chat REST (GET history) thoroughly and only do basic WS tests. We can use `httpx` with `ASGITransport` for the REST tests. For WebSocket, we can use FastAPI's TestClient since httpx's websocket support is limited.
 
-```tsx
-export default function Footer() {
-  return (
-    <footer className="border-t border-white/10 bg-[#0a1628]/60 mt-auto">
-      <div className="max-w-6xl mx-auto px-4 py-6 text-center text-sm text-gray-500">
-        <p>liga.paraguaya.futbol — Proyecto de datos y seguimiento del fútbol paraguayo</p>
-        <p className="mt-1">
-          <a href="https://github.com/usuario/liga.paraguaya.futbol" className="hover:text-gray-300 transition" target="_blank" rel="noopener noreferrer">
-            GitHub
-          </a>
-        </p>
-      </div>
-    </footer>
-  );
-}
-```
+Let me write a practical test file.
 
-- [ ] **Step 3: Update `frontend/src/app/layout.tsx`**
+### Push Endpoints (`POST/DELETE /api/v1/notificaciones/suscribir`, `GET /api/v1/notificaciones/vapid-public-key`)
+- `GET /vapid-public-key` → 200 con `{"publicKey": ""}` (vacío por defecto en test)
+- `POST /suscribir` sin auth → 401/403
+- `POST /suscribir` con auth → 200 con `{"ok": True}`
+- `DELETE /suscribir` con auth → 200
+- `DELETE /suscribir` sin auth → 401/403
 
-```tsx
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
+## Important Notes
+- The `conftest.py` has `seed_test_user(db)` which creates user with token `test_token_123`
+- Auth headers: `Authorization: Bearer test_token_123`
+- VAPID keys vacíos por defecto (config default)
+- For chat messages, the test can call `ChatService.guardar()` directly via db_session
+- WebSocket tests: use `httpx.AsyncClient` with `ws_connect` or fall back to `fastapi.testclient.TestClient`
 
-const inter = Inter({ subsets: ["latin"] });
+## Dependencies
+pytest-asyncio is already installed (existing tests use it). httpx is also installed.
 
-export const metadata: Metadata = {
-  title: "Liga Paraguaya de Fútbol",
-  description: "Clubes, partidos, tabla de posiciones y datos base del fútbol paraguayo.",
-};
+## Expected Count
+Add at least 5-8 tests covering: chat GET empty, chat GET with data, chat auth, push vapid key, push subscribe with/without auth, push unsubscribe.
 
-export default function RootLayout({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
-  return (
-    <html lang="es">
-      <body className={`${inter.className} bg-[#07111f] text-[#f8fafc] min-h-screen flex flex-col`}>
-        <Navbar />
-        <main className="flex-1">{children}</main>
-        <Footer />
-      </body>
-    </html>
-  );
-}
-```
-
-- [ ] **Step 4: Update `frontend/src/app/globals.css` — replace with clean styles**
-
-```css
-@import "tailwindcss";
-
-body {
-  margin: 0;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-```
-
-- [ ] **Step 5: Commit**
-
+## Verify
 ```bash
-git add -A && git commit -m "feat(frontend): layout components (Navbar, Footer)"
+cd backend && python -m pytest tests/ -v
 ```
 
----
+## Commit
+```bash
+git add backend/tests/test_chat_push.py
+git commit -m "test: add chat and push notification tests"
+```
 
-
+## Report File
+`.superpowers/sdd/task-10-report.md`

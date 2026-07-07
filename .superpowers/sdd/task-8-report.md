@@ -1,24 +1,16 @@
-# Task 8 Report: Frontend partidos pages — prediction integration
+# Task 8 Report: Service Worker + PushSetup + Layout Registration
+
+## Status: ✓ Complete
+
+## Files Created
+- `frontend/public/sw.js` — service worker handling push events and notification clicks
+- `frontend/src/components/PushSetup.tsx` — client component that registers SW and subscribes to push
 
 ## Files Modified
-
-- `frontend/src/app/partidos/page.tsx` (180→220 lines)
-- `frontend/src/app/partidos/[id]/page.tsx` (113→152 lines)
-
-## Changes Made
-
-### `partidos/page.tsx`
-- Added imports: `useState`, `useEffect`, `getSavedToken`, `setAuthToken`, `useQueryClient`, `PredictionModal`
-- Added `queryClient`, `userToken`, and `predictionPartido` state + `useEffect` to load auth token
-- Added "Pronóstico" column header between Estado and Jornada
-- Added "🔮 Predecir" button cell (visible only when logged in and partido is "programado")
-- Added `<PredictionModal>` component at the bottom of the page
-
-### `partidos/[id]/page.tsx`
-- Added imports: `useEffect`, `useState`, `getSavedToken`, `setAuthToken`, `misPredicciones`, `PredictionDetail`
-- Added `prediction` state + `useEffect` to fetch user's prediction for this partido
-- Added prediction display section below the detail card showing the user's predicted score, with color-coded border based on points earned
+- `frontend/src/app/layout.tsx` — added import and `<PushSetup />` (no `"use client"` added; server component preserved)
 
 ## Verification
-- `npx tsc --noEmit` — clean, no errors
-- Commit: `1172b73` with message `feat: integrate prediction button and display in partidos`
+- `npm run build` passed (TypeScript compiled successfully, all routes generated)
+
+## Commit
+`f68eaf8` — `feat: add service worker and push subscription setup`

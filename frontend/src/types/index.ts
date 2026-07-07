@@ -44,6 +44,7 @@ export interface TablaRow {
   posicion: number;
   club_id: string;
   club: string;
+  escudo: string;
   pj: number;
   pg: number;
   pe: number;

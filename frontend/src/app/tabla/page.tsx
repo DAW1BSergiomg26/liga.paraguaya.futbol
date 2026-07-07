@@ -66,7 +66,14 @@ export default function TablaPage() {
                     <Medalla pos={row.posicion} />
                     {row.posicion}
                   </td>
-                  <td className="py-3 px-4 font-medium text-white">{row.club}</td>
+                  <td className="py-3 px-4 font-medium text-white">
+                    <div className="flex items-center gap-3">
+                      {row.escudo && (
+                        <img src={row.escudo} alt="" className="w-6 h-6 object-contain shrink-0" />
+                      )}
+                      {row.club}
+                    </div>
+                  </td>
                   <td className="py-3 px-3 text-center text-gray-300">{row.pj}</td>
                   <td className="py-3 px-3 text-center text-green-400">{row.pg}</td>
                   <td className="py-3 px-3 text-center text-yellow-400">{row.pe}</td>

@@ -1,0 +1,71 @@
+cb2e5b6 feat: add MensajeChat and PushSubscription models
+---
+ backend/app/models/__init__.py          |  4 +++-
+ backend/app/models/mensaje_chat.py      | 20 ++++++++++++++++++++
+ backend/app/models/push_subscription.py | 17 +++++++++++++++++
+ 3 files changed, 40 insertions(+), 1 deletion(-)
+---
+diff --git a/backend/app/models/__init__.py b/backend/app/models/__init__.py
+index c124597..ca34309 100644
+--- a/backend/app/models/__init__.py
++++ b/backend/app/models/__init__.py
+@@ -1,7 +1,9 @@
+ from backend.app.models.club import Club
++from backend.app.models.mensaje_chat import MensajeChat
+ from backend.app.models.partido import Partido
+ from backend.app.models.prediction import Prediction
++from backend.app.models.push_subscription import PushSubscription
+ from backend.app.models.tabla import TablaPosicion
+ from backend.app.models.user import User
+ 
+-__all__ = ["Club", "Partido", "Prediction", "TablaPosicion", "User"]
++__all__ = ["Club", "MensajeChat", "Partido", "Prediction", "PushSubscription", "TablaPosicion", "User"]
+diff --git a/backend/app/models/mensaje_chat.py b/backend/app/models/mensaje_chat.py
+new file mode 100644
+index 0000000..cdacb87
+--- /dev/null
++++ b/backend/app/models/mensaje_chat.py
+@@ -0,0 +1,20 @@
++import uuid
++from datetime import datetime, timezone
++
++from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text
++from sqlalchemy.orm import relationship
++
++from backend.app.core.database import Base
++
++
++class MensajeChat(Base):
++    __tablename__ = "mensajes_chat"
++
++    id = Column(String, primary_key=True)
++    partido_id = Column(String, ForeignKey("partidos.id"), nullable=False, index=True)
++    user_id = Column(String, ForeignKey("users.id"), nullable=False)
++    mensaje = Column(Text, nullable=False)
++    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
++
++    partido = relationship("Partido", lazy="selectin")
++    user = relationship("User", lazy="selectin")
+diff --git a/backend/app/models/push_subscription.py b/backend/app/models/push_subscription.py
+new file mode 100644
+index 0000000..537140b
+--- /dev/null
++++ b/backend/app/models/push_subscription.py
+@@ -0,0 +1,17 @@
++import uuid
++from datetime import datetime, timezone
++
++from sqlalchemy import Column, DateTime, ForeignKey, String, Text
++
++from backend.app.core.database import Base
++
++
++class PushSubscription(Base):
++    __tablename__ = "push_subscriptions"
++
++    id = Column(String, primary_key=True)
++    user_id = Column(String, ForeignKey("users.id"), nullable=False)
++    endpoint = Column(Text, nullable=False)
++    p256dh = Column(String, nullable=False)
++    auth = Column(String, nullable=False)
++    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)

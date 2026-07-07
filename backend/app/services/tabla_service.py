@@ -29,6 +29,7 @@ class TablaService:
                 posicion=r.posicion,
                 club_id=r.club_id,
                 club=r.club_rel.nombre if r.club_rel else "",
+                escudo=r.club_rel.escudo if r.club_rel else "",
                 pj=r.pj,
                 pg=r.pg,
                 pe=r.pe,

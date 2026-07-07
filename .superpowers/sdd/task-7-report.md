@@ -1,13 +1,21 @@
-# Task 7 Report: Frontend predictions + leaderboard pages
+# Task 7 Report: Frontend Chat Components
 
-**Status:** ✅ Complete
+## Implemented
+- `frontend/src/components/ChatMessage.tsx` — renders individual chat messages with avatar, name, timestamp, and content
+- `frontend/src/components/ChatWidget.tsx` — chat widget with message history fetch, WebSocket live connection, send message input, connection status indicator
 
-## Changes
+## Test Results
+- `npm run build` — Compiled successfully, TypeScript finished in 3.4s, no errors
 
-- Created `frontend/src/app/predicciones/page.tsx` — Shows user's predictions with login guard, prediction list, and embedded leaderboard
-- Created `frontend/src/app/leaderboard/page.tsx` — Standalone leaderboard page with rank, user info, points, hits, and prediction count
+## Files Changed
+- `frontend/src/components/ChatMessage.tsx` (created, 40 lines)
+- `frontend/src/components/ChatWidget.tsx` (created, 130 lines)
 
-## Verification
+## Self-Review Findings
+- Code matches brief exactly
+- Uses existing project conventions (Tailwind CSS, dark theme, `"use client"`, functional components)
+- No emoji in ChatWidget title per constraints
+- ChatWidget gracefully handles missing auth token (no WebSocket connection, history still loads)
 
-- `npx tsc --noEmit` — ✅ zero errors
-- `git commit` — ✅ committed as `68a0db8`
+## Concerns
+- None

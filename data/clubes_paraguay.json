@@ -22,8 +22,8 @@
     "capacidad": 45000,
     "fundacion": 1912,
     "direccion": "Av. República Argentina y Rca. de Colombia, Asunción",
-    "escudo": "https://upload.wikimedia.org/wikipedia/commons/4/4f/Escudo_Cerro_Porte%C3%B1o.png",
-    "camiseta": "https://upload.wikimedia.org/wikipedia/commons/4/4f/Escudo_Cerro_Porte%C3%B1o.png"
+    "escudo": "https://upload.wikimedia.org/wikipedia/commons/4/44/Escudo_Club_Cerro_Porte%C3%B1o_2023-Actual.svg",
+    "camiseta": "https://upload.wikimedia.org/wikipedia/commons/4/44/Escudo_Club_Cerro_Porte%C3%B1o_2023-Actual.svg"
   },
   {
     "id": "libertad",
@@ -35,8 +35,8 @@
     "capacidad": 15000,
     "fundacion": 1905,
     "direccion": "Av. Eusebio Ayala 3540, Asunción",
-    "escudo": "https://upload.wikimedia.org/wikipedia/commons/0/0d/Escudo_del_Club_Libertad.png",
-    "camiseta": "https://upload.wikimedia.org/wikipedia/commons/0/0d/Escudo_del_Club_Libertad.png"
+    "escudo": "https://upload.wikimedia.org/wikipedia/commons/6/6b/Club_Libertad.png",
+    "camiseta": "https://upload.wikimedia.org/wikipedia/commons/6/6b/Club_Libertad.png"
   },
   {
     "id": "guarani",
@@ -61,8 +61,8 @@
     "capacidad": 7500,
     "fundacion": 1904,
     "direccion": "Av. Gral. Santos 1070, Asunción",
-    "escudo": "https://upload.wikimedia.org/wikipedia/commons/a/a3/Escudo_Nacional_Paraguay.png",
-    "camiseta": "https://upload.wikimedia.org/wikipedia/commons/a/a3/Escudo_Nacional_Paraguay.png"
+    "escudo": "https://upload.wikimedia.org/wikipedia/commons/4/49/Escudo_de_Nacional.png",
+    "camiseta": "https://upload.wikimedia.org/wikipedia/commons/4/49/Escudo_de_Nacional.png"
   },
   {
     "id": "recoleta",

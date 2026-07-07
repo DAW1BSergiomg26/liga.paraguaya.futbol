@@ -1,0 +1,188 @@
+80447e9 feat: register chat, notificaciones, and cron routers
+4e8f46e feat: add WebSocket chat endpoint with ConnectionManager
+---
+ backend/app/api/chat.py           | 106 ++++++++++++++++++++++++++++++++++++++
+ backend/app/api/cron.py           |   3 ++
+ backend/app/api/notificaciones.py |   3 ++
+ backend/app/main.py               |   6 +++
+ 4 files changed, 118 insertions(+)
+---
+diff --git a/backend/app/api/chat.py b/backend/app/api/chat.py
+new file mode 100644
+index 0000000..f82dc77
+--- /dev/null
++++ b/backend/app/api/chat.py
+@@ -0,0 +1,106 @@
++import json
++from fastapi import APIRouter, Depends, Query, WebSocket, WebSocketDisconnect
++from sqlalchemy.ext.asyncio import AsyncSession
++
++from backend.app.core.dependencies import get_db
++from backend.app.models.user import User
++from backend.app.schemas.chat import MensajeChatCreate, MensajeChatOut
++from backend.app.services.chat_service import ChatService
++
++router = APIRouter(prefix="/api/v1", tags=["chat"])
++
++
++class ConnectionManager:
++    def __init__(self):
++        self.active: dict[str, set[WebSocket]] = {}
++
++    async def connect(self, partido_id: str, ws: WebSocket):
++        await ws.accept()
++        if partido_id not in self.active:
++            self.active[partido_id] = set()
++        self.active[partido_id].add(ws)
++
++    def disconnect(self, partido_id: str, ws: WebSocket):
++        if partido_id in self.active:
++            self.active[partido_id].discard(ws)
++            if not self.active[partido_id]:
++                del self.active[partido_id]
++
++    async def broadcast(self, partido_id: str, data: dict):
++        if partido_id not in self.active:
++            return
++        dead = set()
++        for ws in self.active[partido_id]:
++            try:
++                await ws.send_json(data)
++            except Exception:
++                dead.add(ws)
++        for ws in dead:
++            self.active[partido_id].discard(ws)
++
++
++manager = ConnectionManager()
++
++
++async def get_user_from_token(db: AsyncSession, token: str) -> User | None:
++    from sqlalchemy import select
++    from backend.app.models.user import User
++    result = await db.execute(select(User).where(User.token == token))
++    return result.scalar_one_or_none()
++
++
++@router.get("/partidos/{partido_id}/chat", response_model=list[MensajeChatOut])
++async def get_chat_history(
++    partido_id: str,
++    limit: int = Query(default=50, ge=1, le=200),
++    offset: int = Query(default=0, ge=0),
++    db: AsyncSession = Depends(get_db),
++):
++    return await ChatService.obtener_historial(db, partido_id, limit, offset)
++
++
++@router.websocket("/ws/partidos/{partido_id}")
++async def websocket_endpoint(
++    websocket: WebSocket,
++    partido_id: str,
++    token: str = Query(...),
++    db: AsyncSession = Depends(get_db),
++):
++    user = await get_user_from_token(db, token)
++    if not user:
++        await websocket.close(code=4001)
++        return
++
++    from sqlalchemy import select
++    from backend.app.models.partido import Partido
++    result = await db.execute(select(Partido).where(Partido.id == partido_id))
++    if not result.scalar_one_or_none():
++        await websocket.close(code=4004)
++        return
++
++    await manager.connect(partido_id, websocket)
++    try:
++        while True:
++            raw = await websocket.receive_text()
++            data = json.loads(raw)
++            if data.get("tipo") != "mensaje":
++                continue
++            msg_in = MensajeChatCreate(contenido=data["contenido"])
++            msg_out = await ChatService.guardar(db, partido_id, user.id, msg_in)
++            await manager.broadcast(
++                partido_id,
++                {
++                    "tipo": "mensaje_nuevo",
++                    "id": msg_out.id,
++                    "user_id": msg_out.user_id,
++                    "username": msg_out.username,
++                    "nombre": msg_out.nombre,
++                    "imagen": msg_out.imagen,
++                    "contenido": msg_out.mensaje,
++                    "created_at": msg_out.created_at.isoformat(),
++                },
++            )
++    except WebSocketDisconnect:
++        manager.disconnect(partido_id, websocket)
++    except Exception:
++        manager.disconnect(partido_id, websocket)
+diff --git a/backend/app/api/cron.py b/backend/app/api/cron.py
+new file mode 100644
+index 0000000..d18c7f0
+--- /dev/null
++++ b/backend/app/api/cron.py
+@@ -0,0 +1,3 @@
++from fastapi import APIRouter
++
++router = APIRouter(tags=["cron"])
+diff --git a/backend/app/api/notificaciones.py b/backend/app/api/notificaciones.py
+new file mode 100644
+index 0000000..9c14132
+--- /dev/null
++++ b/backend/app/api/notificaciones.py
+@@ -0,0 +1,3 @@
++from fastapi import APIRouter
++
++router = APIRouter(prefix="/api/v1", tags=["notificaciones"])
+diff --git a/backend/app/main.py b/backend/app/main.py
+index a70710d..a448b29 100644
+--- a/backend/app/main.py
++++ b/backend/app/main.py
+@@ -1,17 +1,20 @@
+ from contextlib import asynccontextmanager
+ 
+ from fastapi import FastAPI
+ from fastapi.middleware.cors import CORSMiddleware
+ from sqlalchemy import select
+ 
+ from backend.app.api import admin, auth, clubes, health, leaderboard, partidos, predicciones, tabla
++from backend.app.api.chat import router as chat_router
++from backend.app.api.notificaciones import router as notificaciones_router
++from backend.app.api.cron import router as cron_router
+ from backend.app.core.config import settings
+ from backend.app.core.database import async_session, init_db
+ from backend.app.models.club import Club
+ from backend.app.scripts.seed import seed_clubes, seed_partidos, seed_tabla
+ 
+ 
+ @asynccontextmanager
+ async def lifespan(app: FastAPI):
+     await init_db()
+     async with async_session() as db:
+@@ -40,20 +43,23 @@ app.add_middleware(
+ )
+ 
+ app.include_router(health.router)
+ app.include_router(clubes.router)
+ app.include_router(partidos.router)
+ app.include_router(tabla.router)
+ app.include_router(auth.router)
+ app.include_router(predicciones.router)
+ app.include_router(leaderboard.router)
+ app.include_router(admin.router)
++app.include_router(chat_router)
++app.include_router(notificaciones_router)
++app.include_router(cron_router)
+ 
+ 
+ @app.get("/")
+ async def root():
+     return {
+         "proyecto": "liga.paraguaya.futbol",
+         "estado": "API funcionando",
+         "version": settings.app_version,
+         "endpoints": [
+             "/health",

@@ -1,113 +1,56 @@
-### Task 9: Frontend — API Client + Types
+# Task 9: Integrate Chat + Push into Partido Page
 
-**Files:**
-- Create: `frontend/src/types/index.ts`
-- Create: `frontend/src/lib/api.ts`
+## Files to Modify
+- `frontend/src/lib/api.ts` — add `getChatHistory` function and `MensajeChat` interface
+- `frontend/src/app/partidos/[id]/page.tsx` — add ChatWidget below the prediction section
 
-**Interfaces:**
-- Consumes: Backend API at `NEXT_PUBLIC_API_URL`
-- Produces: Typed API client functions and TypeScript interfaces
+## Exact Changes
 
-- [ ] **Step 1: Create `frontend/src/types/index.ts`**
-
+### frontend/src/lib/api.ts
+Add at the end of the file:
 ```typescript
-export interface Club {
-  id: string;
-  nombre: string;
-  ciudad: string;
-  apodo: string;
-  colores: string[];
-  estadio: string;
-}
-
-export interface Partido {
-  id: string;
-  torneo: string;
-  fecha: string;
-  jornada: number;
-  local_id: string;
-  visitante_id: string;
-  goles_local: number | null;
-  goles_visitante: number | null;
-  estado: string;
-}
-
-export interface PartidoDetail extends Partido {
-  local_nombre: string;
-  visitante_nombre: string;
-}
-
-export interface TablaRow {
-  posicion: number;
-  club_id: string;
-  club: string;
-  pj: number;
-  pg: number;
-  pe: number;
-  pp: number;
-  gf: number;
-  gc: number;
-  dg: number;
-  puntos: number;
-}
-```
-
-- [ ] **Step 2: Create `frontend/src/lib/api.ts`**
-
-```typescript
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8001";
-
-async function fetchJSON<T>(path: string): Promise<T> {
-  const res = await fetch(`${API_URL}${path}`);
-  if (!res.ok) {
-    throw new Error(`API error: ${res.status} ${res.statusText}`);
-  }
+export async function getChatHistory(partidoId: string, limit = 50, offset = 0): Promise<MensajeChat[]> {
+  const res = await fetch(
+    `${API_URL}/api/v1/partidos/${partidoId}/chat?limit=${limit}&offset=${offset}`,
+    { headers: authHeaders() }
+  );
+  if (!res.ok) throw new Error("Failed to fetch chat history");
   return res.json();
 }
 
-import type { Club, Partido, PartidoDetail, TablaRow } from "@/types";
-
-export async function getClubes(ciudad?: string): Promise<Club[]> {
-  const params = ciudad ? `?ciudad=${encodeURIComponent(ciudad)}` : "";
-  return fetchJSON<Club[]>(`/api/v1/clubes${params}`);
-}
-
-export async function getClub(id: string): Promise<Club> {
-  return fetchJSON<Club>(`/api/v1/clubes/${id}`);
-}
-
-export async function getPartidos(torneo?: string, estado?: string): Promise<Partido[]> {
-  const params = new URLSearchParams();
-  if (torneo) params.set("torneo", torneo);
-  if (estado) params.set("estado", estado);
-  const qs = params.toString();
-  return fetchJSON<Partido[]>(`/api/v1/partidos${qs ? `?${qs}` : ""}`);
-}
-
-export async function getPartido(id: string): Promise<PartidoDetail> {
-  return fetchJSON<PartidoDetail>(`/api/v1/partidos/${id}`);
-}
-
-export async function getTabla(torneo?: string): Promise<TablaRow[]> {
-  const params = torneo ? `?torneo=${encodeURIComponent(torneo)}` : "";
-  return fetchJSON<TablaRow[]>(`/api/v1/tabla${params}`);
+export interface MensajeChat {
+  id: string;
+  partido_id: string;
+  user_id: string;
+  username: string;
+  nombre: string;
+  imagen: string;
+  mensaje: string;
+  created_at: string;
 }
 ```
 
-- [ ] **Step 3: Add `.env.local` for development**
-
-Create `frontend/.env.local`:
-
+### frontend/src/app/partidos/[id]/page.tsx
+Read the existing file first. Then:
+1. Add import at top:
+```tsx
+import ChatWidget from "@/components/ChatWidget";
 ```
-NEXT_PUBLIC_API_URL=http://localhost:8001
+2. Inside the return, after the prediction section (after the prediction-related JSX), add:
+```tsx
+{partido && <ChatWidget partidoId={partido.id} />}
 ```
 
-- [ ] **Step 4: Commit**
+## Global Constraints
+- Follow existing patterns in both files
+- `ChatWidget` already exists from Task 7
+- TypeScript must compile after changes
 
+## Commit
 ```bash
-git add -A && git commit -m "feat(frontend): API client and TypeScript types"
+git add frontend/src/lib/api.ts frontend/src/app/partidos/[id]/page.tsx
+git commit -m "feat: integrate chat widget into partido detail page"
 ```
 
----
-
-
+## Report File
+`.superpowers/sdd/task-9-report.md`

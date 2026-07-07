@@ -1,0 +1,233 @@
+facd6ff feat: add push notification service and subscription endpoints
+---
+ backend/app/api/notificaciones.py        |  36 +++++++++-
+ backend/app/core/config.py               |   4 ++
+ backend/app/schemas/push_subscription.py |   7 ++
+ backend/app/services/push_service.py     | 120 +++++++++++++++++++++++++++++++
+ backend/requirements.txt                 |   1 +
+ 5 files changed, 166 insertions(+), 2 deletions(-)
+---
+diff --git a/backend/app/api/notificaciones.py b/backend/app/api/notificaciones.py
+index 9c14132..c39a58a 100644
+--- a/backend/app/api/notificaciones.py
++++ b/backend/app/api/notificaciones.py
+@@ -1,3 +1,35 @@
+-from fastapi import APIRouter
++from fastapi import APIRouter, Depends
++from sqlalchemy.ext.asyncio import AsyncSession
+ 
+-router = APIRouter(prefix="/api/v1", tags=["notificaciones"])
++from backend.app.core.config import settings
++from backend.app.core.dependencies import get_current_user, get_db
++from backend.app.models.user import User
++from backend.app.schemas.push_subscription import PushSubscriptionCreate
++from backend.app.services.push_service import PushService
++
++router = APIRouter(prefix="/api/v1/notificaciones", tags=["notificaciones"])
++
++
++@router.post("/suscribir")
++async def suscribir(
++    data: PushSubscriptionCreate,
++    user: User = Depends(get_current_user),
++    db: AsyncSession = Depends(get_db),
++):
++    await PushService.suscribir(db, user.id, data)
++    return {"ok": True}
++
++
++@router.delete("/suscribir")
++async def desuscribir(
++    endpoint: str,
++    user: User = Depends(get_current_user),
++    db: AsyncSession = Depends(get_db),
++):
++    await PushService.desuscribir(db, user.id, endpoint)
++    return {"ok": True}
++
++
++@router.get("/vapid-public-key")
++async def get_vapid_public_key():
++    return {"publicKey": settings.VAPID_PUBLIC_KEY}
+diff --git a/backend/app/core/config.py b/backend/app/core/config.py
+index 35ebe5e..1b92d74 100644
+--- a/backend/app/core/config.py
++++ b/backend/app/core/config.py
+@@ -6,18 +6,22 @@ class Settings(BaseSettings):
+     app_version: str = "0.6.0"
+     debug: bool = True
+ 
+     database_url: str = "sqlite+aiosqlite:///./data/liga.db"
+     cors_origins: str = "http://localhost:3000,http://localhost:5173,https://frontend-ten-swart-85.vercel.app"
+ 
+     api_football_key: str = ""
+ 
+     admin_api_key: str = "admin123"
+ 
++    VAPID_PUBLIC_KEY: str = ""
++    VAPID_PRIVATE_KEY: str = ""
++    VAPID_CLAIM_EMAIL: str = "admin@ligapy.app"
++
+     @property
+     def cors_origin_list(self) -> list[str]:
+         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
+ 
+     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
+ 
+ 
+ settings = Settings()
+diff --git a/backend/app/schemas/push_subscription.py b/backend/app/schemas/push_subscription.py
+new file mode 100644
+index 0000000..c94281b
+--- /dev/null
++++ b/backend/app/schemas/push_subscription.py
+@@ -0,0 +1,7 @@
++from pydantic import BaseModel
++
++
++class PushSubscriptionCreate(BaseModel):
++    endpoint: str
++    p256dh: str
++    auth: str
+diff --git a/backend/app/services/push_service.py b/backend/app/services/push_service.py
+new file mode 100644
+index 0000000..30c27b7
+--- /dev/null
++++ b/backend/app/services/push_service.py
+@@ -0,0 +1,120 @@
++import json
++import uuid
++from datetime import datetime, timezone
++
++from sqlalchemy import select
++from sqlalchemy.ext.asyncio import AsyncSession
++
++from backend.app.core.config import settings
++from backend.app.models.prediction import Prediction
++from backend.app.models.partido import Partido
++from backend.app.models.push_subscription import PushSubscription as PushSubscriptionModel
++from backend.app.schemas.push_subscription import PushSubscriptionCreate
++
++try:
++    from pywebpush import webpush, WebPushException
++    HAS_PYWEBPUSH = True
++except ImportError:
++    HAS_PYWEBPUSH = False
++
++
++class PushService:
++
++    VAPID_PRIVATE_KEY = settings.VAPID_PRIVATE_KEY
++    VAPID_CLAIM_EMAIL = settings.VAPID_CLAIM_EMAIL
++
++    @staticmethod
++    async def suscribir(
++        db: AsyncSession, user_id: str, data: PushSubscriptionCreate
++    ):
++        sub_id = f"sub_{uuid.uuid4().hex[:12]}"
++        sub = PushSubscriptionModel(
++            id=sub_id,
++            user_id=user_id,
++            endpoint=data.endpoint,
++            p256dh=data.p256dh,
++            auth=data.auth,
++            created_at=datetime.now(timezone.utc),
++        )
++        db.add(sub)
++        await db.flush()
++
++    @staticmethod
++    async def desuscribir(db: AsyncSession, user_id: str, endpoint: str):
++        result = await db.execute(
++            select(PushSubscriptionModel).where(
++                PushSubscriptionModel.user_id == user_id,
++                PushSubscriptionModel.endpoint == endpoint,
++            )
++        )
++        sub = result.scalar_one_or_none()
++        if sub:
++            await db.delete(sub)
++            await db.flush()
++
++    @staticmethod
++    async def _enviar(sub: PushSubscriptionModel, title: str, body: str, url: str):
++        if not HAS_PYWEBPUSH:
++            return
++        try:
++            webpush(
++                subscription_info={
++                    "endpoint": sub.endpoint,
++                    "keys": {"p256dh": sub.p256dh, "auth": sub.auth},
++                },
++                data=json.dumps({
++                    "title": title,
++                    "body": body,
++                    "icon": "/icon-192.png",
++                    "badge": "/badge-72.png",
++                    "data": {"url": url},
++                }),
++                vapid_private_key=PushService.VAPID_PRIVATE_KEY,
++                vapid_claims={"sub": f"mailto:{PushService.VAPID_CLAIM_EMAIL}"},
++            )
++        except WebPushException:
++            pass
++
++    @staticmethod
++    async def enviar_a_partido(
++        db: AsyncSession, partido_id: str, title: str, body: str, url: str
++    ):
++        result = await db.execute(
++            select(PushSubscriptionModel).where(
++                PushSubscriptionModel.user_id.in_(
++                    select(Prediction.user_id).where(
++                        Prediction.partido_id == partido_id
++                    )
++                )
++            )
++        )
++        subs = result.scalars().all()
++        for sub in subs:
++            await PushService._enviar(sub, title, body, url)
++
++    @staticmethod
++    async def enviar_a_usuario(
++        db: AsyncSession, user_id: str, title: str, body: str, url: str
++    ):
++        result = await db.execute(
++            select(PushSubscriptionModel).where(
++                PushSubscriptionModel.user_id == user_id
++            )
++        )
++        subs = result.scalars().all()
++        for sub in subs:
++            await PushService._enviar(sub, title, body, url)
++
++    @staticmethod
++    async def obtener_recordatorios(db: AsyncSession):
++        from datetime import timedelta
++        ahora = datetime.now(timezone.utc)
++        ventana = ahora + timedelta(minutes=30)
++        result = await db.execute(
++            select(Partido).where(
++                Partido.fecha >= ahora,
++                Partido.fecha <= ventana,
++                Partido.estado == "programado",
++            )
++        )
++        return result.scalars().all()
+diff --git a/backend/requirements.txt b/backend/requirements.txt
+index d1e0297..59495ef 100644
+--- a/backend/requirements.txt
++++ b/backend/requirements.txt
+@@ -2,10 +2,11 @@ fastapi>=0.115.0
+ uvicorn[standard]>=0.30.0
+ sqlalchemy[asyncio]>=2.0.0
+ aiosqlite>=0.20.0
+ pydantic>=2.0.0
+ pydantic-settings>=2.0.0
+ alembic>=1.13.0
+ httpx>=0.27.0
+ pytest>=8.0.0
+ pytest-asyncio>=0.24.0
+ asyncpg>=0.30.0
++pywebpush>=1.0.0

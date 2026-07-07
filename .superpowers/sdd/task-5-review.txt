@@ -1,0 +1,101 @@
+3c16b09 feat: trigger push notifications from admin and prediction service
+---
+ backend/app/api/admin.py                   | 21 +++++++++++++++++++++
+ backend/app/services/prediction_service.py | 19 +++++++++++++++++++
+ 2 files changed, 40 insertions(+)
+---
+diff --git a/backend/app/api/admin.py b/backend/app/api/admin.py
+index acfaefd..2149796 100644
+--- a/backend/app/api/admin.py
++++ b/backend/app/api/admin.py
+@@ -31,25 +31,46 @@ async def actualizar_partido(
+ 
+     if data.goles_local is not None:
+         partido.goles_local = data.goles_local
+     if data.goles_visitante is not None:
+         partido.goles_visitante = data.goles_visitante
+     if data.estado is not None:
+         partido.estado = data.estado
+ 
+     was_finalized = partido.estado == "finalizado"
+ 
++    if data.estado == "en_vivo" and data.goles_local is not None and data.goles_visitante is not None:
++        from backend.app.services.push_service import PushService
++        await PushService.enviar_a_partido(
++            db,
++            partido_id,
++            "ÔÜ¢ Gol!",
++            f"{partido.local.nombre} {partido.goles_local}-{partido.goles_visitante} {partido.visitante.nombre}",
++            f"/partidos/{partido_id}",
++        )
++
+     await db.commit()
+ 
+     if was_finalized:
+         from backend.app.services.prediction_service import PredictionService
+         await PredictionService.calcular_puntos(db, partido_id)
+         from backend.app.models.prediction import Prediction
+         result = await db.execute(
+             select(Prediction.user_id).where(Prediction.partido_id == partido_id).distinct()
+         )
+         user_ids = [r[0] for r in result.all()]
+         for uid in user_ids:
+             await PredictionService.recalcular_totales_usuario(db, uid)
++        from backend.app.services.push_service import PushService
++        result = await db.execute(select(Prediction).where(Prediction.partido_id == partido_id))
++        preds = result.scalars().all()
++        for pred in preds:
++            await PushService.enviar_a_usuario(
++                db,
++                pred.user_id,
++                "Ô£à Resultado de tu predicci├│n",
++                f"{partido.local.nombre} {partido.goles_local}-{partido.goles_visitante} {partido.visitante.nombre} ÔÇö Obtuviste {pred.puntos} pts",
++                f"/predicciones",
++            )
+         await db.commit()
+     await db.refresh(partido)
+     return await PartidoService.get_by_id(db, partido_id)
+diff --git a/backend/app/services/prediction_service.py b/backend/app/services/prediction_service.py
+index 321cd55..beb3aa5 100644
+--- a/backend/app/services/prediction_service.py
++++ b/backend/app/services/prediction_service.py
+@@ -94,20 +94,39 @@ class PredictionService:
+                 pred.goles_visitante == partido.goles_visitante):
+                 puntos = 3
+             elif ((pred.goles_local - pred.goles_visitante) *
+                   (partido.goles_local - partido.goles_visitante) > 0):
+                 puntos = 2
+             elif pred.goles_local == pred.goles_visitante and partido.goles_local == partido.goles_visitante:
+                 puntos = 2
+             pred.puntos = puntos
+             await db.flush()
+ 
++        for pred in preds:
++            if pred.puntos >= 2:
++                from backend.app.services.push_service import PushService
++                streak_result = await db.execute(
++                    select(func.count(Prediction.id)).where(
++                        Prediction.user_id == pred.user_id,
++                        Prediction.puntos >= 2,
++                    )
++                )
++                streak_count = streak_result.scalar() or 0
++                if streak_count > 0 and streak_count % 5 == 0:
++                    await PushService.enviar_a_usuario(
++                        db,
++                        pred.user_id,
++                        "­ƒÅå Logro desbloqueado!",
++                        f"Acertaste {streak_count} predicciones seguidas!",
++                        f"/predicciones",
++                    )
++
+     @staticmethod
+     async def recalcular_totales_usuario(db: AsyncSession, user_id: str):
+         result = await db.execute(
+             select(func.coalesce(func.sum(Prediction.puntos), 0)).where(
+                 Prediction.user_id == user_id
+             )
+         )
+         total = result.scalar() or 0
+         result = await db.execute(select(User).where(User.id == user_id))
+         user = result.scalar_one_or_none()

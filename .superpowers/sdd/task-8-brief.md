@@ -1,138 +1,116 @@
-# Task 8: Frontend partidos pages — prediction integration
+# Task 8: Service Worker + PushSetup + Layout Registration
 
-**Files:**
-- Modify: `frontend/src/app/partidos/page.tsx`
-- Modify: `frontend/src/app/partidos/[id]/page.tsx`
+## Files
+- Create: `frontend/public/sw.js`
+- Create: `frontend/src/components/PushSetup.tsx`
+- Modify: `frontend/src/app/layout.tsx`
 
-## Steps
+## Important: Layout is a Server Component
+`layout.tsx` uses `export const metadata` (server-only). Do NOT add `"use client"`. Instead, PushSetup handles both SW registration and push subscription, and is safely nestable inside server components as a client boundary.
 
-- [ ] **Modify `frontend/src/app/partidos/page.tsx`** — add "Predecir" button and PredictionModal
+## Exact Code
 
-Add these imports after the existing ones (add after line 10):
+### frontend/public/sw.js
+```js
+self.addEventListener("push", (event) => {
+  const data = event.data ? event.data.json() : {};
+  const { title, body, icon, badge, data: extra } = data;
+
+  event.waitUntil(
+    self.registration.showNotification(title || "Liga Paraguaya", {
+      body: body || "",
+      icon: icon || "/icon-192.png",
+      badge: badge || "/badge-72.png",
+      data: extra || {},
+    })
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const url = event.notification.data?.url || "/";
+  event.waitUntil(
+    clients.matchAll({ type: "window" }).then((clientList) => {
+      for (const client of clientList) {
+        if (client.url === url && "focus" in client) {
+          return client.focus();
+        }
+      }
+      if (clients.openWindow) {
+        return clients.openWindow(url);
+      }
+    })
+  );
+});
+```
+
+### frontend/src/components/PushSetup.tsx
 ```tsx
-import { useState, useEffect } from "react";
-import { getSavedToken, setAuthToken } from "@/lib/api";
-import { useQueryClient } from "@tanstack/react-query";
-import PredictionModal from "@/components/PredictionModal";
+"use client";
+
+import { useEffect } from "react";
+
+export default function PushSetup() {
+  useEffect(() => {
+    if (!("serviceWorker" in navigator)) return;
+
+    // Register service worker
+    navigator.serviceWorker.register("/sw.js");
+
+    // Set up push subscription if PushManager is available
+    if (!("PushManager" in window)) return;
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://backend-production-0b7d.up.railway.app";
+
+    async function setup() {
+      try {
+        const registration = await navigator.serviceWorker.ready;
+        const vapidResponse = await fetch(`${apiUrl}/api/v1/notificaciones/vapid-public-key`);
+        const { publicKey } = await vapidResponse.json();
+        const keyBytes = Uint8Array.from(atob(publicKey.replace(/-/g, "+").replace(/_/g, "/")), c => c.charCodeAt(0));
+        const subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: keyBytes,
+        });
+        const token = localStorage.getItem("auth_token");
+        if (!token) return;
+        await fetch(`${apiUrl}/api/v1/notificaciones/suscribir`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify(subscription.toJSON()),
+        });
+      } catch {
+        // Notification permission denied or unavailable
+      }
+    }
+    setup();
+  }, []);
+
+  return null;
+}
 ```
 
-In the `PartidosContent` function, add state after `const clubMap...` block (after line 51):
+### Edit frontend/src/app/layout.tsx
+Add import for PushSetup:
 ```tsx
-const queryClient = useQueryClient();
-const [userToken, setUserToken] = useState<string | null>(null);
-const [predictionPartido, setPredictionPartido] = useState<Partido | null>(null);
-
-useEffect(() => {
-  const token = getSavedToken();
-  if (token) {
-    setAuthToken(token);
-    setUserToken(token);
-  }
-}, []);
+import PushSetup from "@/components/PushSetup";
 ```
-
-In the table header row, add a new `<th>` after the Estado column:
+Then add `<PushSetup />` in the JSX body (e.g. before closing `</body>`):
 ```tsx
-<th className="text-center py-3 px-2">Estado</th>
-<th className="text-center py-3 px-2">Pronóstico</th>
-<th className="text-center py-3 px-2">Jornada</th>
+<PushSetup />
 ```
 
-In the table body, add a new `<td>` after the EstadoBadge column:
-```tsx
-<td className="py-3 px-2 text-center">
-  <EstadoBadge estado={p.estado} />
-</td>
-<td className="py-3 px-2 text-center">
-  {userToken && p.estado === "programado" && (
-    <button
-      onClick={() => setPredictionPartido(p)}
-      className="text-xs px-2 py-1 rounded-lg bg-[#1a2a3a] border border-white/10 text-[#76e4f7] hover:bg-[#76e4f7] hover:text-black transition"
-    >
-      🔮 Predecir
-    </button>
-  )}
-</td>
+Do NOT add `"use client"` directive. The layout stays as a server component.
+
+## Global Constraints
+- Service Worker is vanilla JS (in `public/`)
+- Layout stays server component (no `"use client"`)
+- PushSetup is a client component (`"use client"`) — can be nested in server layout
+
+## Commit
+```bash
+git add frontend/public/sw.js frontend/src/components/PushSetup.tsx frontend/src/app/layout.tsx
+git commit -m "feat: add service worker and push subscription setup"
 ```
 
-Before the closing `</div>` of the table section and after the table, add the modal:
-```tsx
-      {predictionPartido && (
-        <PredictionModal
-          partido={predictionPartido}
-          clubLocal={clubMap.get(predictionPartido.local_id) || predictionPartido.local_id}
-          clubVisitante={clubMap.get(predictionPartido.visitante_id) || predictionPartido.visitante_id}
-          onClose={() => setPredictionPartido(null)}
-          onSuccess={() => {
-            setPredictionPartido(null);
-            queryClient.invalidateQueries({ queryKey: ["predicciones"] });
-          }}
-        />
-      )}
-```
-
-- [ ] **Modify `frontend/src/app/partidos/[id]/page.tsx`** — show user's prediction
-
-Add imports after existing ones (after line 9):
-```tsx
-import { useEffect, useState } from "react";
-import { getSavedToken, setAuthToken, misPredicciones } from "@/lib/api";
-import type { PredictionDetail } from "@/types";
-```
-
-Add state after `const id = params.id as string;` (after line 13):
-```tsx
-const [prediction, setPrediction] = useState<PredictionDetail | null>(null);
-const [loggedIn, setLoggedIn] = useState(false);
-
-useEffect(() => {
-  const token = getSavedToken();
-  if (token) {
-    setAuthToken(token);
-    setLoggedIn(true);
-    misPredicciones().then((preds) => {
-      const found = preds.find((p) => p.partido_id === id);
-      if (found) setPrediction(found);
-    }).catch(() => {});
-  }
-}, [id]);
-```
-
-After the main detail card (after line 111), add the prediction section:
-```tsx
-      {prediction && (
-        <section className="mt-10">
-          <h2 className="text-2xl font-bold mb-4">🔮 Tu predicción</h2>
-          <div className={`p-4 rounded-xl border ${
-            prediction.puntos === 3 ? "border-green-500/50 bg-green-900/20" :
-            prediction.puntos === 2 ? "border-yellow-500/50 bg-yellow-900/20" :
-            prediction.puntos === 0 && prediction.estado === "finalizado" ? "border-red-500/50 bg-red-900/20" :
-            "border-white/10 bg-[#0a1628]/60"
-          }`}>
-            <div className="flex items-center justify-center gap-4 text-2xl font-bold">
-              <span>{partido.local_nombre}</span>
-              <span className="text-[#76e4f7]">{prediction.goles_local} - {prediction.goles_visitante}</span>
-              <span>{prediction.visitante_nombre}</span>
-            </div>
-            {prediction.puntos > 0 && (
-              <p className="text-center mt-2 font-semibold text-green-400">+{prediction.puntos} pts</p>
-            )}
-          </div>
-        </section>
-      )}
-```
-
-- [ ] **Verify TypeScript compiles**
-
-```powershell
-cd C:\Users\astur\Desktop\liga.paraguaya.futbol\frontend && npx tsc --noEmit 2>&1
-```
-Expected: no errors
-
-- [ ] **Commit**
-
-```powershell
-cd C:\Users\astur\Desktop\liga.paraguaya.futbol
-git add frontend/src/app/partidos/page.tsx frontend/src/app/partidos/[id]/page.tsx
-git commit -m "feat: integrate prediction button and display in partidos"
-```
+## Report File
+`.superpowers/sdd/task-8-report.md`

@@ -1,0 +1,55 @@
+b99852d feat: add cron endpoint for prediction reminders
+---
+ .github/workflows/keep-alive.yml |  2 ++
+ backend/app/api/cron.py          | 26 ++++++++++++++++++++++++--
+ 2 files changed, 26 insertions(+), 2 deletions(-)
+---
+diff --git a/.github/workflows/keep-alive.yml b/.github/workflows/keep-alive.yml
+index b084843..84dcc3a 100644
+--- a/.github/workflows/keep-alive.yml
++++ b/.github/workflows/keep-alive.yml
+@@ -3,10 +3,12 @@ on:
+   schedule:
+     - cron: '*/14 * * * *'
+   workflow_dispatch:
+ 
+ jobs:
+   ping:
+     runs-on: ubuntu-latest
+     steps:
+       - name: Ping Railway backend
+         run: curl -sSf https://backend-production-0b7d.up.railway.app/health > /dev/null
++      - name: Recordatorios predicciones
++        run: curl -s -X POST "https://backend-production-0b7d.up.railway.app/api/v1/cron/recordatorios"
+diff --git a/backend/app/api/cron.py b/backend/app/api/cron.py
+index d18c7f0..aa772e5 100644
+--- a/backend/app/api/cron.py
++++ b/backend/app/api/cron.py
+@@ -1,3 +1,25 @@
+-from fastapi import APIRouter
++from fastapi import APIRouter, Depends
++from sqlalchemy.ext.asyncio import AsyncSession
+ 
+-router = APIRouter(tags=["cron"])
++from backend.app.core.dependencies import get_db
++from backend.app.services.push_service import PushService
++
++router = APIRouter(prefix="/api/v1/cron", tags=["cron"])
++
++
++@router.post("/recordatorios")
++async def enviar_recordatorios(
++    db: AsyncSession = Depends(get_db),
++):
++    partidos = await PushService.obtener_recordatorios(db)
++    enviados = 0
++    for partido in partidos:
++        await PushService.enviar_a_partido(
++            db,
++            partido.id,
++            "­ƒöö Recordatorio de predicci├│n",
++            f"{partido.local.nombre} vs {partido.visitante.nombre} comienza en 30 min!",
++            f"/partidos/{partido.id}",
++        )
++        enviados += 1
++    return {"recordatorios_enviados": enviados}

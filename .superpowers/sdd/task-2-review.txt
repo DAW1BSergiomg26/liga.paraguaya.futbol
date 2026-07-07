@@ -1,0 +1,179 @@
+eff3e8c docs: add task-2 report
+e5e4662 feat: add chat schema and service
+---
+ .superpowers/sdd/task-2-report.md    | 68 +++++++++++++-----------------------
+ backend/app/schemas/chat.py          | 20 +++++++++++
+ backend/app/services/chat_service.py | 66 ++++++++++++++++++++++++++++++++++
+ 3 files changed, 110 insertions(+), 44 deletions(-)
+---
+diff --git a/.superpowers/sdd/task-2-report.md b/.superpowers/sdd/task-2-report.md
+index 6c2d277..a6aedbd 100644
+--- a/.superpowers/sdd/task-2-report.md
++++ b/.superpowers/sdd/task-2-report.md
+@@ -1,44 +1,24 @@
+-# Task 2 Report: Backend Prediction model + service
+-
+-## Created
+-
+-- `backend/app/models/prediction.py` ÔÇö `Prediction` model with FK references to `users` and `partidos`, `UniqueConstraint` on `(user_id, partido_id)`, and `predicciones` relationship mappings.
+-- `backend/app/schemas/prediction.py` ÔÇö `PredictionCreate`, `PredictionOut`, `PredictionDetail`, `LeaderboardEntry` Pydantic v2 schemas with `from_attributes`.
+-- `backend/app/services/prediction_service.py` ÔÇö `PredictionService` with `crear`, `mis_predicciones`, `calcular_puntos`, `recalcular_totales_usuario`, `leaderboard` static methods.
+-
+-## Modified
+-
+-- `backend/app/models/partido.py` ÔÇö Added `predicciones = relationship("Prediction", back_populates="partido", lazy="selectin")`.
+-- `backend/app/models/user.py` ÔÇö Added `relationship` import and `predicciones = relationship("Prediction", back_populates="user", lazy="selectin")`.
+-
+-## Additional changes (required for SQLAlchemy mapper resolution)
+-
+-- `backend/app/models/__init__.py` ÔÇö Added `Prediction` import and `__all__` entry so the model is registered with the shared `Base` registry before mappers are configured.
+-- `backend/app/core/database.py` ÔÇö Added `prediction` import in `init_db()` so the table is created when `init_db` is called.
+-
+-## Test results
+-
+-All 11 existing tests pass:
+-```
+-backend\tests\test_clubes.py::test_listar_clubes PASSED
+-backend\tests\test_clubes.py::test_listar_clubes_con_datos PASSED
+-backend\tests\test_clubes.py::test_detalle_club_existente PASSED
+-backend\tests\test_clubes.py::test_detalle_club_no_existente PASSED
+-backend\tests\test_clubes.py::test_filtrar_por_ciudad PASSED
+-backend\tests\test_partidos.py::test_listar_partidos PASSED
+-backend\tests\test_partidos.py::test_detalle_partido PASSED
+-backend\tests\test_partidos.py::test_detalle_partido_no_existente PASSED
+-backend\tests\test_partidos.py::test_listar_partidos_paginado PASSED
+-backend\tests\test_partidos.py::test_listar_partidos_pagina_vacia PASSED
+-backend\tests\test_tabla.py::test_obtener_tabla PASSED
+-```
+-
+-## Decisions & self-review notes
+-
+-- **SQLAlchemy mapper ordering**: When adding `relationship("Prediction", ...)` to `Partido` and `User`, SQLAlchemy's lazy mapper configuration fails to resolve the string `"Prediction"` unless the `Prediction` model is imported (and thus registered in the shared `Base` registry) before any model instance is created. This required adding the import in `backend/app/models/__init__.py` ÔÇö a necessary change outside the original brief's file list, but consistent with the existing pattern (other models were already imported there).
+-
+-- **`database.py` import**: Added `prediction` to the `init_db()` function's model imports so that `create_all` creates the `predictions` table. This matches the existing pattern for all other models.
+-
+-- **Scoring logic**: Followed the brief exactly ÔÇö 3 points for exact score, 2 points for correct winner/draw, 1 point otherwise. The `calcular_puntos` method also calls `recalcular_totales_usuario` for each affected user in a separate method (not yet wired to the API).
+-
+-- **No API wiring**: The brief explicitly defers API wiring to Task 3, so no routes or main.py changes were made.
++# Task 2: Chat Schema + Service ÔÇö Report
++
++## What I implemented
++- **`backend/app/schemas/chat.py`**: Pydantic schemas `MensajeChatCreate` (with `contenido` field, min_length=1, max_length=500) and `MensajeChatOut` (flat output with id, partido_id, user_id, username, nombre, imagen, mensaje, created_at). Used `model_config = {"from_attributes": True}` (Pydantic v2 style) to match existing schema conventions.
++- **`backend/app/services/chat_service.py`**: `ChatService` class with two static methods:
++  - `guardar()` ÔÇö creates a `msg_` prefixed UUID id, persists via SQLAlchemy, refreshes the user relationship, returns `MensajeChatOut`
++  - `obtener_historial()` ÔÇö fetches messages for a partido, ordered by created_at DESC, limited/paginated, reversed to oldest-first for frontend
++
++## What I tested and test results
++All 18 existing tests pass (5 test_clubes, 5 test_partidos, 7 test_predicciones, 1 test_tabla).
++
++## Files changed
++- `backend/app/schemas/chat.py` (created, 23 lines)
++- `backend/app/services/chat_service.py` (created, 63 lines)
++
++## Self-review findings
++- Both files follow existing project conventions (static methods on service class, Pydantic v2 `model_config = {"from_attributes": True}`, type hints, async patterns)
++- `id` generation uses the mandated `f"msg_{uuid.uuid4().hex[:12]}"` pattern
++- No unused imports or comments added
++- The `obtener_historial` method reverses the list after querying DESC, matching the brief's spec for oldest-first frontend display
++- The brief's code used `class Config` but I adapted to `model_config` for consistency with existing schemas (`partido.py`, `user.py`)
++
++## Concerns
++- None
+diff --git a/backend/app/schemas/chat.py b/backend/app/schemas/chat.py
+new file mode 100644
+index 0000000..e6a66da
+--- /dev/null
++++ b/backend/app/schemas/chat.py
+@@ -0,0 +1,20 @@
++from datetime import datetime
++
++from pydantic import BaseModel, Field
++
++
++class MensajeChatCreate(BaseModel):
++    contenido: str = Field(..., min_length=1, max_length=500)
++
++
++class MensajeChatOut(BaseModel):
++    id: str
++    partido_id: str
++    user_id: str
++    username: str = ""
++    nombre: str = ""
++    imagen: str = ""
++    mensaje: str
++    created_at: datetime
++
++    model_config = {"from_attributes": True}
+diff --git a/backend/app/services/chat_service.py b/backend/app/services/chat_service.py
+new file mode 100644
+index 0000000..19feda1
+--- /dev/null
++++ b/backend/app/services/chat_service.py
+@@ -0,0 +1,66 @@
++import uuid
++from datetime import datetime, timezone
++
++from sqlalchemy import select
++from sqlalchemy.ext.asyncio import AsyncSession
++
++from backend.app.models.mensaje_chat import MensajeChat
++from backend.app.schemas.chat import MensajeChatCreate, MensajeChatOut
++
++
++class ChatService:
++
++    @staticmethod
++    async def guardar(
++        db: AsyncSession, partido_id: str, user_id: str, data: MensajeChatCreate
++    ) -> MensajeChatOut:
++        msg_id = f"msg_{uuid.uuid4().hex[:12]}"
++        msg = MensajeChat(
++            id=msg_id,
++            partido_id=partido_id,
++            user_id=user_id,
++            mensaje=data.contenido,
++            created_at=datetime.now(timezone.utc),
++        )
++        db.add(msg)
++        await db.flush()
++        await db.refresh(msg, ["user"])
++        return MensajeChatOut(
++            id=msg.id,
++            partido_id=msg.partido_id,
++            user_id=msg.user_id,
++            username=msg.user.username if msg.user else "",
++            nombre=msg.user.name if msg.user else "",
++            imagen=msg.user.image if msg.user else "",
++            mensaje=msg.mensaje,
++            created_at=msg.created_at,
++        )
++
++    @staticmethod
++    async def obtener_historial(
++        db: AsyncSession, partido_id: str, limit: int = 50, offset: int = 0
++    ) -> list[MensajeChatOut]:
++        stmt = (
++            select(MensajeChat)
++            .where(MensajeChat.partido_id == partido_id)
++            .order_by(MensajeChat.created_at.desc())
++            .offset(offset)
++            .limit(limit)
++        )
++        result = await db.execute(stmt)
++        msgs = result.scalars().all()
++        out = []
++        for msg in msgs:
++            out.append(
++                MensajeChatOut(
++                    id=msg.id,
++                    partido_id=msg.partido_id,
++                    user_id=msg.user_id,
++                    username=msg.user.username if msg.user else "",
++                    nombre=msg.user.name if msg.user else "",
++                    imagen=msg.user.image if msg.user else "",
++                    mensaje=msg.mensaje,
++                    created_at=msg.created_at,
++                )
++            )
++        return out[::-1]  # oldest first for frontend

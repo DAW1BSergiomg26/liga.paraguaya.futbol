@@ -1,17 +1,11 @@
-# Task 6 Report: Frontend PredictionModal component
+# Task 6: Cron Endpoint for Recordatorios
 
-**Status:** ✅ Complete
+## Status: ✅ Complete
 
-## Steps
+## Changes
+- **`backend/app/api/cron.py`**: Overwritten stub with full `POST /api/v1/cron/recordatorios` endpoint that fetches pending reminders via `PushService.obtener_recordatorios` and sends push notifications via `PushService.enviar_a_partido`
+- **`.github/workflows/keep-alive.yml`**: Added `Recordatorios predicciones` step that hits the new cron endpoint every 14 minutes
 
-- [x] Created `frontend/src/components/PredictionModal.tsx` with the exact content from the brief
-- [x] Verified TypeScript compiles (`npx tsc --noEmit` — no errors)
-- [x] Committed as `e710a7b` with message "feat: add PredictionModal component"
-
-## Details
-
-- Component uses `"use client"` directive for client-side interactivity
-- Imports `crearPrediccion` from `@/lib/api` and `Partido` type from `@/types` — both verified existing
-- Validates goal inputs are non-negative integers before submission
-- Shows loading state (`saving`) and error state
-- Calls `onSuccess` callback after successful API call
+## Verification
+- All 18 tests passed (`python -m pytest backend/tests/ -v`)
+- Committed: `b99852d` — `feat: add cron endpoint for prediction reminders`

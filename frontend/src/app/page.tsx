@@ -66,7 +66,14 @@ export default async function HomePage() {
                 {tabla.slice(0, 4).map((row) => (
                   <tr key={row.club_id} className="border-b border-white/5 hover:bg-white/5">
                     <td className="p-4 font-bold">{row.posicion}</td>
-                    <td className="p-4">{row.club}</td>
+                    <td className="p-4">
+                      <div className="flex items-center gap-2">
+                        {row.escudo && (
+                          <img src={row.escudo} alt="" className="w-5 h-5 object-contain shrink-0" />
+                        )}
+                        {row.club}
+                      </div>
+                    </td>
                     <td className="p-4 text-center">{row.pj}</td>
                     <td className="p-4 text-center">{row.pg}</td>
                     <td className="p-4 text-center">{row.pe}</td>

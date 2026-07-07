@@ -1,224 +1,179 @@
-# Task 7: Frontend predictions + leaderboard pages
+# Task 7: Frontend Chat Components (ChatWidget + ChatMessage)
 
-**Files:**
-- Create: `frontend/src/app/predicciones/page.tsx`
-- Create: `frontend/src/app/leaderboard/page.tsx`
+## Files to Create
+- `frontend/src/components/ChatMessage.tsx`
+- `frontend/src/components/ChatWidget.tsx`
 
-## Steps
+## Exact Code
 
-- [ ] **Create `frontend/src/app/predicciones/page.tsx`**
+### frontend/src/components/ChatMessage.tsx
+```tsx
+interface ChatMessageProps {
+  username: string;
+  nombre: string;
+  imagen: string;
+  contenido: string;
+  created_at: string;
+}
 
+export default function ChatMessage({ username, nombre, imagen, contenido, created_at }: ChatMessageProps) {
+  return (
+    <div className="flex gap-2 py-2 px-3 hover:bg-gray-800/30 rounded-lg transition-colors">
+      <img
+        src={imagen || `https://ui-avatars.com/api/?name=${nombre}&background=1f2937&color=fff`}
+        alt={nombre}
+        className="w-8 h-8 rounded-full mt-0.5"
+      />
+      <div className="flex-1 min-w-0">
+        <div className="flex items-baseline gap-2">
+          <span className="text-sm font-semibold text-indigo-400 truncate">
+            {nombre}
+          </span>
+          <span className="text-xs text-gray-500 shrink-0">
+            {new Date(created_at).toLocaleTimeString("es-PY", { hour: "2-digit", minute: "2-digit" })}
+          </span>
+        </div>
+        <p className="text-sm text-gray-200 break-words">{contenido}</p>
+      </div>
+    </div>
+  );
+}
+```
+
+### frontend/src/components/ChatWidget.tsx
 ```tsx
 "use client";
 
-import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { misPredicciones, getLeaderboard, getSavedToken, setAuthToken } from "@/lib/api";
-import type { PredictionDetail, LeaderboardEntry } from "@/types";
-import Link from "next/link";
-import LoadingSpinner from "@/components/ui/LoadingSpinner";
-import ErrorMessage from "@/components/ui/ErrorMessage";
+import { useState, useEffect, useRef, useCallback } from "react";
+import ChatMessage from "./ChatMessage";
 
-export default function PrediccionesPage() {
-  const [loggedIn, setLoggedIn] = useState(false);
+interface ChatWidgetProps {
+  partidoId: string;
+}
+
+interface Mensaje {
+  id: string;
+  user_id: string;
+  username: string;
+  nombre: string;
+  imagen: string;
+  contenido: string;
+  created_at: string;
+}
+
+export default function ChatWidget({ partidoId }: ChatWidgetProps) {
+  const [messages, setMessages] = useState<Mensaje[]>([]);
+  const [input, setInput] = useState("");
+  const [connected, setConnected] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const wsRef = useRef<WebSocket | null>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const tokenRef = useRef<string>("");
+
+  const token = typeof window !== "undefined"
+    ? localStorage.getItem("auth_token") || ""
+    : "";
 
   useEffect(() => {
-    const token = getSavedToken();
-    if (token) {
-      setAuthToken(token);
-      setLoggedIn(true);
-    }
-  }, []);
+    tokenRef.current = token;
+  }, [token]);
 
-  const { data: predicciones, isLoading, error } = useQuery<PredictionDetail[]>({
-    queryKey: ["predicciones"],
-    queryFn: () => misPredicciones(),
-    enabled: loggedIn,
-  });
+  // Load history
+  useEffect(() => {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://backend-production-0b7d.up.railway.app";
+    fetch(`${apiUrl}/api/v1/partidos/${partidoId}/chat?limit=50`)
+      .then((r) => r.json())
+      .then((data) => {
+        setMessages(data.reverse());
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, [partidoId]);
 
-  const { data: leaderboard } = useQuery<LeaderboardEntry[]>({
-    queryKey: ["leaderboard"],
-    queryFn: () => getLeaderboard(),
-  });
+  // WebSocket connection
+  useEffect(() => {
+    if (!token) return;
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://backend-production-0b7d.up.railway.app";
+    const wsUrl = apiUrl.replace(/^http/, "ws");
+    const ws = new WebSocket(`${wsUrl}/api/v1/ws/partidos/${partidoId}?token=${token}`);
 
-  if (!loggedIn) {
-    return (
-      <div className="max-w-6xl mx-auto px-4 py-12 text-center">
-        <h1 className="text-3xl font-bold mb-4">Mis Predicciones</h1>
-        <div className="p-8 rounded-xl border border-white/10 bg-[#0a1628]/60">
-          <p className="text-gray-400 mb-4">Iniciá sesión para ver tus predicciones</p>
-          <Link href="/login" className="inline-block px-6 py-3 rounded-xl bg-[#76e4f7] text-black font-semibold">
-            Iniciar sesión
-          </Link>
-        </div>
+    ws.onopen = () => setConnected(true);
+    ws.onclose = () => setConnected(false);
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.tipo === "mensaje_nuevo") {
+        setMessages((prev) => [...prev, data]);
+        setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 50);
+      }
+    };
+
+    wsRef.current = ws;
+    return () => ws.close();
+  }, [partidoId, token]);
+
+  const sendMessage = useCallback(() => {
+    if (!input.trim() || !wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return;
+    wsRef.current.send(JSON.stringify({ tipo: "mensaje", contenido: input.trim() }));
+    setInput("");
+  }, [input]);
+
+  return (
+    <div className="mt-6 border border-gray-700 rounded-xl overflow-hidden">
+      <div className="bg-gray-800/50 px-4 py-2 border-b border-gray-700 flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-gray-200">Chat en Vivo</h3>
+        <span className={`w-2 h-2 rounded-full ${connected ? "bg-green-500" : "bg-red-500"}`} />
       </div>
-    );
-  }
 
-  if (isLoading) return <LoadingSpinner text="Cargando predicciones..." />;
-  if (error) return <ErrorMessage message="Error al cargar predicciones" />;
+      <div className="h-72 overflow-y-auto bg-gray-900/50">
+        {loading ? (
+          <div className="flex items-center justify-center h-full text-gray-500 text-sm">
+            Cargando mensajes...
+          </div>
+        ) : messages.length === 0 ? (
+          <div className="flex items-center justify-center h-full text-gray-500 text-sm">
+            No hay mensajes aún. ¡Sé el primero!
+          </div>
+        ) : (
+          messages.map((msg) => (
+            <ChatMessage key={msg.id} {...msg} />
+          ))
+        )}
+        <div ref={bottomRef} />
+      </div>
 
-  return (
-    <div className="max-w-6xl mx-auto px-4 py-12">
-      <h1 className="text-3xl font-bold mb-8">Mis Predicciones</h1>
-
-      {(!predicciones || predicciones.length === 0) ? (
-        <div className="p-8 rounded-xl border border-white/10 bg-[#0a1628]/60 text-center mb-8">
-          <p className="text-gray-400">Todavía no hiciste predicciones.</p>
-          <Link href="/partidos" className="text-[#76e4f7] hover:underline mt-2 inline-block">
-            Ir a partidos →
-          </Link>
-        </div>
-      ) : (
-        <div className="space-y-3 mb-12">
-          {predicciones.map((p) => (
-            <Link key={p.id} href={`/partidos/${p.partido_id}`}
-              className="block p-4 rounded-xl border border-white/10 bg-[#0a1628]/60 hover:bg-[#0a1628] transition">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-400">{p.torneo} · J{p.jornada}</p>
-                  <p className="text-white font-medium mt-1">
-                    {p.local_nombre} {p.goles_local}-{p.goles_visitante} {p.visitante_nombre}
-                  </p>
-                </div>
-                <div className="text-right">
-                  {p.estado === "finalizado" ? (
-                    <span className={`text-sm font-bold ${p.puntos === 3 ? "text-green-400" : p.puntos === 2 ? "text-yellow-400" : "text-gray-500"}`}>
-                      +{p.puntos} pts
-                    </span>
-                  ) : (
-                    <span className="text-xs text-gray-500">Pendiente</span>
-                  )}
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      )}
-
-      {/* Leaderboard */}
-      <h2 className="text-2xl font-bold mb-4">🏆 Leaderboard</h2>
-      {leaderboard && leaderboard.length > 0 ? (
-        <div className="overflow-x-auto rounded-xl border border-white/10 bg-[#0a1628]/60">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-white/10 text-gray-400 uppercase text-xs">
-                <th className="p-4 text-left">#</th>
-                <th className="p-4 text-left">Usuario</th>
-                <th className="p-4 text-center">Pts</th>
-                <th className="p-4 text-center">Aciertos</th>
-                <th className="p-4 text-center">Predicciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {leaderboard.map((entry, i) => (
-                <tr key={entry.username} className="border-b border-white/5 hover:bg-white/5">
-                  <td className="p-4 font-bold">{i + 1}</td>
-                  <td className="p-4">
-                    <div className="flex items-center gap-3">
-                      {entry.image && (
-                        <img src={entry.image} alt="" className="w-8 h-8 rounded-full" />
-                      )}
-                      <span className="text-white font-medium">{entry.name}</span>
-                      <span className="text-gray-500 text-xs">@{entry.username}</span>
-                    </div>
-                  </td>
-                  <td className="p-4 text-center font-bold text-[#76e4f7]">{entry.puntos}</td>
-                  <td className="p-4 text-center text-green-400">{entry.aciertos}</td>
-                  <td className="p-4 text-center text-gray-400">{entry.predicciones}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ) : (
-        <div className="p-8 rounded-xl border border-white/10 bg-[#0a1628]/60 text-center">
-          <p className="text-gray-500">Todavía no hay participantes.</p>
-        </div>
-      )}
+      <div className="flex gap-2 p-3 border-t border-gray-700 bg-gray-800/30">
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+          placeholder="Escribe un mensaje..."
+          maxLength={500}
+          className="flex-1 bg-gray-700 text-sm text-white rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500 placeholder-gray-400"
+        />
+        <button
+          onClick={sendMessage}
+          disabled={!input.trim() || !connected}
+          className="px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          Enviar
+        </button>
+      </div>
     </div>
   );
 }
 ```
 
-- [ ] **Create `frontend/src/app/leaderboard/page.tsx`**
+## Global Constraints
+- Follow existing frontend patterns (Tailwind CSS, dark theme, existing components in `frontend/src/components/`)
+- `"use client"` directive required for ChatWidget (uses hooks)
+- No emoji in code - already removed from ChatWidget title
 
-```tsx
-"use client";
-
-import { useQuery } from "@tanstack/react-query";
-import { getLeaderboard } from "@/lib/api";
-import type { LeaderboardEntry } from "@/types";
-import LoadingSpinner from "@/components/ui/LoadingSpinner";
-import ErrorMessage from "@/components/ui/ErrorMessage";
-
-export default function LeaderboardPage() {
-  const { data: leaderboard, isLoading, error } = useQuery<LeaderboardEntry[]>({
-    queryKey: ["leaderboard"],
-    queryFn: () => getLeaderboard(),
-  });
-
-  if (isLoading) return <LoadingSpinner text="Cargando leaderboard..." />;
-  if (error) return <ErrorMessage message="Error al cargar leaderboard" />;
-
-  return (
-    <div className="max-w-4xl mx-auto px-4 py-12">
-      <h1 className="text-3xl font-bold mb-8">🏆 Leaderboard</h1>
-
-      {!leaderboard || leaderboard.length === 0 ? (
-        <div className="p-8 rounded-xl border border-white/10 bg-[#0a1628]/60 text-center">
-          <p className="text-gray-500">Todavía no hay participantes.</p>
-        </div>
-      ) : (
-        <div className="overflow-x-auto rounded-xl border border-white/10 bg-[#0a1628]/60">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-white/10 text-gray-400 uppercase text-xs">
-                <th className="p-4 text-left">#</th>
-                <th className="p-4 text-left">Usuario</th>
-                <th className="p-4 text-center">Pts</th>
-                <th className="p-4 text-center">Aciertos</th>
-                <th className="p-4 text-center">Predicciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {leaderboard.map((entry, i) => (
-                <tr key={entry.username} className="border-b border-white/5 hover:bg-white/5">
-                  <td className="p-4 font-bold">{i + 1}</td>
-                  <td className="p-4">
-                    <div className="flex items-center gap-3">
-                      {entry.image && (
-                        <img src={entry.image} alt="" className="w-8 h-8 rounded-full" />
-                      )}
-                      <span className="text-white font-medium">{entry.name}</span>
-                      <span className="text-gray-500 text-xs">@{entry.username}</span>
-                    </div>
-                  </td>
-                  <td className="p-4 text-center font-bold text-[#76e4f7]">{entry.puntos}</td>
-                  <td className="p-4 text-center text-green-400">{entry.aciertos}</td>
-                  <td className="p-4 text-center text-gray-400">{entry.predicciones}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </div>
-  );
-}
+## Commit
+```bash
+git add frontend/src/components/ChatMessage.tsx frontend/src/components/ChatWidget.tsx
+git commit -m "feat: add ChatWidget and ChatMessage components"
 ```
 
-- [ ] **Verify TypeScript compiles**
-
-```powershell
-cd C:\Users\astur\Desktop\liga.paraguaya.futbol\frontend && npx tsc --noEmit 2>&1
-```
-Expected: no errors
-
-- [ ] **Commit**
-
-```powershell
-cd C:\Users\astur\Desktop\liga.paraguaya.futbol
-git add frontend/src/app/predicciones/page.tsx frontend/src/app/leaderboard/page.tsx
-git commit -m "feat: add predicciones and leaderboard pages"
-```
+## Report File
+`.superpowers/sdd/task-7-report.md`

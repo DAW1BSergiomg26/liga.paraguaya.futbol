@@ -40,3 +40,4 @@ desktop.ini
 # Base de datos generada
 *.db
 .vercel
+.env*

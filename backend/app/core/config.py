@@ -11,7 +11,7 @@ class Settings(BaseSettings):
 
     api_football_key: str = ""
 
-    admin_api_key: str = "admin123"
+    admin_api_key: str = "Rufi141414%$"
 
     VAPID_PUBLIC_KEY: str = ""
     VAPID_PRIVATE_KEY: str = ""

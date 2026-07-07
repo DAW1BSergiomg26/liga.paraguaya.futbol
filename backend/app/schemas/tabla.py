@@ -5,6 +5,7 @@ class TablaRowOut(BaseModel):
     posicion: int
     club_id: str
     club: str
+    escudo: str = ""
     pj: int
     pg: int
     pe: int

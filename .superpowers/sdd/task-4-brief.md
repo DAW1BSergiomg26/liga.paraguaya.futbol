@@ -1,197 +1,211 @@
-# Task 4: Backend tests for predictions
+# Task 4: Push Service + Subscription Endpoints
 
-**Files:**
-- Create: `backend/tests/test_predicciones.py`
-- Modify: `backend/tests/conftest.py`
+## Files
+- Modify: `backend/requirements.txt` (add pywebpush)
+- Modify: `backend/app/core/config.py` (add VAPID env vars)
+- Create: `backend/app/schemas/push_subscription.py`
+- Create: `backend/app/services/push_service.py`
+- Create: `backend/app/api/notificaciones.py` (overwrite existing stub)
 
-## Steps
+## Exact Code
 
-- [ ] **Modify `backend/tests/conftest.py`** — add `seed_test_user` helper
-
-Add at the bottom of the file (before the test fixtures if any, or at the end):
-```python
-async def seed_test_user(db: AsyncSession):
-    from backend.app.models.user import User
-    user = User(
-        id="test_user",
-        email="test@test.com",
-        name="Test",
-        username="tester",
-        token="test_token_123",
-    )
-    db.add(user)
-    await db.flush()
+### backend/requirements.txt — Append
+```
+pywebpush>=1.0.0
 ```
 
-Also ensure the file has these imports at the top (check first; `select` may already be imported, also check for `Partido` and `Prediction`):
+### backend/app/core/config.py — Add to Settings class
 ```python
+    VAPID_PUBLIC_KEY: str = ""
+    VAPID_PRIVATE_KEY: str = ""
+    VAPID_CLAIM_EMAIL: str = "admin@ligapy.app"
+```
+
+### backend/app/schemas/push_subscription.py
+```python
+from pydantic import BaseModel
+
+
+class PushSubscriptionCreate(BaseModel):
+    endpoint: str
+    p256dh: str
+    auth: str
+```
+
+### backend/app/services/push_service.py
+```python
+import json
+import uuid
+from datetime import datetime, timezone
+
 from sqlalchemy import select
-from backend.app.models.partido import Partido
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from backend.app.core.config import settings
 from backend.app.models.prediction import Prediction
+from backend.app.models.partido import Partido
+from backend.app.models.push_subscription import PushSubscription as PushSubscriptionModel
+from backend.app.schemas.push_subscription import PushSubscriptionCreate
+
+try:
+    from pywebpush import webpush, WebPushException
+    HAS_PYWEBPUSH = True
+except ImportError:
+    HAS_PYWEBPUSH = False
+
+
+class PushService:
+
+    VAPID_PRIVATE_KEY = settings.VAPID_PRIVATE_KEY
+    VAPID_CLAIM_EMAIL = settings.VAPID_CLAIM_EMAIL
+
+    @staticmethod
+    async def suscribir(
+        db: AsyncSession, user_id: str, data: PushSubscriptionCreate
+    ):
+        sub_id = f"sub_{uuid.uuid4().hex[:12]}"
+        sub = PushSubscriptionModel(
+            id=sub_id,
+            user_id=user_id,
+            endpoint=data.endpoint,
+            p256dh=data.p256dh,
+            auth=data.auth,
+            created_at=datetime.now(timezone.utc),
+        )
+        db.add(sub)
+        await db.flush()
+
+    @staticmethod
+    async def desuscribir(db: AsyncSession, user_id: str, endpoint: str):
+        result = await db.execute(
+            select(PushSubscriptionModel).where(
+                PushSubscriptionModel.user_id == user_id,
+                PushSubscriptionModel.endpoint == endpoint,
+            )
+        )
+        sub = result.scalar_one_or_none()
+        if sub:
+            await db.delete(sub)
+            await db.flush()
+
+    @staticmethod
+    async def _enviar(sub: PushSubscriptionModel, title: str, body: str, url: str):
+        if not HAS_PYWEBPUSH:
+            return
+        try:
+            webpush(
+                subscription_info={
+                    "endpoint": sub.endpoint,
+                    "keys": {"p256dh": sub.p256dh, "auth": sub.auth},
+                },
+                data=json.dumps({
+                    "title": title,
+                    "body": body,
+                    "icon": "/icon-192.png",
+                    "badge": "/badge-72.png",
+                    "data": {"url": url},
+                }),
+                vapid_private_key=PushService.VAPID_PRIVATE_KEY,
+                vapid_claims={"sub": f"mailto:{PushService.VAPID_CLAIM_EMAIL}"},
+            )
+        except WebPushException:
+            pass
+
+    @staticmethod
+    async def enviar_a_partido(
+        db: AsyncSession, partido_id: str, title: str, body: str, url: str
+    ):
+        result = await db.execute(
+            select(PushSubscriptionModel).where(
+                PushSubscriptionModel.user_id.in_(
+                    select(Prediction.user_id).where(
+                        Prediction.partido_id == partido_id
+                    )
+                )
+            )
+        )
+        subs = result.scalars().all()
+        for sub in subs:
+            await PushService._enviar(sub, title, body, url)
+
+    @staticmethod
+    async def enviar_a_usuario(
+        db: AsyncSession, user_id: str, title: str, body: str, url: str
+    ):
+        result = await db.execute(
+            select(PushSubscriptionModel).where(
+                PushSubscriptionModel.user_id == user_id
+            )
+        )
+        subs = result.scalars().all()
+        for sub in subs:
+            await PushService._enviar(sub, title, body, url)
+
+    @staticmethod
+    async def obtener_recordatorios(db: AsyncSession):
+        from datetime import timedelta
+        ahora = datetime.now(timezone.utc)
+        ventana = ahora + timedelta(minutes=30)
+        result = await db.execute(
+            select(Partido).where(
+                Partido.fecha >= ahora,
+                Partido.fecha <= ventana,
+                Partido.estado == "programado",
+            )
+        )
+        return result.scalars().all()
 ```
 
-- [ ] **Create `backend/tests/test_predicciones.py`**
-
+### backend/app/api/notificaciones.py
 ```python
-import pytest
+from fastapi import APIRouter, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.tests.conftest import seed_test_data, seed_test_user
+from backend.app.core.config import settings
+from backend.app.core.dependencies import get_current_user, get_db
+from backend.app.models.user import User
+from backend.app.schemas.push_subscription import PushSubscriptionCreate
+from backend.app.services.push_service import PushService
 
-
-@pytest.mark.asyncio
-async def test_login_creates_user(client, db_session):
-    response = await client.post("/api/v1/auth/login", json={
-        "email": "test@example.com",
-        "name": "Test User",
-        "provider": "google",
-        "provider_id": "google_123",
-    })
-    assert response.status_code == 200
-    data = response.json()
-    assert data["email"] == "test@example.com"
-    assert data["token"] != ""
-    assert data["username"] != ""
+router = APIRouter(prefix="/api/v1/notificaciones", tags=["notificaciones"])
 
 
-@pytest.mark.asyncio
-async def test_login_returns_same_user(client, db_session):
-    r1 = await client.post("/api/v1/auth/login", json={
-        "email": "same@example.com", "name": "User", "provider": "google", "provider_id": "g1",
-    })
-    token1 = r1.json()["token"]
-    r2 = await client.post("/api/v1/auth/login", json={
-        "email": "same@example.com", "name": "User Updated", "provider": "google", "provider_id": "g1",
-    })
-    assert r2.status_code == 200
-    assert r2.json()["token"] != token1  # new token each time
+@router.post("/suscribir")
+async def suscribir(
+    data: PushSubscriptionCreate,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    await PushService.suscribir(db, user.id, data)
+    return {"ok": True}
 
 
-@pytest.mark.asyncio
-async def test_crear_prediccion(client, db_session):
-    await seed_test_data(db_session)
-    await seed_test_user(db_session)
-
-    r = await client.post("/api/v1/auth/login", json={
-        "email": "pred@test.com", "name": "Pred User", "provider": "google", "provider_id": "gp1",
-    })
-    token = r.json()["token"]
-
-    response = await client.post(
-        "/api/v1/predicciones",
-        json={"partido_id": "p001", "goles_local": 2, "goles_visitante": 1},
-        headers={"Authorization": f"Bearer {token}"},
-    )
-    assert response.status_code == 201
-    data = response.json()
-    assert data["partido_id"] == "p001"
-    assert data["goles_local"] == 2
+@router.delete("/suscribir")
+async def desuscribir(
+    endpoint: str,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    await PushService.desuscribir(db, user.id, endpoint)
+    return {"ok": True}
 
 
-@pytest.mark.asyncio
-async def test_mis_predicciones(client, db_session):
-    await seed_test_data(db_session)
-    await seed_test_user(db_session)
-
-    r = await client.post("/api/v1/auth/login", json={
-        "email": "list@test.com", "name": "List User", "provider": "google", "provider_id": "gl1",
-    })
-    token = r.json()["token"]
-
-    await client.post(
-        "/api/v1/predicciones",
-        json={"partido_id": "p001", "goles_local": 1, "goles_visitante": 1},
-        headers={"Authorization": f"Bearer {token}"},
-    )
-
-    response = await client.get(
-        "/api/v1/predicciones/mis",
-        headers={"Authorization": f"Bearer {token}"},
-    )
-    assert response.status_code == 200
-    data = response.json()
-    assert len(data) >= 1
-
-
-@pytest.mark.asyncio
-async def test_leaderboard(client, db_session):
-    await seed_test_data(db_session)
-    await seed_test_user(db_session)
-
-    r = await client.post("/api/v1/auth/login", json={
-        "email": "lb@test.com", "name": "LB User", "provider": "google", "provider_id": "glb1",
-    })
-    token = r.json()["token"]
-
-    await client.post(
-        "/api/v1/predicciones",
-        json={"partido_id": "p001", "goles_local": 0, "goles_visitante": 0},
-        headers={"Authorization": f"Bearer {token}"},
-    )
-
-    response = await client.get("/api/v1/leaderboard")
-    assert response.status_code == 200
-    data = response.json()
-    assert len(data) >= 1
-
-
-@pytest.mark.asyncio
-async def test_prediccion_sin_auth(client, db_session):
-    await seed_test_data(db_session)
-    response = await client.post(
-        "/api/v1/predicciones",
-        json={"partido_id": "p001", "goles_local": 2, "goles_visitante": 1},
-    )
-    assert response.status_code == 401
-
-
-@pytest.mark.asyncio
-async def test_calcular_puntos_exacto(client, db_session):
-    from sqlalchemy import select
-    from backend.app.models.partido import Partido
-    from backend.app.models.prediction import Prediction
-    from backend.app.services.prediction_service import PredictionService
-
-    await seed_test_data(db_session)
-    await seed_test_user(db_session)
-
-    r = await client.post("/api/v1/auth/login", json={
-        "email": "exact@test.com", "name": "Exact", "provider": "google", "provider_id": "ge1",
-    })
-    token = r.json()["token"]
-
-    await client.post(
-        "/api/v1/predicciones",
-        json={"partido_id": "p001", "goles_local": 2, "goles_visitante": 1},
-        headers={"Authorization": f"Bearer {token}"},
-    )
-
-    partido_result = await db_session.execute(
-        select(Partido).where(Partido.id == "p001")
-    )
-    partido = partido_result.scalar_one()
-    partido.goles_local = 2
-    partido.goles_visitante = 1
-    partido.estado = "finalizado"
-    await db_session.flush()
-
-    await PredictionService.calcular_puntos(db_session, "p001")
-    result = await db_session.execute(
-        select(Prediction).where(Prediction.partido_id == "p001")
-    )
-    pred = result.scalar_one()
-    assert pred.puntos == 3
+@router.get("/vapid-public-key")
+async def get_vapid_public_key():
+    return {"publicKey": settings.VAPID_PUBLIC_KEY}
 ```
 
-- [ ] **Run all tests**
+## Global Constraints
+- `pywebpush` imported with try/except guard (graceful if not installed)
+- Subscription id pattern: `f"sub_{uuid.uuid4().hex[:12]}"`
+- Token auth via `get_current_user` dependency
+- Follow existing service patterns
 
-```powershell
-$env:PYTHONPATH="C:\Users\astur\Desktop\liga.paraguaya.futbol"; cd C:\Users\astur\Desktop\liga.paraguaya.futbol; python -m pytest backend/tests/ -v
+## Commit
+```bash
+git add backend/requirements.txt backend/app/core/config.py backend/app/schemas/push_subscription.py backend/app/services/push_service.py backend/app/api/notificaciones.py
+git commit -m "feat: add push notification service and subscription endpoints"
 ```
-Expected: 11 existing + 7 new = 18 pass
 
-- [ ] **Commit**
-
-```powershell
-git add backend/tests/test_predicciones.py backend/tests/conftest.py
-git commit -m "feat: add prediction tests"
-```
+## Report File
+`.superpowers/sdd/task-4-report.md`

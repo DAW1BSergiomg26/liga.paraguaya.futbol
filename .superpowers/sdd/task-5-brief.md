@@ -1,140 +1,80 @@
-# Task 5: Frontend types + API functions
+# Task 5: Push Triggers in Admin + Prediction Service
 
-**Files:**
-- Modify: `frontend/src/types/index.ts`
-- Modify: `frontend/src/lib/api.ts`
+## Files to Modify
+- `backend/app/api/admin.py`
+- `backend/app/services/prediction_service.py`
 
-## Steps
+## Exact Changes
 
-- [ ] **Add types to `frontend/src/types/index.ts`**
+### backend/app/api/admin.py
+Find the `actualizar_partido` endpoint. After the partido update logic but before the response, add:
 
-Append after the `TablaRow` interface:
+For gol push when `en_vivo`:
+```python
+from backend.app.services.push_service import PushService
 
-```typescript
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-  image: string;
-  username: string;
-  puntos: number;
-  token: string;
-}
-
-export interface PredictionCreate {
-  partido_id: string;
-  goles_local: number;
-  goles_visitante: number;
-}
-
-export interface PredictionDetail {
-  id: string;
-  user_id: string;
-  partido_id: string;
-  goles_local: number;
-  goles_visitante: number;
-  puntos: number;
-  created_at: string;
-  torneo: string;
-  jornada: number;
-  local_id: string;
-  visitante_id: string;
-  local_nombre: string;
-  visitante_nombre: string;
-  goles_real_local: number | null;
-  goles_real_visitante: number | null;
-  estado: string;
-}
-
-export interface LeaderboardEntry {
-  username: string;
-  name: string;
-  image: string;
-  puntos: number;
-  aciertos: number;
-  predicciones: number;
-}
+# After partido update, send push for gol if en_vivo
+if nuevo_estado == "en_vivo" and (nuevo_goles_local is not None and nuevo_goles_visitante is not None):
+    await PushService.enviar_a_partido(
+        db,
+        partido_id,
+        "⚽ Gol!",
+        f"{partido.local.nombre} {nuevo_goles_local}-{nuevo_goles_visitante} {partido.visitante.nombre}",
+        f"/partidos/{partido_id}",
+    )
 ```
 
-- [ ] **Add API functions to `frontend/src/lib/api.ts`**
-
-Update the import line to include new types:
-```typescript
-import type { Club, ClubDetail, Partido, PartidoDetail, PartidoPage, TablaRow, User, PredictionCreate, PredictionDetail, LeaderboardEntry } from "@/types";
+For finalizado, send result push:
+```python
+if nuevo_estado == "finalizado":
+    result = await db.execute(select(Prediction).where(Prediction.partido_id == partido_id))
+    preds = result.scalars().all()
+    for pred in preds:
+        await PushService.enviar_a_usuario(
+            db,
+            pred.user_id,
+            "✅ Resultado de tu predicción",
+            f"{partido.local.nombre} {nuevo_goles_local}-{nuevo_goles_visitante} {partido.visitante.nombre} — Obtuviste {pred.puntos} pts",
+            f"/predicciones",
+        )
 ```
 
-Add before `updatePartido` function:
+### backend/app/services/prediction_service.py
+In `calcular_puntos`, after assigning points, check for streak:
 
-```typescript
-let authToken: string | null = null;
+```python
+from backend.app.services.push_service import PushService
 
-export function setAuthToken(token: string | null) {
-  authToken = token;
-  if (token) localStorage.setItem("user_token", token);
-  else localStorage.removeItem("user_token");
-}
-
-export function getSavedToken(): string | null {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem("user_token");
-}
-
-async function authFetchJSON<T>(path: string, options?: RequestInit): Promise<T> {
-  const token = authToken || getSavedToken();
-  const headers: Record<string, string> = {
-    ...(options?.headers as Record<string, string>),
-  };
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-  const res = await fetch(`${API_URL}${path}`, { ...options, headers });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ detail: "Error desconocido" }));
-    throw new Error(err.detail || `Error ${res.status}`);
-  }
-  return res.json();
-}
-
-export async function loginWithProvider(data: {
-  email: string;
-  name: string;
-  image?: string;
-  provider: string;
-  provider_id: string;
-}): Promise<User> {
-  return authFetchJSON<User>("/api/v1/auth/login", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
-}
-
-export async function crearPrediccion(data: PredictionCreate): Promise<PredictionDetail> {
-  return authFetchJSON<PredictionDetail>("/api/v1/predicciones", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
-}
-
-export async function misPredicciones(): Promise<PredictionDetail[]> {
-  return authFetchJSON<PredictionDetail[]>("/api/v1/predicciones/mis");
-}
-
-export async function getLeaderboard(): Promise<LeaderboardEntry[]> {
-  return fetchJSON<LeaderboardEntry[]>("/api/v1/leaderboard");
-}
+# After calculating points, check streak for logro
+if pred.puntos >= 2:
+    streak_result = await db.execute(
+        select(func.count(Prediction.id)).where(
+            Prediction.user_id == pred.user_id,
+            Prediction.puntos >= 2,
+        )
+    )
+    streak_count = streak_result.scalar() or 0
+    if streak_count > 0 and streak_count % 5 == 0:
+        await PushService.enviar_a_usuario(
+            db,
+            pred.user_id,
+            "🏆 Logro desbloqueado!",
+            f"Acertaste {streak_count} predicciones seguidas!",
+            f"/predicciones",
+        )
 ```
 
-- [ ] **Verify TypeScript compiles**
+Note: You'll need to add `from sqlalchemy import select, func` if not already imported.
 
-```powershell
-cd C:\Users\astur\Desktop\liga.paraguaya.futbol\frontend && npx tsc --noEmit 2>&1
+## Global Constraints
+- PushService.enviar_a_partido and enviar_a_usuario are already available (Task 4)
+- Follow existing patterns in admin.py and prediction_service.py
+
+## Commit
+```bash
+git add backend/app/api/admin.py backend/app/services/prediction_service.py
+git commit -m "feat: trigger push notifications from admin and prediction service"
 ```
-Expected: no errors
 
-- [ ] **Commit**
-
-```powershell
-cd C:\Users\astur\Desktop\liga.paraguaya.futbol
-git add frontend/src/types/index.ts frontend/src/lib/api.ts
-git commit -m "feat: add user, prediction types and API functions"
-```
+## Report File
+`.superpowers/sdd/task-5-report.md`

@@ -1,41 +1,27 @@
-# Task 1 Report: Backend User Model + Auth Endpoint
+# Task 1 Report: Backend Models (MensajeChat + PushSubscription)
 
-## What was implemented
+## Status: DONE
 
-- **`backend/app/models/user.py`** — SQLAlchemy `User` model with `id`, `email`, `name`, `image`, `username`, `provider`, `provider_id`, `token`, `puntos`, `created_at` columns, plus `generate_token()` and `to_dict()` methods.
-- **`backend/app/schemas/user.py`** — Pydantic `UserLogin` (request) and `UserOut` (response) schemas.
-- **`backend/app/services/user_service.py`** — `UserService` with `upsert()` (create-or-update by email, generates token + username) and `get_by_token()` methods.
-- **`backend/app/api/auth.py`** — `POST /api/v1/auth/login` endpoint accepting `UserLogin` body, validating email/name, calling `UserService.upsert()`.
-- **Modified `backend/app/core/dependencies.py`** — Added `get_current_user` dependency that extracts Bearer token from `Authorization` header and validates via `UserService.get_by_token()`.
-- **Modified `backend/app/models/__init__.py`** — Added `User` to imports and `__all__`.
-- **Modified `backend/app/core/database.py`** — Added `user` to the models imported in `init_db()`.
-- **Modified `backend/app/main.py`** — Added `auth` router import and registration.
+## What Was Implemented
+- `backend/app/models/mensaje_chat.py` — `MensajeChat` model with fields: id, partido_id (FK→partidos), user_id (FK→users), mensaje (Text), created_at. Relationships to Partido and User.
+- `backend/app/models/push_subscription.py` — `PushSubscription` model with fields: id, user_id (FK→users), endpoint (Text), p256dh, auth, created_at.
+- Updated `backend/app/models/__init__.py` to export both new models.
 
-## Test results
+## Tests
+- `python -c "from backend.app.models.mensaje_chat import MensajeChat; from backend.app.models.push_subscription import PushSubscription"` — imports OK
+- `python -m pytest backend/tests/ -v` — 18/18 passed (same as baseline, 14 deprecation warnings for `utcnow()` in existing code)
 
-All 11 existing tests pass:
-- test_clubes: 5/5 passed
-- test_partidos: 5/5 passed
-- test_tabla: 1/1 passed
+## Files Changed
+- `backend/app/models/mensaje_chat.py` (created)
+- `backend/app/models/push_subscription.py` (created)
+- `backend/app/models/__init__.py` (modified)
 
-## Files changed
+## Self-Review
+- Models follow the exact code from the brief.
+- Model style uses classic `Column` style (matching the brief) vs the `Mapped`/`mapped_column` style used in other existing models — this is intentional as per task spec.
+- Foreign keys reference existing tables (`partidos`, `users`).
+- Relationships use `lazy="selectin"` matching project conventions.
+- UUID import is included but not used in model definitions (used at instance creation layer).
 
-| File | Action |
-|------|--------|
-| `backend/app/models/user.py` | Created |
-| `backend/app/schemas/user.py` | Created |
-| `backend/app/services/user_service.py` | Created |
-| `backend/app/api/auth.py` | Created |
-| `backend/app/core/dependencies.py` | Modified (added `get_current_user`) |
-| `backend/app/models/__init__.py` | Modified (added `User`) |
-| `backend/app/core/database.py` | Modified (added `user` import) |
-| `backend/app/main.py` | Modified (added `auth` router) |
-
-## Self-review
-
-- Followed existing patterns (SQLAlchemy async with `Mapped`/`mapped_column`, Pydantic `model_config`, static service class, `APIRouter` with prefix/tags, `Depends(get_db)` injection).
-- Did NOT add `Prediction` model references since it doesn't exist yet (Task 2).
-- Did NOT add `predicciones`, `leaderboard` routers since they don't exist yet.
-- `get_db` was preserved as-is; `get_current_user` was appended.
-- `UserOut.model_validate(user)` used (newer Pydantic v2 pattern) consistent with schemas having `from_attributes = True`.
-- Test env required `PYTHONPATH` workaround (no package setup). Tests pass after setting it.
+## Concerns
+- None.
