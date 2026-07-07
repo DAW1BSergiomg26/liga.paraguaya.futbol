@@ -38,6 +38,16 @@ async def actualizar_partido(
 
     was_finalized = partido.estado == "finalizado"
 
+    if data.estado == "en_vivo" and data.goles_local is not None and data.goles_visitante is not None:
+        from backend.app.services.push_service import PushService
+        await PushService.enviar_a_partido(
+            db,
+            partido_id,
+            "⚽ Gol!",
+            f"{partido.local.nombre} {partido.goles_local}-{partido.goles_visitante} {partido.visitante.nombre}",
+            f"/partidos/{partido_id}",
+        )
+
     await db.commit()
 
     if was_finalized:
@@ -50,6 +60,17 @@ async def actualizar_partido(
         user_ids = [r[0] for r in result.all()]
         for uid in user_ids:
             await PredictionService.recalcular_totales_usuario(db, uid)
+        from backend.app.services.push_service import PushService
+        result = await db.execute(select(Prediction).where(Prediction.partido_id == partido_id))
+        preds = result.scalars().all()
+        for pred in preds:
+            await PushService.enviar_a_usuario(
+                db,
+                pred.user_id,
+                "✅ Resultado de tu predicción",
+                f"{partido.local.nombre} {partido.goles_local}-{partido.goles_visitante} {partido.visitante.nombre} — Obtuviste {pred.puntos} pts",
+                f"/predicciones",
+            )
         await db.commit()
     await db.refresh(partido)
     return await PartidoService.get_by_id(db, partido_id)

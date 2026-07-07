@@ -101,6 +101,25 @@ class PredictionService:
             pred.puntos = puntos
             await db.flush()
 
+        for pred in preds:
+            if pred.puntos >= 2:
+                from backend.app.services.push_service import PushService
+                streak_result = await db.execute(
+                    select(func.count(Prediction.id)).where(
+                        Prediction.user_id == pred.user_id,
+                        Prediction.puntos >= 2,
+                    )
+                )
+                streak_count = streak_result.scalar() or 0
+                if streak_count > 0 and streak_count % 5 == 0:
+                    await PushService.enviar_a_usuario(
+                        db,
+                        pred.user_id,
+                        "🏆 Logro desbloqueado!",
+                        f"Acertaste {streak_count} predicciones seguidas!",
+                        f"/predicciones",
+                    )
+
     @staticmethod
     async def recalcular_totales_usuario(db: AsyncSession, user_id: str):
         result = await db.execute(
