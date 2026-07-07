@@ -10,3 +10,5 @@ jobs:
     steps:
       - name: Ping Railway backend
         run: curl -sSf https://backend-production-0b7d.up.railway.app/health > /dev/null
+      - name: Recordatorios predicciones
+        run: curl -s -X POST "https://backend-production-0b7d.up.railway.app/api/v1/cron/recordatorios"
