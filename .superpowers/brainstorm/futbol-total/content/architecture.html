@@ -1,0 +1,101 @@
+<h2>🏟️ Fútbol Total Ecosystem — Arquitectura General</h2>
+<p class="subtitle">4 fases progresivas, cada una construye sobre la anterior</p>
+
+<div class="section">
+  <h3>Fase 1 ⚡ — Live Predictions + OAuth</h3>
+  <div style="background:#0a1628;border:1px solid rgba(118,228,247,0.2);border-radius:12px;padding:1.5rem;margin-bottom:1rem;">
+    <div style="display:flex;gap:1.5rem;flex-wrap:wrap;">
+      <div style="flex:1;min-width:200px;">
+        <div style="font-size:0.8rem;color:#76e4f7;font-weight:bold;text-transform:uppercase;margin-bottom:0.5rem;">Auth</div>
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+          <span style="background:#1a2a3a;padding:0.25rem 0.75rem;border-radius:999px;font-size:0.85rem;">Google OAuth</span>
+          <span style="background:#1a2a3a;padding:0.25rem 0.75rem;border-radius:999px;font-size:0.85rem;">GitHub OAuth</span>
+        </div>
+      </div>
+      <div style="flex:1;min-width:200px;">
+        <div style="font-size:0.8rem;color:#76e4f7;font-weight:bold;text-transform:uppercase;margin-bottom:0.5rem;">Predicciones</div>
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+          <span style="background:#1a2a3a;padding:0.25rem 0.75rem;border-radius:999px;font-size:0.85rem;">Resultado exacto</span>
+          <span style="background:#1a2a3a;padding:0.25rem 0.75rem;border-radius:999px;font-size:0.85rem;">Leaderboard</span>
+          <span style="background:#1a2a3a;padding:0.25rem 0.75rem;border-radius:999px;font-size:0.85rem;">Streaks</span>
+        </div>
+      </div>
+      <div style="flex:1;min-width:200px;">
+        <div style="font-size:0.8rem;color:#76e4f7;font-weight:bold;text-transform:uppercase;margin-bottom:0.5rem;">Notificaciones</div>
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+          <span style="background:#1a2a3a;padding:0.25rem 0.75rem;border-radius:999px;font-size:0.85rem;">Push API</span>
+          <span style="background:#1a2a3a;padding:0.25rem 0.75rem;border-radius:999px;font-size:0.85rem;">Goal alerts</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Fase 2 📡 — Chat en Vivo + WebSockets</h3>
+  <div style="background:#0a1628;border:1px solid rgba(118,228,247,0.2);border-radius:12px;padding:1.5rem;margin-bottom:1rem;">
+    <div style="display:flex;gap:1.5rem;flex-wrap:wrap;">
+      <div style="flex:1;min-width:200px;">
+        <div style="font-size:0.8rem;color:#76e4f7;font-weight:bold;text-transform:uppercase;margin-bottom:0.5rem;">Backend</div>
+        <span style="background:#1a2a3a;padding:0.25rem 0.75rem;border-radius:999px;font-size:0.85rem;">FastAPI WebSocket</span>
+      </div>
+      <div style="flex:1;min-width:200px;">
+        <div style="font-size:0.8rem;color:#76e4f7;font-weight:bold;text-transform:uppercase;margin-bottom:0.5rem;">Frontend</div>
+        <span style="background:#1a2a3a;padding:0.25rem 0.75rem;border-radius:999px;font-size:0.85rem;">Chat embed por partido</span>
+      </div>
+      <div style="flex:1;min-width:200px;">
+        <div style="font-size:0.8rem;color:#76e4f7;font-weight:bold;text-transform:uppercase;margin-bottom:0.5rem;">Moderación</div>
+        <span style="background:#1a2a3a;padding:0.25rem 0.75rem;border-radius:999px;font-size:0.85rem;">Rate limiting + reportes</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Fase 3 🔌 — API Pública + Analytics IA</h3>
+  <div style="background:#0a1628;border:1px solid rgba(118,228,247,0.2);border-radius:12px;padding:1.5rem;margin-bottom:1rem;">
+    <div style="display:flex;gap:1.5rem;flex-wrap:wrap;">
+      <div style="flex:1;min-width:200px;">
+        <div style="font-size:0.8rem;color:#76e4f7;font-weight:bold;text-transform:uppercase;margin-bottom:0.5rem;">API Pública</div>
+        <span style="background:#1a2a3a;padding:0.25rem 0.75rem;border-radius:999px;font-size:0.85rem;">Docs interactivas + API Keys</span>
+      </div>
+      <div style="flex:1;min-width:200px;">
+        <div style="font-size:0.8rem;color:#76e4f7;font-weight:bold;text-transform:uppercase;margin-bottom:0.5rem;">Analytics ML</div>
+        <span style="background:#1a2a3a;padding:0.25rem 0.75rem;border-radius:999px;font-size:0.85rem;">Predicciones IA + xG</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Fase 4 🏆 — Fantasy League + PWA</h3>
+  <div style="background:#0a1628;border:1px solid rgba(118,228,247,0.2);border-radius:12px;padding:1.5rem;">
+    <div style="display:flex;gap:1.5rem;flex-wrap:wrap;">
+      <div style="flex:1;min-width:200px;">
+        <div style="font-size:0.8rem;color:#76e4f7;font-weight:bold;text-transform:uppercase;margin-bottom:0.5rem;">Fantasy</div>
+        <span style="background:#1a2a3a;padding:0.25rem 0.75rem;border-radius:999px;font-size:0.85rem;">Armar plantilla + puntuar</span>
+      </div>
+      <div style="flex:1;min-width:200px;">
+        <div style="font-size:0.8rem;color:#76e4f7;font-weight:bold;text-transform:uppercase;margin-bottom:0.5rem;">PWA</div>
+        <span style="background:#1a2a3a;padding:0.25rem 0.75rem;border-radius:999px;font-size:0.85rem;">Offline + instalable</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="options" style="margin-top:2rem;">
+  <div class="option" data-choice="approve" onclick="toggleSelect(this)">
+    <div class="letter">✅</div>
+    <div class="content">
+      <h3>¡Me gusta! Empecemos</h3>
+      <p>La arquitectura tiene sentido, pasemos a diseñar los detalles</p>
+    </div>
+  </div>
+  <div class="option" data-choice="refine" onclick="toggleSelect(this)">
+    <div class="letter">🔄</div>
+    <div class="content">
+      <h3>Cambiemos algo</h3>
+      <p>Quiero ajustar el orden de las fases o agregar/quitar features</p>
+    </div>
+  </div>
+</div>
