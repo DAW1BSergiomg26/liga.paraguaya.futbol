@@ -1,8 +1,10 @@
 import json
 from fastapi import APIRouter, Depends, Query, WebSocket, WebSocketDisconnect
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.app.core.dependencies import get_db
+from backend.app.models.partido import Partido
 from backend.app.models.user import User
 from backend.app.schemas.chat import MensajeChatCreate, MensajeChatOut
 from backend.app.services.chat_service import ChatService
@@ -43,8 +45,6 @@ manager = ConnectionManager()
 
 
 async def get_user_from_token(db: AsyncSession, token: str) -> User | None:
-    from sqlalchemy import select
-    from backend.app.models.user import User
     result = await db.execute(select(User).where(User.token == token))
     return result.scalar_one_or_none()
 
@@ -71,8 +71,6 @@ async def websocket_endpoint(
         await websocket.close(code=4001)
         return
 
-    from sqlalchemy import select
-    from backend.app.models.partido import Partido
     result = await db.execute(select(Partido).where(Partido.id == partido_id))
     if not result.scalar_one_or_none():
         await websocket.close(code=4004)
