@@ -9,6 +9,7 @@ class PartidoOut(BaseModel):
     torneo: str
     fecha: date
     jornada: int
+    temporada: str = "2026"
     local_id: str
     visitante_id: str
     goles_local: Optional[int] = None

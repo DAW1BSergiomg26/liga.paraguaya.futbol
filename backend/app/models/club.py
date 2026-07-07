@@ -18,3 +18,7 @@ class Club(Base):
     direccion: Mapped[str] = mapped_column(String(200), default="")
     escudo: Mapped[str] = mapped_column(String(500), default="")
     camiseta: Mapped[str] = mapped_column(String(500), default="")
+    sitio_web: Mapped[str] = mapped_column(String(500), default="")
+    descripcion: Mapped[str] = mapped_column(String(2000), default="")
+    titulos_liga: Mapped[int] = mapped_column(Integer, default=0)
+    titulos_info: Mapped[list] = mapped_column(JSON, default=list)

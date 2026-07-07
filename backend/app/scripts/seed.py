@@ -24,10 +24,20 @@ def load_json(name: str) -> list:
 
 async def seed_clubes(db: AsyncSession):
     data = load_json("clubes_paraguay.json")
-    count = 0
+    count_new = 0
+    count_upd = 0
     for item in data:
         existing = await db.execute(select(Club).where(Club.id == item["id"]))
-        if existing.scalar_one_or_none():
+        club = existing.scalar_one_or_none()
+        if club:
+            changed = False
+            for field in ("sitio_web", "descripcion", "titulos_liga", "titulos_info"):
+                val = item.get(field)
+                if val is not None and getattr(club, field, None) != val:
+                    setattr(club, field, val)
+                    changed = True
+            if changed:
+                count_upd += 1
             continue
         club = Club(
             id=item["id"],
@@ -41,12 +51,16 @@ async def seed_clubes(db: AsyncSession):
             direccion=item.get("direccion", ""),
             escudo=item.get("escudo", ""),
             camiseta=item.get("camiseta", ""),
+            sitio_web=item.get("sitio_web", ""),
+            descripcion=item.get("descripcion", ""),
+            titulos_liga=item.get("titulos_liga", 0),
+            titulos_info=item.get("titulos_info", []),
         )
         db.add(club)
-        count += 1
+        count_new += 1
     await db.flush()
-    print(f"  Clubes: {count} nuevos")
-    return count
+    print(f"  Clubes: {count_new} nuevos, {count_upd} actualizados")
+    return count_new
 
 
 async def seed_partidos(db: AsyncSession):
@@ -105,6 +119,49 @@ async def seed_tabla(db: AsyncSession):
     await db.flush()
     print(f"  Tabla: {count} filas nuevas")
     return count
+
+
+HISTORICO_DIR = DATA_DIR / "partidos_historicos"
+
+
+async def seed_tabla_historico(db: AsyncSession):
+    import glob as _glob
+
+    pattern = str(HISTORICO_DIR / "temporada_*.json")
+    files = sorted(_glob.glob(pattern))
+    total = 0
+    for path in files:
+        rel = Path(path).relative_to(DATA_DIR)
+        print(f"  Cargando {Path(rel).as_posix()}...")
+        data = load_json(str(rel))
+        for item in data:
+            stmt = select(TablaPosicion).where(
+                TablaPosicion.torneo == item["torneo"],
+                TablaPosicion.jornada == 0,
+                TablaPosicion.club_id == item["club_id"],
+            )
+            existing = await db.execute(stmt)
+            if existing.scalar_one_or_none():
+                continue
+            tabla_row = TablaPosicion(
+                torneo=item["torneo"],
+                jornada=0,
+                club_id=item["club_id"],
+                posicion=item["posicion"],
+                pj=item["pj"],
+                pg=item["pg"],
+                pe=item["pe"],
+                pp=item["pp"],
+                gf=item["gf"],
+                gc=item["gc"],
+                dg=item["dg"],
+                puntos=item["puntos"],
+            )
+            db.add(tabla_row)
+            total += 1
+        await db.flush()
+    print(f"  Tabla histórica: {total} filas nuevas")
+    return total
 
 
 async def main():

@@ -9,21 +9,20 @@ from backend.app.api.chat import router as chat_router
 from backend.app.api.notificaciones import router as notificaciones_router
 from backend.app.api.cron import router as cron_router
 from backend.app.core.config import settings
-from backend.app.core.database import async_session, init_db
+from backend.app.core.database import async_session, run_alembic_upgrade
 from backend.app.models.club import Club
-from backend.app.scripts.seed import seed_clubes, seed_partidos, seed_tabla
+from backend.app.scripts.seed import seed_clubes, seed_partidos, seed_tabla, seed_tabla_historico
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await init_db()
+    await run_alembic_upgrade()
     async with async_session() as db:
-        result = await db.execute(select(Club).limit(1))
-        if result.scalar_one_or_none() is None:
-            await seed_clubes(db)
-            await seed_partidos(db)
-            await seed_tabla(db)
-            await db.commit()
+        await seed_clubes(db)
+        await seed_partidos(db)
+        await seed_tabla(db)
+        await seed_tabla_historico(db)
+        await db.commit()
     yield
 
 

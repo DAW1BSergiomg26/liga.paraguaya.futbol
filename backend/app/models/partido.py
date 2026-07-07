@@ -14,6 +14,7 @@ class Partido(Base):
     torneo: Mapped[str] = mapped_column(String(100))
     fecha: Mapped[date] = mapped_column(Date)
     jornada: Mapped[int] = mapped_column(Integer, default=1)
+    temporada: Mapped[str] = mapped_column(String(20), default="2026")
     local_id: Mapped[str] = mapped_column(ForeignKey("clubes.id"))
     visitante_id: Mapped[str] = mapped_column(ForeignKey("clubes.id"))
     goles_local: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)

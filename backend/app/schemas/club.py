@@ -11,6 +11,10 @@ class ClubOut(BaseModel):
     capacidad: int
     fundacion: int
     escudo: str
+    sitio_web: str = ""
+    descripcion: str = ""
+    titulos_liga: int = 0
+    titulos_info: list = []
 
     model_config = {"from_attributes": True}
 
