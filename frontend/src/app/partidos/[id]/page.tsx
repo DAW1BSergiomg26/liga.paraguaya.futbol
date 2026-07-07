@@ -10,6 +10,7 @@ import ErrorMessage from "@/components/ui/ErrorMessage";
 import { useEffect, useState } from "react";
 import { getSavedToken, setAuthToken, misPredicciones } from "@/lib/api";
 import type { PredictionDetail } from "@/types";
+import ChatWidget from "@/components/ChatWidget";
 
 export default function PartidoDetailPage() {
   const params = useParams();
@@ -144,6 +145,8 @@ export default function PartidoDetailPage() {
           </div>
         </section>
       )}
+
+      {partido && <ChatWidget partidoId={partido.id} />}
       </div>
     </div>
   );

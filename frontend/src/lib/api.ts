@@ -119,3 +119,30 @@ export async function updatePartido(
   }
   return res.json();
 }
+
+function authHeaders(): Record<string, string> {
+  const token = authToken || getSavedToken();
+  const headers: Record<string, string> = {};
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+  return headers;
+}
+
+export async function getChatHistory(partidoId: string, limit = 50, offset = 0): Promise<MensajeChat[]> {
+  const res = await fetch(
+    `${API_URL}/api/v1/partidos/${partidoId}/chat?limit=${limit}&offset=${offset}`,
+    { headers: authHeaders() }
+  );
+  if (!res.ok) throw new Error("Failed to fetch chat history");
+  return res.json();
+}
+
+export interface MensajeChat {
+  id: string;
+  partido_id: string;
+  user_id: string;
+  username: string;
+  nombre: string;
+  imagen: string;
+  mensaje: string;
+  created_at: string;
+}
