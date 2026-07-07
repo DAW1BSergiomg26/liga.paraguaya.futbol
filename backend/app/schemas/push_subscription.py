@@ -1,7 +1,11 @@
 from pydantic import BaseModel
 
 
-class PushSubscriptionCreate(BaseModel):
-    endpoint: str
+class PushKeys(BaseModel):
     p256dh: str
     auth: str
+
+
+class PushSubscriptionCreate(BaseModel):
+    endpoint: str
+    keys: PushKeys

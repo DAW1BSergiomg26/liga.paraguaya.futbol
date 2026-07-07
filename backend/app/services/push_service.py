@@ -32,8 +32,8 @@ class PushService:
             id=sub_id,
             user_id=user_id,
             endpoint=data.endpoint,
-            p256dh=data.p256dh,
-            auth=data.auth,
+            p256dh=data.keys.p256dh,
+            auth=data.keys.auth,
             created_at=datetime.now(timezone.utc),
         )
         db.add(sub)
