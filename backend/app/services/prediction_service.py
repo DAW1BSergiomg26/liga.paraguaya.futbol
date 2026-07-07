@@ -1,7 +1,7 @@
 import uuid
 from typing import Optional
 
-from sqlalchemy import func, select
+from sqlalchemy import case, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -127,7 +127,7 @@ class PredictionService:
                 User.puntos,
                 func.count(Prediction.id).label("predicciones"),
                 func.sum(
-                    Prediction.puntos == 3
+                    case((Prediction.puntos == 3, 1), else_=0)
                 ).label("aciertos"),
             )
             .outerjoin(Prediction, Prediction.user_id == User.id)

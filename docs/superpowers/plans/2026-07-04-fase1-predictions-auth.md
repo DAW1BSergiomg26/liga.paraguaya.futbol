@@ -766,6 +766,11 @@ async def test_prediccion_sin_auth(client, db_session):
 
 @pytest.mark.asyncio
 async def test_calcular_puntos_exacto(client, db_session):
+    from sqlalchemy import select
+    from backend.app.models.partido import Partido
+    from backend.app.models.prediction import Prediction
+    from backend.app.services.prediction_service import PredictionService
+
     await seed_test_data(db_session)
     await seed_test_user(db_session)
 
@@ -780,8 +785,6 @@ async def test_calcular_puntos_exacto(client, db_session):
         headers={"Authorization": f"Bearer {token}"},
     )
 
-    # Finalize the partido with same score
-    from backend.app.services.prediction_service import PredictionService
     partido_result = await db_session.execute(
         select(Partido).where(Partido.id == "p001")
     )
