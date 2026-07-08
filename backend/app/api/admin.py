@@ -1,10 +1,12 @@
 from fastapi import APIRouter, Depends, Header, HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.app.core.config import settings
 from backend.app.core.dependencies import get_db
+from backend.app.models.api_key import APIKey
 from backend.app.models.partido import Partido
+from backend.app.schemas.api_key import APIKeyCreate, APIKeyOut
 from backend.app.schemas.partido import PartidoDetailOut, PartidoUpdate
 from backend.app.services.partido_service import PartidoService
 
@@ -74,3 +76,55 @@ async def actualizar_partido(
         await db.commit()
     await db.refresh(partido)
     return await PartidoService.get_by_id(db, partido_id)
+
+
+@router.post("/api-keys", response_model=APIKeyOut, status_code=201)
+async def crear_api_key(
+    data: APIKeyCreate,
+    _: bool = Depends(verify_admin_key),
+    db: AsyncSession = Depends(get_db),
+):
+    key = APIKey(owner=data.owner, email=data.email)
+    db.add(key)
+    await db.commit()
+    await db.refresh(key)
+    return key
+
+
+@router.get("/api-keys", response_model=list[APIKeyOut])
+async def listar_api_keys(
+    _: bool = Depends(verify_admin_key),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(select(APIKey).order_by(APIKey.created_at.desc()))
+    return result.scalars().all()
+
+
+@router.patch("/api-keys/{key_id}/toggle", response_model=APIKeyOut)
+async def toggle_api_key(
+    key_id: str,
+    _: bool = Depends(verify_admin_key),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(select(APIKey).where(APIKey.key == key_id))
+    api_key = result.scalar_one_or_none()
+    if not api_key:
+        raise HTTPException(status_code=404, detail="API Key no encontrada")
+    api_key.is_active = not api_key.is_active
+    await db.commit()
+    await db.refresh(api_key)
+    return api_key
+
+
+@router.delete("/api-keys/{key_id}", status_code=204)
+async def eliminar_api_key(
+    key_id: str,
+    _: bool = Depends(verify_admin_key),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(select(APIKey).where(APIKey.key == key_id))
+    api_key = result.scalar_one_or_none()
+    if not api_key:
+        raise HTTPException(status_code=404, detail="API Key no encontrada")
+    await db.delete(api_key)
+    await db.commit()

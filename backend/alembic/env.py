@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 
 from backend.app.core.config import settings
 from backend.app.core.database import Base
-from backend.app.models import Club, MensajeChat, Partido, Prediction, PushSubscription, TablaPosicion, User  # noqa: F401
+from backend.app.models import APIKey, Club, MensajeChat, Partido, Prediction, PushSubscription, TablaPosicion, User  # noqa: F401
 
 config = context.config
 if config.config_file_name is not None:
