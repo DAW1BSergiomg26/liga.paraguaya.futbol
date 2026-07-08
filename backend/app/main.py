@@ -6,6 +6,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy import select
 
 from backend.app.api import admin, auth, clubes, health, leaderboard, partidos, predicciones, tabla
+from backend.app.api.cerezo import router as cerezo_router
 from backend.app.api.chat import router as chat_router
 from backend.app.api.notificaciones import router as notificaciones_router
 from backend.app.api.cron import router as cron_router
@@ -76,6 +77,7 @@ app.include_router(auth.router)
 app.include_router(predicciones.router)
 app.include_router(leaderboard.router)
 app.include_router(admin.router)
+app.include_router(cerezo_router)
 app.include_router(chat_router)
 app.include_router(notificaciones_router)
 app.include_router(cron_router)
