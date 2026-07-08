@@ -1,0 +1,52 @@
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from backend.app.services.club_service import ClubService
+from backend.app.services.partido_service import PartidoService
+from backend.app.services.tabla_service import TablaService
+
+
+class CerezoDataFetcher:
+
+    @staticmethod
+    async def fetch(intent: str, entities: dict, db: AsyncSession) -> dict:
+        if intent == "club_info" and entities.get("clubes"):
+            club_id = entities["clubes"][0]
+            club = await ClubService.get_by_id(db, club_id)
+            return {"club": club.model_dump() if club else None}
+
+        if intent == "match_result" and entities.get("clubes"):
+            clubes = entities["clubes"]
+            local_id = clubes[0]
+            visitante_id = clubes[1] if len(clubes) > 1 else None
+            partidos = await PartidoService.get_all(db)
+            matches = [
+                p.model_dump() for p in partidos
+                if (p.local_id == local_id or p.visitante_id == local_id)
+            ]
+            return {"partidos": matches}
+
+        if intent == "head_to_head" and len(entities.get("clubes", [])) >= 2:
+            club_a, club_b = entities["clubes"][0], entities["clubes"][1]
+            partidos = await PartidoService.get_all(db)
+            h2h = [
+                p.model_dump() for p in partidos
+                if (p.local_id == club_a and p.visitante_id == club_b)
+                or (p.local_id == club_b and p.visitante_id == club_a)
+            ]
+            return {"head_to_head": h2h}
+
+        if intent == "table_position":
+            tabla = await TablaService.get_table(db)
+            return {"tabla": [t.model_dump() for t in tabla]}
+
+        if intent == "prediction" and entities.get("clubes"):
+            clubes_ids = entities["clubes"]
+            partidos = await PartidoService.get_all(db)
+            upcoming = [
+                p for p in partidos
+                if p.estado == "programado"
+                and (not clubes_ids or p.local_id in clubes_ids or p.visitante_id in clubes_ids)
+            ]
+            return {"proximos": [p.model_dump() for p in upcoming]}
+
+        return {}
