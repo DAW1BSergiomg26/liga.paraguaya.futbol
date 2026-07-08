@@ -12,3 +12,4 @@ asyncpg>=0.30.0
 pywebpush>=1.0.0
 selectolax>=0.3.0
 respx>=0.21.0
+llama-cpp-python>=0.3.0
