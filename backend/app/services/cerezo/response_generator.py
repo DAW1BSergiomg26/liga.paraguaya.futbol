@@ -23,8 +23,18 @@ _TEMPLATES: dict[str, list[str]] = {
     "head_to_head": [
         "En los últimos {total} partidos: {local_nombre} ganó {local_wins}, {visitante_nombre} ganó {vis_wins}, {draws} empates.",
     ],
+    "club_comparison": [
+        "{a_nombre} tiene {a_ligas} ligas y {a_intl} títulos internacionales. {b_nombre} tiene {b_ligas} ligas y {b_intl} títulos internacionales. {ventaja}",
+        "{a_nombre} fue fundado en {a_fundacion} ({a_edad} años) y {b_nombre} en {b_fundacion} ({b_edad} años). {ventaja_edad}",
+    ],
+    "next_match": [
+        "El próximo partido es el {fecha} contra {rival} por el {torneo}.",
+        "Juega el {fecha} vs {rival} en el {torneo}.",
+        "Próximos partidos: {lista_partidos}",
+    ],
     "match_result": [
         "Los últimos partidos: revisá la tabla de partidos para más detalles.",
+        "En los últimos {forma_total} partidos: {wins} ganados, {draws} empatados, {losses} perdidos.",
     ],
     "top_scorer": [
         "Todavía no tengo datos de goleadores actualizados al instante. Preguntame sobre clubes o partidos.",
@@ -99,7 +109,63 @@ def _render_template(intent: str, data: dict, prediction: dict | None) -> str:
         ctx["local_nombre"] = "Local"
         ctx["visitante_nombre"] = "Visitante"
 
-    return template.format(**ctx) if ctx else template
+    if intent == "club_comparison" and data.get("club_a") and data.get("club_b"):
+        a = data["club_a"]
+        b = data["club_b"]
+        cmp = data.get("comparison", {})
+        ctx["a_nombre"] = a["nombre"]
+        ctx["b_nombre"] = b["nombre"]
+        ctx["a_ligas"] = a["titulos_liga"]
+        ctx["b_ligas"] = b["titulos_liga"]
+        ctx["a_intl"] = cmp.get("total_intl_a", 0)
+        ctx["b_intl"] = cmp.get("total_intl_b", 0)
+        ctx["a_fundacion"] = a["fundacion"]
+        ctx["b_fundacion"] = b["fundacion"]
+        ctx["a_edad"] = 2026 - a["fundacion"]
+        ctx["b_edad"] = 2026 - b["fundacion"]
+        vl = cmp.get("ventaja_ligas", 0)
+        vi = cmp.get("ventaja_intl", 0)
+        partes = []
+        if vl != 0:
+            quien = a["nombre"] if vl > 0 else b["nombre"]
+            partes.append(f"{quien} lidera por {abs(vl)} título(s) de liga")
+        if vi != 0:
+            quien = a["nombre"] if vi > 0 else b["nombre"]
+            partes.append(f"{quien} lidera por {abs(vi)} título(s) internacional(es)")
+        ctx["ventaja"] = " | ".join(partes) if partes else "Están parejos en títulos"
+        ctx["ventaja_edad"] = f"{a['nombre']} es más antiguo" if cmp.get("a_mas_viejo") else f"{b['nombre']} es más antiguo"
+
+    if intent == "next_match" and data.get("proximos"):
+        prox = data["proximos"]
+        if len(prox) == 1:
+            p = prox[0]
+            ctx["fecha"] = p["fecha"]
+            ctx["rival"] = p["rival_nombre"]
+            ctx["torneo"] = p["torneo"]
+            template = random.choice(templates[:2])
+        elif len(prox) > 1:
+            parts = []
+            for p in prox:
+                parts.append(f"{p['fecha']} vs {p['rival_nombre']} ({p['torneo']})")
+            ctx["lista_partidos"] = "; ".join(parts)
+            template = templates[2]
+
+    if intent == "match_result" and data.get("forma"):
+        f = data["forma"]
+        ctx["wins"] = f["wins"]
+        ctx["draws"] = f["draws"]
+        ctx["losses"] = f["losses"]
+        ctx["forma_total"] = f.get("total", f["wins"] + f["draws"] + f["losses"])
+        template = templates[1]
+
+    if not ctx:
+        return template
+    try:
+        return template.format(**ctx)
+    except (KeyError, ValueError, AttributeError) as e:
+        logger.warning("Template format failed for intent '%s': %s", intent, e)
+    fallback = random.choice(_TEMPLATES.get("unknown", _TEMPLATES["unknown"]))
+    return fallback
 
 
 class CerezoResponseGenerator:

@@ -31,3 +31,39 @@ async def test_generate_prediction():
     answer = await CerezoResponseGenerator.generate("prediction", data, prediction, "Quién gana")
     assert isinstance(answer, str)
     assert len(answer) > 0
+
+
+@pytest.mark.asyncio
+async def test_generate_club_comparison():
+    data = {
+        "club_a": {"nombre": "Club Olimpia", "fundacion": 1902, "titulos_liga": 46, "titulos_internacionales": [{"torneo": "Copa Libertadores", "cantidad": 3}]},
+        "club_b": {"nombre": "Club Cerro Porteño", "fundacion": 1912, "titulos_liga": 34, "titulos_internacionales": []},
+        "comparison": {"ventaja_ligas": 12, "total_intl_a": 1, "total_intl_b": 0, "ventaja_intl": 1, "a_mas_viejo": True},
+    }
+    answer = await CerezoResponseGenerator.generate("club_comparison", data, None, "Quién tiene más títulos")
+    assert isinstance(answer, str)
+    assert len(answer) > 0
+    assert "Olimpia" in answer
+    assert "Cerro" in answer
+
+
+@pytest.mark.asyncio
+async def test_generate_next_match():
+    data = {
+        "proximos": [
+            {"fecha": "2026-02-15", "torneo": "Apertura 2026", "es_local": True, "rival_nombre": "Club Libertad", "local_id": "olimpia", "visitante_id": "libertad"},
+        ]
+    }
+    answer = await CerezoResponseGenerator.generate("next_match", data, None, "Cuándo juega Olimpia")
+    assert isinstance(answer, str)
+    assert len(answer) > 0
+    assert "fecha" in answer.lower() or "juega" in answer.lower() or "contra" in answer.lower()
+
+
+@pytest.mark.asyncio
+async def test_generate_match_result_form():
+    data = {"partidos": [], "forma": {"wins": 3, "draws": 1, "losses": 1, "total": 5}}
+    answer = await CerezoResponseGenerator.generate("match_result", data, None, "Últimos resultados")
+    assert isinstance(answer, str)
+    assert len(answer) > 0
+    assert "3" in answer
