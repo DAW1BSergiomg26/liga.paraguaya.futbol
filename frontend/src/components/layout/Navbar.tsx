@@ -33,6 +33,7 @@ export default function Navbar() {
       <Link href="/partidos" onClick={closeMenu} className="hover:text-white transition">Partidos</Link>
       <Link href="/tabla" onClick={closeMenu} className="hover:text-white transition">Tabla</Link>
       <Link href="/predicciones" onClick={closeMenu} className="hover:text-white transition">Predicciones</Link>
+      <Link href="/cerezo" onClick={closeMenu} className="hover:text-white transition">Cerezo</Link>
       {isAdmin && (
         <Link href="/admin/partidos" onClick={closeMenu} className="text-[#76e4f7] hover:text-white transition">Admin</Link>
       )}
