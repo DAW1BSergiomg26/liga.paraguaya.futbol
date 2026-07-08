@@ -23,10 +23,11 @@ class CerezoDataFetcher:
                 p.model_dump() for p in partidos
                 if (p.local_id == local_id or p.visitante_id == local_id)
             ]
-            last5 = [
-                p for p in partidos if p.estado == "finalizado"
-                and (p.local_id == local_id or p.visitante_id == local_id)
-            ][:5]
+            last5 = sorted(
+                [p for p in partidos if p.estado == "finalizado"
+                 and (p.local_id == local_id or p.visitante_id == local_id)],
+                key=lambda p: p.fecha, reverse=True
+            )[:5]
             wins = sum(1 for p in last5 if (p.local_id == local_id and p.goles_local is not None and p.goles_local > (p.goles_visitante or 0)) or (p.visitante_id == local_id and p.goles_visitante is not None and p.goles_visitante > (p.goles_local or 0)))
             losses = sum(1 for p in last5 if (p.local_id == local_id and p.goles_local is not None and p.goles_local < (p.goles_visitante or 0)) or (p.visitante_id == local_id and p.goles_visitante is not None and p.goles_visitante < (p.goles_local or 0)))
             draws = len(last5) - wins - losses
