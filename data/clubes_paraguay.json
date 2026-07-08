@@ -14,13 +14,35 @@
     "direccion": "Av. Mariscal López 1377, Asunción",
     "escudo": "https://upload.wikimedia.org/wikipedia/commons/3/3a/Emblem_Olimpia.png",
     "camiseta": "https://upload.wikimedia.org/wikipedia/commons/d/d7/Escudo_de_Olimpia_8_estrellas.png",
-    "descripcion": "ElClub Olimpiaes unaentidad deportivacon sede en la ciudad deAsunción,Paraguay. Fue fundado el 25 de julio de 1902 por un grupo de jóvenes paraguayos.[2]Su nombre fue propuesto porWilliam Paats, ciudadano neerlandés radicado en el país desde fines delsigloXIXy considerado el «padre delfútbol paraguayo» por haber insertado y fomentado la práctica de dicho deporte en el país. El equipo de fútbol disputa sus partidos de local en elestadio Osvaldo Domínguez Dibb, conocido popularmente comoEl Bosqueo",
+    "descripcion": "El Club Olimpia es una entidad deportiva con sede en la ciudad de Asunción, Paraguay. Fue fundado el 25 de julio de 1902 por un grupo de jóvenes paraguayos. Su nombre fue propuesto por William Paats, ciudadano neerlandés radicado en el país desde fines del siglo XIX y considerado el «padre del fútbol paraguayo» por haber insertado y fomentado la práctica de dicho deporte en el país. El equipo disputa sus partidos de local en el Estadio Osvaldo Domínguez Dibb, conocido popularmente como El Bosque.",
     "sitio_web": "https://clubolimpia.com.py/",
     "titulos_liga": 48,
     "titulos_info": [
       {
         "torneo": "Primera División",
         "cantidad": 48
+      }
+    ],
+    "titulos_internacionales": [
+      {
+        "torneo": "Copa Libertadores",
+        "cantidad": 3
+      },
+      {
+        "torneo": "Supercopa Sudamericana",
+        "cantidad": 1
+      },
+      {
+        "torneo": "Recopa Sudamericana",
+        "cantidad": 1
+      },
+      {
+        "torneo": "Copa Intercontinental",
+        "cantidad": 1
+      },
+      {
+        "torneo": "Copa Interamericana",
+        "cantidad": 2
       }
     ]
   },
@@ -39,7 +61,7 @@
     "direccion": "Av. República Argentina y Rca. de Colombia, Asunción",
     "escudo": "https://upload.wikimedia.org/wikipedia/commons/4/44/Escudo_Club_Cerro_Porte%C3%B1o_2023-Actual.svg",
     "camiseta": "https://upload.wikimedia.org/wikipedia/commons/4/44/Escudo_Club_Cerro_Porte%C3%B1o_2023-Actual.svg",
-    "descripcion": "ElClub Cerro Porteñoes unaentidad deportivacon sede enbarrio Obrerode la capital deParaguay,Asunción. Su principal actividad es elfútboly actualmente compite en laPrimera División de Paraguay, donde ha logrado conquistar un total de 41 títulos oficiales a lo largo de su historia.[3]Fue fundado el 1 de octubre de 1912 bajo el nombre de Cerro Porteño Football Club.[4]",
+    "descripcion": "El Club Cerro Porteño es una entidad deportiva con sede en el barrio Obrero de la capital de Paraguay, Asunción. Su principal actividad es el fútbol y actualmente compite en la Primera División de Paraguay, donde ha logrado conquistar un total de 41 títulos oficiales a lo largo de su historia. Fue fundado el 1 de octubre de 1912 bajo el nombre de Cerro Porteño Football Club.",
     "sitio_web": "http://www.cerro.com.py/",
     "titulos_liga": 35,
     "titulos_info": [
@@ -64,7 +86,7 @@
     "direccion": "Barrio Virgen del Huerto, Asunción",
     "escudo": "https://upload.wikimedia.org/wikipedia/commons/6/63/Club_atletico_colegiales.png",
     "camiseta": "https://upload.wikimedia.org/wikipedia/commons/6/63/Club_atletico_colegiales.png",
-    "descripcion": "ElClub Atlético Colegialeses un equipo profesional defútboldeParaguayoriundo de la zona de Cuatro Mojones, municipio deLambaré. Fue fundado el 7 de enero de 1977.[1]Actualmente milita en laTercera División de Paraguaydel fútbol paraguayo desde 2024."
+    "descripcion": "El Club Atlético Colegiales es un equipo profesional de fútbol de Paraguay oriundo de la zona de Cuatro Mojones, municipio de Lambaré. Fue fundado el 7 de enero de 1977. Actualmente milita en la Tercera División de Paraguay desde 2024."
   },
   {
     "id": "libertad",
@@ -81,7 +103,7 @@
     "direccion": "Av. Eusebio Ayala 3540, Asunción",
     "escudo": "https://upload.wikimedia.org/wikipedia/commons/6/6b/Club_Libertad.png",
     "camiseta": "https://upload.wikimedia.org/wikipedia/commons/6/6b/Club_Libertad.png",
-    "descripcion": "ElClub Libertades una entidad deportiva con sede en el barrioLas Mercedesde la ciudad deAsunción,Paraguay. El club fue fundado el 30 de julio de 1905. Hasta la fecha ha conquistado un total de 26campeonatos de la primera división, además de tres títulos deCopa Paraguayy dos deSupercopa Paraguay.[1]",
+    "descripcion": "El Club Libertad es una entidad deportiva con sede en el barrio Las Mercedes de la ciudad de Asunción, Paraguay. El club fue fundado el 30 de julio de 1905. Hasta la fecha ha conquistado un total de 26 campeonatos de primera división, además de tres títulos de Copa Paraguay y dos de Supercopa Paraguay.",
     "sitio_web": "https://clublibertad.online/",
     "titulos_liga": 26,
     "titulos_info": [
@@ -106,7 +128,7 @@
     "direccion": "Av. Eusebio Ayala 1317, Asunción",
     "escudo": "https://upload.wikimedia.org/wikipedia/commons/1/1a/Guaran%C3%AD_Logo_2018.png",
     "camiseta": "https://upload.wikimedia.org/wikipedia/commons/1/1a/Guaran%C3%AD_Logo_2018.png",
-    "descripcion": "ElClub Guaraníes unainstitución deportiva y socialdeParaguay, con sede en elbarrio Pinozá, en la zona conocida como Dos Bocas de la ciudad deAsunción. Fundado el 12 de octubre de 1903, juega en laPrimera División de Paraguaydesde la creación de la misma. Disputa elclásico más añejoanteOlimpia[1]y elclásico capitalinofrente aLibertad.[2]También mantiene una importanterivalidad deportivaconCerro Porteñoy en menor medida con elSportivo Luqueño.",
+    "descripcion": "El Club Guaraní es una institución deportiva y social de Paraguay, con sede en el barrio Pinozá, en la zona conocida como Dos Bocas de la ciudad de Asunción. Fundado el 12 de octubre de 1903, juega en la Primera División de Paraguay desde su creación. Disputa el clásico más añejo ante Olimpia y el clásico capitalino frente a Libertad. También mantiene una importante rivalidad deportiva con Cerro Porteño y en menor medida con el Sportivo Luqueño.",
     "sitio_web": "http://www.clubguarani.com.py",
     "titulos_liga": 11,
     "titulos_info": [
@@ -131,7 +153,7 @@
     "direccion": "Juan León Mallorquín, Alto Paraná",
     "escudo": "https://upload.wikimedia.org/wikipedia/en/6/68/General_Caballero_JLM.png",
     "camiseta": "https://upload.wikimedia.org/wikipedia/en/6/68/General_Caballero_JLM.png",
-    "descripcion": "ElClub General Caballeroes un club defútboldeParaguay, de la ciudad deDr. Juan León Mallorquín(ex Ka'arendy),departamento de Alto Paraná. Desde el año2026disputará en laSegunda División de Paraguay, tras no haber logrado salvar la categoría en la temporada2025, tras 4 años en Primera División.[4]",
+    "descripcion": "El Club General Caballero es un club de fútbol de Paraguay, de la ciudad de Dr. Juan León Mallorquín (ex Ka'arendy), departamento de Alto Paraná. Desde el año 2026 disputa en la Segunda División de Paraguay, tras no haber logrado salvar la categoría en la temporada 2025, luego de 4 años en Primera División.",
     "sitio_web": "https://generalcaballerojlm.com.py/",
     "titulos_liga": 1,
     "titulos_info": [
@@ -156,7 +178,7 @@
     "direccion": "Av. Gral. Santos 1070, Asunción",
     "escudo": "https://upload.wikimedia.org/wikipedia/commons/4/49/Escudo_de_Nacional.png",
     "camiseta": "https://upload.wikimedia.org/wikipedia/commons/4/49/Escudo_de_Nacional.png",
-    "descripcion": "ElClub Nacionales una entidaddeportivacon sede enbarrio Obrerode laciudaddeAsunciónque se desempeña en laPrimera División de Paraguay.",
+    "descripcion": "El Club Nacional es una entidad deportiva con sede en el barrio Obrero de la ciudad de Asunción que se desempeña en la Primera División de Paraguay.",
     "sitio_web": "https://www.clubnacional.com.py/",
     "titulos_liga": 13,
     "titulos_info": [
@@ -181,7 +203,7 @@
     "direccion": "Av. Santísimo Sacramento 1420, Asunción",
     "escudo": "https://upload.wikimedia.org/wikipedia/en/4/4e/Deportivo_Recoleta_logo.png",
     "camiseta": "https://upload.wikimedia.org/wikipedia/en/4/4e/Deportivo_Recoleta_logo.png",
-    "descripcion": "Recoleta Football Club, anteriormente conocido comoClub Deportivo Recoleta, es una asociación deportiva y social de la ciudad deAsunción,Paraguay, con sede en elbarrio del mismo nombre. Fue fundado el 12 de febrero de 1931 y es reconocido por suclub de fútbol, el cual milita en laPrimera División de Paraguaydesde el 2025."
+    "descripcion": "Recoleta Football Club, anteriormente conocido como Club Deportivo Recoleta, es una asociación deportiva y social de la ciudad de Asunción, Paraguay, con sede en el barrio del mismo nombre. Fue fundado el 12 de febrero de 1931. Su club de fútbol milita en la Primera División de Paraguay desde 2025."
   },
   {
     "id": "rubio-nu",
@@ -198,7 +220,7 @@
     "direccion": "Av. Pettirossi c/ Gral. Aquino, Asunción",
     "escudo": "https://upload.wikimedia.org/wikipedia/en/7/76/Club_Rubio_%C3%91u_logo.png",
     "camiseta": "https://upload.wikimedia.org/wikipedia/en/7/76/Club_Rubio_%C3%91u_logo.png",
-    "descripcion": "ElClub Rubio Ñues unclub de fútbolparaguayo, situado en el barrioSantísima Trinidadde la ciudad deAsunción. Fue fundado el 24 de agosto de 1913 por jóvenes soñadores menores de 18 años en honor a los niños mártires deAcosta Ñu, batalla ocurrida durante laGuerra de la Triple Alianza. Su clásico rival es elClub Sportivo Trinidensemás conocido como el \"Clásico de Trinidad\". Desde la temporada 2026 disputa la en laPrimera División de Paraguay, tras ascender y coronarse campeón en laDivisión Intermed",
+    "descripcion": "El Club Rubio Ñu es un club de fútbol paraguayo, situado en el barrio Santísima Trinidad de la ciudad de Asunción. Fue fundado el 24 de agosto de 1913 por jóvenes menores de 18 años en honor a los niños mártires de Acosta Ñu, batalla ocurrida durante la Guerra de la Triple Alianza. Su clásico rival es el Club Sportivo Trinidense, más conocido como el «Clásico de Trinidad». Desde la temporada 2026 disputa la Primera División de Paraguay, tras ascender y coronarse campeón en la División Intermedia.",
     "sitio_web": "https://www.facebook.com/clubrubionu/"
   },
   {
@@ -216,7 +238,7 @@
     "direccion": "Av. 2 de Mayo c/ Mayor Martínez, Pedro Juan Caballero",
     "escudo": "https://upload.wikimedia.org/wikipedia/commons/b/b4/Escudo_Oficial_del_Club_2_de_Mayo_de_Paraguay.svg",
     "camiseta": "https://upload.wikimedia.org/wikipedia/commons/b/b4/Escudo_Oficial_del_Club_2_de_Mayo_de_Paraguay.svg",
-    "descripcion": "ElClub Sportivo 2 de Mayoes unclub de fútbolparaguayocon sede en la ciudad dePedro Juan Caballero, en la capital deldepartamento de Amambay. Desde 2024 compite en laPrimera División, después de una ausencia de 14 años, habiendo estado en la máxima categoría entre los años 2006 y 2009.[1]"
+    "descripcion": "El Club Sportivo 2 de Mayo es un club de fútbol paraguayo con sede en la ciudad de Pedro Juan Caballero, capital del departamento de Amambay. Desde 2024 compite en la Primera División, después de una ausencia de 14 años, habiendo estado en la máxima categoría entre los años 2006 y 2009."
   },
   {
     "id": "ameliano",
@@ -233,7 +255,7 @@
     "direccion": "Ruta 1 km 25, Villeta",
     "escudo": "https://upload.wikimedia.org/wikipedia/en/e/e5/Club_Sportivo_Ameliano.png",
     "camiseta": "https://upload.wikimedia.org/wikipedia/en/e/e5/Club_Sportivo_Ameliano.png",
-    "descripcion": "ElClub Sportivo Ameliano, también simplemente conocido comoAmeliano, es una entidad deportiva deParaguaycon sede social en el barrioBarrio Jarade la ciudad deAsuncióny con su campo de juego en la ciudad deVilleta. Su fundación se remonta a 1936, y desde el año 2022 compite en laPrimera División de Paraguay.",
+    "descripcion": "El Club Sportivo Ameliano, también conocido simplemente como Ameliano, es una entidad deportiva de Paraguay con sede social en el barrio Jara de la ciudad de Asunción y su campo de juego en la ciudad de Villeta. Su fundación se remonta a 1936, y desde el año 2022 compite en la Primera División de Paraguay.",
     "sitio_web": "https://www.twitter.com/clubspameliano",
     "titulos_liga": 1,
     "titulos_info": [
@@ -258,7 +280,7 @@
     "direccion": "Av. Gral. Elizardo Aquino c/ 12 de Junio, Luque",
     "escudo": "https://upload.wikimedia.org/wikipedia/commons/1/15/EscudoLuque2022.png",
     "camiseta": "https://upload.wikimedia.org/wikipedia/commons/1/15/EscudoLuque2022.png",
-    "descripcion": "ElClub Sportivo Luqueñoes unclub de fútboldeParaguay, ubicada en la ciudad deLuque. Fue fundado el 1 de mayo de 1921 a partir de la fusión de los clubes Marte Atlético, El Vencedor y General Aquino, con el objetivo de consolidar a la comunidad deportiva de Luque. Participa en laPrimera División de Paraguay, en donde ha obtenido 2 títulos absolutos y 6 subcampeonatos.",
+    "descripcion": "El Club Sportivo Luqueño es un club de fútbol de Paraguay, ubicado en la ciudad de Luque. Fue fundado el 1 de mayo de 1921 a partir de la fusión de los clubes Marte Atlético, El Vencedor y General Aquino, con el objetivo de consolidar a la comunidad deportiva de Luque. Participa en la Primera División de Paraguay, donde ha obtenido 2 títulos absolutos y 6 subcampeonatos.",
     "sitio_web": "https://www.clubsportivoluqueno.com.py/",
     "titulos_liga": 2,
     "titulos_info": [
@@ -283,7 +305,7 @@
     "direccion": "Av. Mcal. López 2255, San Lorenzo",
     "escudo": "https://upload.wikimedia.org/wikipedia/commons/3/3d/Escudo_Sportivo_San_Lorenzo.png",
     "camiseta": "https://upload.wikimedia.org/wikipedia/commons/3/3d/Escudo_Sportivo_San_Lorenzo.png",
-    "descripcion": "ElClub Sportivo San Lorenzo, o simplementeSan Lorenzo, es unclub deportivosituado en laciudaddeSan Lorenzo,Departamento Centraly afiliado a laAsociación Paraguaya de Fútbol. Fue fundado el 17 de abril de 1930 y actualmente milita en laPrimera Divisióndel fútbol paraguayo.[1]"
+    "descripcion": "El Club Sportivo San Lorenzo, o simplemente San Lorenzo, es un club deportivo situado en la ciudad de San Lorenzo, Departamento Central, y afiliado a la Asociación Paraguaya de Fútbol. Fue fundado el 17 de abril de 1930 y actualmente milita en la Primera División del fútbol paraguayo."
   },
   {
     "id": "sol-de-america",
@@ -300,7 +322,7 @@
     "direccion": "Av. Melgarejo c/ Coronel Báez, Villa Elisa",
     "escudo": "https://upload.wikimedia.org/wikipedia/commons/d/d9/Escudo_de_sol_de_am%C3%A9rica.png",
     "camiseta": "https://upload.wikimedia.org/wikipedia/commons/d/d9/Escudo_de_sol_de_am%C3%A9rica.png",
-    "descripcion": "ElClub Sol de Américaes unaasociación deportivadeParaguaycuya sede social se encuentra en el barrio obrero deAsuncióny sucampo de fútbolse sitúa en la ciudad vecina deVilla Elisa. Fue fundada el 22 de marzo de 1909 en la ciudad capital del país. Enfútbolmilita desde el 2025 en laSegunda División, luego de descender de laPrimera División, categoría en la cual es uno de los animadores históricos más tradicionales. A este nivel retornó por última vez en2024tras ganar el campeonato de la Segunda Div",
+    "descripcion": "El Club Sol de América es una asociación deportiva de Paraguay cuya sede social se encuentra en el barrio Obrero de Asunción y su campo de fútbol se sitúa en la ciudad vecina de Villa Elisa. Fue fundado el 22 de marzo de 1909 en la ciudad capital del país. En fútbol milita desde 2025 en la Segunda División, luego de descender de la Primera División, categoría en la cual es uno de los animadores históricos más tradicionales.",
     "sitio_web": "http://www.soldeamerica.com.py/",
     "titulos_liga": 4,
     "titulos_info": [
@@ -325,7 +347,7 @@
     "direccion": "Barrio Tembetary, Asunción",
     "escudo": "https://upload.wikimedia.org/wikipedia/commons/2/2d/Atl%C3%A9tico_Tembetary.png",
     "camiseta": "https://upload.wikimedia.org/wikipedia/commons/2/2d/Atl%C3%A9tico_Tembetary.png",
-    "descripcion": "ElClub Atlético Tembetary, o simplementeTembetary, es un club defútbolactualmente ubicado en la ciudad deVilla Elisa, Paraguay. Fue fundado el 3 de agosto de 1912, en elbarrio de nombre homónimode la capital paraguaya,Asunción. Desde la temporada 2026 competirá en laSegunda Divisiónde fútbol de Paraguay.[1][2]"
+    "descripcion": "El Club Atlético Tembetary, o simplemente Tembetary, es un club de fútbol actualmente ubicado en la ciudad de Villa Elisa, Paraguay. Fue fundado el 3 de agosto de 1912, en el barrio del mismo nombre de la capital paraguaya, Asunción. Desde la temporada 2026 competirá en la Segunda División de fútbol de Paraguay."
   },
   {
     "id": "trinidense",
@@ -342,6 +364,6 @@
     "direccion": "Av. Santísimo Sacramento c/ Tte. Benítez, Asunción",
     "escudo": "https://upload.wikimedia.org/wikipedia/commons/2/2a/Club_Sportivo_Trinidense.svg",
     "camiseta": "https://upload.wikimedia.org/wikipedia/commons/2/2a/Club_Sportivo_Trinidense.svg",
-    "descripcion": "ElSportivo Trinidensees unclub de fútboldeParaguayque milita actualmente en laPrimera División de Paraguay. Está situado en elbarrio Virgen de la Asuncióndel distrito de Santísima Trinidad, en la ciudad deAsunción. Sus partidos como local los juega en elEstadio Martín Torres. Su clásico rival es el clubRubio Ñu, cuyo estadio se encuentra a 1 km de distancia, dichoderbies conocido como el Clásico de Trinidad."
+    "descripcion": "El Sportivo Trinidense es un club de fútbol de Paraguay que milita actualmente en la Primera División de Paraguay. Está situado en el barrio Virgen de la Asunción del distrito de Santísima Trinidad, en la ciudad de Asunción. Sus partidos como local los juega en el Estadio Martín Torres. Su clásico rival es el club Rubio Ñu, cuyo estadio se encuentra a 1 km de distancia, en el denominado Clásico de Trinidad."
   }
 ]

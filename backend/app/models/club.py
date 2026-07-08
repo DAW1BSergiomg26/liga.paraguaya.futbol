@@ -22,3 +22,4 @@ class Club(Base):
     descripcion: Mapped[str] = mapped_column(String(2000), default="")
     titulos_liga: Mapped[int] = mapped_column(Integer, default=0)
     titulos_info: Mapped[list] = mapped_column(JSON, default=list)
+    titulos_internacionales: Mapped[list] = mapped_column(JSON, default=list)

@@ -15,6 +15,7 @@ class ClubOut(BaseModel):
     descripcion: str = ""
     titulos_liga: int = 0
     titulos_info: list = []
+    titulos_internacionales: list = []
 
     model_config = {"from_attributes": True}
 

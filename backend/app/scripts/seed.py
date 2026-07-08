@@ -31,7 +31,7 @@ async def seed_clubes(db: AsyncSession):
         club = existing.scalar_one_or_none()
         if club:
             changed = False
-            for field in ("sitio_web", "descripcion", "titulos_liga", "titulos_info"):
+            for field in ("sitio_web", "descripcion", "titulos_liga", "titulos_info", "titulos_internacionales"):
                 val = item.get(field)
                 if val is not None and getattr(club, field, None) != val:
                     setattr(club, field, val)
@@ -55,6 +55,7 @@ async def seed_clubes(db: AsyncSession):
             descripcion=item.get("descripcion", ""),
             titulos_liga=item.get("titulos_liga", 0),
             titulos_info=item.get("titulos_info", []),
+            titulos_internacionales=item.get("titulos_internacionales", []),
         )
         db.add(club)
         count_new += 1

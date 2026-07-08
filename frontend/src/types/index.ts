@@ -8,6 +8,11 @@ export interface Club {
   capacidad: number;
   fundacion: number;
   escudo: string;
+  sitio_web: string;
+  descripcion: string;
+  titulos_liga: number;
+  titulos_info: { torneo: string; cantidad: number }[];
+  titulos_internacionales: { torneo: string; cantidad: number }[];
 }
 
 export interface ClubDetail extends Club {
