@@ -164,7 +164,7 @@ def _render_template(intent: str, data: dict, prediction: dict | None) -> str:
         return template.format(**ctx)
     except (KeyError, ValueError, AttributeError) as e:
         logger.warning("Template format failed for intent '%s': %s", intent, e)
-    fallback = random.choice(_TEMPLATES.get("unknown", _TEMPLATES["unknown"]))
+    fallback = random.choice(_TEMPLATES["unknown"])
     return fallback
 
 
