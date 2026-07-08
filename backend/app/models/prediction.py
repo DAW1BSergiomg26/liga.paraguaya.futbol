@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import DateTime, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -15,7 +15,7 @@ class Prediction(Base):
     goles_local: Mapped[int] = mapped_column(Integer)
     goles_visitante: Mapped[int] = mapped_column(Integer)
     puntos: Mapped[int] = mapped_column(Integer, default=0)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     user = relationship("User", back_populates="predicciones")
     partido = relationship("Partido", back_populates="predicciones", lazy="selectin")

@@ -1,8 +1,9 @@
 import time
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.app.core.database import async_session
 from backend.app.models.api_key import APIKey
@@ -31,24 +32,30 @@ class RateLimiter:
 rate_limiter = RateLimiter()
 
 
-async def rate_limit_info(x_api_key: str) -> dict | None:
-    async with async_session() as db:
-        result = await db.execute(select(APIKey).where(APIKey.key == x_api_key))
-        api_key = result.scalar_one_or_none()
-        if not api_key or not api_key.is_active:
-            return _err(401, "INVALID_API_KEY", "API Key inválida o desactivada")
+async def rate_limit_info(x_api_key: str, db: AsyncSession | None = None) -> dict:
+    if db is None:
+        async with async_session() as db:
+            return await _rate_limit_impl(db, x_api_key)
+    return await _rate_limit_impl(db, x_api_key)
 
-        ok, remaining, reset_in = rate_limiter.check(x_api_key)
-        if not ok:
-            return _err(
-                429, "RATE_LIMIT_EXCEEDED",
-                f"Límite de requests excedido. Esperá {reset_in} segundos.",
-                reset_in,
-            )
 
-        api_key.requests_count += 1
-        api_key.last_used_at = datetime.utcnow()
-        await db.commit()
+async def _rate_limit_impl(db: AsyncSession, x_api_key: str) -> dict:
+    result = await db.execute(select(APIKey).where(APIKey.key == x_api_key))
+    api_key = result.scalar_one_or_none()
+    if not api_key or not api_key.is_active:
+        return _err(401, "INVALID_API_KEY", "API Key inválida o desactivada")
+
+    ok, remaining, reset_in = rate_limiter.check(x_api_key)
+    if not ok:
+        return _err(
+            429, "RATE_LIMIT_EXCEEDED",
+            f"Límite de requests excedido. Esperá {reset_in} segundos.",
+            reset_in,
+        )
+
+    api_key.requests_count += 1
+    api_key.last_used_at = datetime.now(timezone.utc)
+    await db.commit()
 
     return {"ok": True, "remaining": remaining, "reset_in": reset_in}
 

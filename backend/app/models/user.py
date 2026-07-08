@@ -1,5 +1,5 @@
 import secrets
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import DateTime, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -19,7 +19,7 @@ class User(Base):
     provider_id: Mapped[str] = mapped_column(String(200), default="")
     token: Mapped[str] = mapped_column(String(100), default="")
     puntos: Mapped[int] = mapped_column(Integer, default=0)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     predicciones = relationship("Prediction", back_populates="user", lazy="selectin")
 
