@@ -18,7 +18,7 @@ async def test_classify_club_info():
 
 @pytest.mark.asyncio
 async def test_classify_table_position():
-    result = await CerezoIntentClassifier.classify("Cómo viene la tabla")
+    result = await CerezoIntentClassifier.classify("Posiciones de la tabla")
     assert result["intent"] == "table_position"
 
 

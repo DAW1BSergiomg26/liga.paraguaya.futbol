@@ -2,22 +2,27 @@ import re
 
 _CLUB_ALIASES: dict[str, str] = {
     "olimpia": "olimpia",
+    "olimpi": "olimpia",
     "el decano": "olimpia",
     "decano": "olimpia",
     "cerro porteño": "cerro-porteno",
     "cerro porteno": "cerro-porteno",
     "cerro": "cerro-porteno",
+    "cerri": "cerro-porteno",
     "el ciclón": "cerro-porteno",
     "el ciclon": "cerro-porteno",
     "ciclón": "cerro-porteno",
     "ciclon": "cerro-porteno",
     "libertad": "libertad",
+    "liberta": "libertad",
     "gumarelo": "libertad",
     "guaraní": "guarani",
     "guarani": "guarani",
+    "guara": "guarani",
     "el aborigen": "guarani",
     "aborigen": "guarani",
     "nacional": "nacional",
+    "naciona": "nacional",
     "tricolor": "nacional",
     "sol de américa": "sol-de-america",
     "sol de america": "sol-de-america",
@@ -26,10 +31,14 @@ _CLUB_ALIASES: dict[str, str] = {
     "sportivo luqueño": "sportivo-luqueno",
     "sportivo luqueno": "sportivo-luqueno",
     "luque": "sportivo-luqueno",
+    "luqueno": "sportivo-luqueno",
     "capiatá": "deportivo-capiat",
     "deportivo capiatá": "deportivo-capiat",
+    "capia": "deportivo-capiat",
     "tacuary": "tacuary",
     "tacua": "tacuary",
+    "2 de mayo": "2-de-mayo",
+    "dos de mayo": "2-de-mayo",
 }
 
 _FECHA_KEYWORDS: dict[str, str] = {
@@ -44,7 +53,16 @@ _FECHA_KEYWORDS: dict[str, str] = {
     "ayer": "ayer",
     "pasado": "ultimo",
     "anterior": "ultimo",
+    "hoy": "hoy",
+    "ahora": "proximo",
+    "siguiente": "proximo",
+    "próximos": "proximo",
+    "proximos": "proximo",
+    "próximas": "proximo",
+    "proximas": "proximo",
 }
+
+_TORNEO_KEYWORDS = ["apertura", "clausura", "torneo", "liga", "campeonato", "copa", "copas"]
 
 
 class CerezoEntityExtractor:
@@ -64,7 +82,7 @@ class CerezoEntityExtractor:
                 break
 
         torneo = None
-        for t in ["apertura", "clausura"]:
+        for t in _TORNEO_KEYWORDS:
             if t in text_lower:
                 match = re.search(rf"{t}\s*(\d{{4}})?", text_lower)
                 if match:
