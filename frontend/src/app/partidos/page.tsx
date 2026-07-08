@@ -6,7 +6,7 @@ import type { Partido, PartidoPage, Club } from "@/types";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense, useCallback } from "react";
-import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import { TableSkeleton } from "@/components/ui/Skeleton";
 import ErrorMessage from "@/components/ui/ErrorMessage";
 import { useState, useEffect } from "react";
 import { getSavedToken, setAuthToken } from "@/lib/api";
@@ -79,7 +79,7 @@ function PartidosContent() {
     [searchParams, router]
   );
 
-  if (isLoading) return <LoadingSpinner text="Cargando partidos..." />;
+  if (isLoading) return <TableSkeleton rows={8} cols={7} />;
 
   if (error) return <ErrorMessage message="Error al cargar los partidos" />;
 
@@ -213,7 +213,7 @@ function PartidosContent() {
 
 export default function PartidosPage() {
   return (
-    <Suspense fallback={<LoadingSpinner text="Cargando partidos..." />}>
+    <Suspense fallback={<TableSkeleton rows={8} cols={7} />}>
       <PartidosContent />
     </Suspense>
   );

@@ -143,7 +143,11 @@ export default function AdminPartidosPage() {
       {error && <div className="mb-4 p-3 rounded-lg bg-red-900/30 text-red-300 text-sm">{error}</div>}
 
       {isLoading ? (
-        <div className="text-center py-12 text-gray-400">Cargando partidos...</div>
+        <div className="space-y-2">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="h-16 bg-white/5 rounded-xl animate-pulse" />
+          ))}
+        </div>
       ) : (
         <>
           <div className="space-y-2">

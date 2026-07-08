@@ -4,16 +4,17 @@ import { useQuery } from "@tanstack/react-query";
 import { getClubes } from "@/lib/api";
 import type { Club } from "@/types";
 import Link from "next/link";
-import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import { CardSkeleton } from "@/components/ui/Skeleton";
 import ErrorMessage from "@/components/ui/ErrorMessage";
 
 export default function ClubesPage() {
   const { data: clubes, isLoading, error } = useQuery<Club[]>({
     queryKey: ["clubes"],
     queryFn: () => getClubes(),
+    staleTime: 60_000,
   });
 
-  if (isLoading) return <LoadingSpinner text="Cargando clubes..." />;
+  if (isLoading) return <CardSkeleton count={6} />;
 
   if (error) return <ErrorMessage message="Error al cargar los clubes" />;
 
@@ -60,6 +61,14 @@ export default function ClubesPage() {
                     title={color}
                   />
                 ))}
+              </div>
+              <div className="flex items-center gap-3 pt-2 border-t border-white/5">
+                <span className="text-sm text-gray-500">🏆 {club.titulos_liga} nacionales</span>
+                {club.titulos_internacionales?.length > 0 && (
+                  <span className="text-sm text-yellow-400 font-medium">
+                    🌍 {club.titulos_internacionales.reduce((s, t) => s + t.cantidad, 0)} internacionales
+                  </span>
+                )}
               </div>
             </div>
           </Link>

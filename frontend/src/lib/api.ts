@@ -74,8 +74,8 @@ export async function loginWithProvider(data: {
   email: string;
   name: string;
   image?: string;
-  provider: string;
-  provider_id: string;
+  provider?: string;
+  provider_id?: string;
 }): Promise<User> {
   return authFetchJSON<User>("/api/v1/auth/login", {
     method: "POST",

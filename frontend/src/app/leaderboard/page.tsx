@@ -9,7 +9,8 @@ import ErrorMessage from "@/components/ui/ErrorMessage";
 export default function LeaderboardPage() {
   const { data: leaderboard, isLoading, error } = useQuery<LeaderboardEntry[]>({
     queryKey: ["leaderboard"],
-    queryFn: () => getLeaderboard(),
+    queryFn: getLeaderboard,
+    staleTime: 60_000,
   });
 
   if (isLoading) return <LoadingSpinner text="Cargando leaderboard..." />;

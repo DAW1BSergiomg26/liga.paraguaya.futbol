@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { getTabla } from "@/lib/api";
 import type { TablaRow } from "@/types";
-import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import { TableSkeleton } from "@/components/ui/Skeleton";
 import ErrorMessage from "@/components/ui/ErrorMessage";
 
 function Medalla({ pos }: { pos: number }) {
@@ -17,9 +17,10 @@ export default function TablaPage() {
   const { data: filas, isLoading, error } = useQuery<TablaRow[]>({
     queryKey: ["tabla"],
     queryFn: () => getTabla(),
+    staleTime: 60_000,
   });
 
-  if (isLoading) return <LoadingSpinner text="Cargando tabla de posiciones..." />;
+  if (isLoading) return <TableSkeleton rows={12} cols={10} />;
 
   if (error) return <ErrorMessage message="Error al cargar la tabla de posiciones" />;
 

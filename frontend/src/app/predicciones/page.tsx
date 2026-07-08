@@ -5,7 +5,6 @@ import { useQuery } from "@tanstack/react-query";
 import { misPredicciones, getLeaderboard, getSavedToken, setAuthToken } from "@/lib/api";
 import type { PredictionDetail, LeaderboardEntry } from "@/types";
 import Link from "next/link";
-import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import ErrorMessage from "@/components/ui/ErrorMessage";
 
 export default function PrediccionesPage() {
@@ -44,7 +43,7 @@ export default function PrediccionesPage() {
     );
   }
 
-  if (isLoading) return <LoadingSpinner text="Cargando predicciones..." />;
+  if (isLoading) return <div className="max-w-6xl mx-auto px-4 py-12 space-y-3">{Array.from({ length: 4 }).map((_, i) => (<div key={i} className="h-20 bg-white/5 rounded-xl animate-pulse" />))}</div>;
   if (error) return <ErrorMessage message="Error al cargar predicciones" />;
 
   return (

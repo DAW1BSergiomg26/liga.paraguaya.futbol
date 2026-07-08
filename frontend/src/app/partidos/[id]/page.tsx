@@ -5,7 +5,6 @@ import { getPartido } from "@/lib/api";
 import type { PartidoDetail } from "@/types";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import ErrorMessage from "@/components/ui/ErrorMessage";
 import { useEffect, useState } from "react";
 import { getSavedToken, setAuthToken, misPredicciones } from "@/lib/api";
@@ -34,7 +33,27 @@ export default function PartidoDetailPage() {
     queryFn: () => getPartido(id),
   });
 
-  if (isLoading) return <LoadingSpinner text="Cargando partido..." />;
+  if (isLoading) return (
+    <div className="max-w-4xl mx-auto px-4 py-12">
+      <div className="h-4 bg-white/10 rounded animate-pulse w-24 mb-8" />
+      <div className="p-8 rounded-2xl border border-white/10 bg-[#0a1628]/80">
+        <div className="h-6 bg-white/10 rounded animate-pulse w-32 mx-auto mb-8" />
+        <div className="grid grid-cols-7 items-center gap-4 mb-8">
+          <div className="col-span-3 text-center">
+            <div className="w-16 h-16 rounded-full bg-white/10 animate-pulse mx-auto mb-3" />
+            <div className="h-6 bg-white/10 rounded animate-pulse w-32 mx-auto" />
+          </div>
+          <div className="col-span-1 text-center">
+            <div className="h-8 bg-white/10 rounded animate-pulse w-16 mx-auto" />
+          </div>
+          <div className="col-span-3 text-center">
+            <div className="w-16 h-16 rounded-full bg-white/10 animate-pulse mx-auto mb-3" />
+            <div className="h-6 bg-white/10 rounded animate-pulse w-32 mx-auto" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   if (error) return <ErrorMessage message="Error al cargar el partido" />;
 
