@@ -44,8 +44,8 @@ liga.paraguaya.futbol/
 │   └── partidos_historicos/  # Temporadas 2020-2026
 └── docs/
     └── superpowers/          # Specs de diseño + planes
-        ├── specs/            # 7 specs de diseño
-        └── plans/            # 6 planes de implementación
+        ├── specs/            # 8 specs de diseño
+        └── plans/            # 7 planes de implementación
 ```
 
 ## Funcionalidades implementadas
@@ -104,6 +104,16 @@ liga.paraguaya.futbol/
 - [x] Página de detalle con toda la info visible
 - [x] Tipos TypeScript actualizados (`Club` + `ClubDetail`)
 
+### Cerezo Digital — AI Assistant (Julio 2026)
+- [x] `CerezoIntentClassifier` — clasificador por keywords (5 intents: greeting, club_info, prediction, head_to_head, unknown)
+- [x] `CerezoEntityExtractor` — extrae clubes (alias incluyendo «sol», «cerro»), fechas, torneos
+- [x] `CerezoDataFetcher` — consulta DB real para 5 intents via servicios existentes
+- [x] `CerezoPredictionEngine` — predicciones estadísticas H2H (local/empate/visitante + confianza)
+- [x] `CerezoResponseGenerator` — Tiny LLM (Llama 3.2 1B GGUF) + template fallback (8 intents)
+- [x] `POST /api/v1/cerezo/ask` — endpoint completo con Pydantic request/response
+- [x] Página `/cerezo` — chat UI con ChatBubble, PredictionCard, TypingIndicator (Next.js + Tailwind)
+- [x] Docker: download condicional del modelo GGUF + `llama-cpp-python` en imagen
+
 ## Pendientes / Issues conocidos
 
 ### Frontend compatibility
@@ -112,6 +122,8 @@ liga.paraguaya.futbol/
 ### Deuda técnica
 - El middleware de API Key crea una conexión DB separada por request (no reusa el pool de `async_session`). Aceptable para MVP.
 - Mejorar la cobertura de tests en el frontend.
+- Cerezo ResponseGenerator: `table_position` y `match_result` intents usan mensajes placeholder estáticos (sin datos reales formateados) hasta que se integren con el DataFetcher correspondiente.
+- Sin tests de frontend para la página `/cerezo` (solo verificación manual + build).
 
 ### En producción (Railway + Vercel)
 - Backend: https://backend-production-0b7d.up.railway.app
@@ -124,7 +136,7 @@ liga.paraguaya.futbol/
 ```bash
 cd backend
 $env:PYTHONPATH=".."
-python -m pytest tests/ -v    # 64 tests
+python -m pytest tests/ -v    # 86 tests (64 legacy + 22 Cerezo)
 ```
 
 | Archivo | Tests | Qué cubre |
@@ -141,6 +153,12 @@ python -m pytest tests/ -v    # 64 tests
 | `test_admin.py` | 5 | Update partido, validación, API Key |
 | `test_cron.py` | 2 | Cierre automático de predicciones |
 | `test_api_key.py` | 8 | CRUD, rate limiting, admin endpoints |
+| `test_cerezo_classifier.py` | 5 | Clasificación de intents por keywords |
+| `test_cerezo_entity_extractor.py` | 5 | Extracción de entidades (clubes, fecha, torneo) |
+| `test_cerezo_data_fetcher.py` | 3 | Fetch de datos por intent |
+| `test_cerezo_prediction_engine.py` | 3 | Predicciones H2H estadísticas |
+| `test_cerezo_response_generator.py` | 3 | Template fallback + tiny LLM |
+| `test_cerezo_router.py` | 3 | POST /api/v1/cerezo/ask |
 
 ## Variables de entorno
 
@@ -171,6 +189,7 @@ Toda en `docs/superpowers/`:
 | Fase 2 chat + push | `specs/2026-07-07-fase2-chat-push-design.md` |
 | Scraper engine + DB | `specs/2026-07-07-scraper-engine-database-design.md` |
 | API Pública | `specs/2026-07-07-api-publica-design.md` |
+| Cerezo Digital | `specs/2026-07-08-cerezo-digital-design.md` |
 
 ## Para correr local
 
