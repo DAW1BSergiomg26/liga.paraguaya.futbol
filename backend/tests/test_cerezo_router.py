@@ -28,3 +28,18 @@ async def test_ask_cerezo_with_prediction(client, db_session):
     data = response.json()
     assert "prediction" in data
     assert "intent" in data
+
+
+@pytest.mark.asyncio
+async def test_ask_cerezo_follow_up(client, db_session):
+    from backend.app.api.cerezo import _cerezo_context
+    _cerezo_context.clear()
+    payload = {"message": "Datos de Olimpia"}
+    resp = await client.post("/api/v1/cerezo/ask", json=payload)
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["intent"] == "club_info"
+    payload2 = {"message": "Cuándo juega"}
+    resp2 = await client.post("/api/v1/cerezo/ask", json=payload2)
+    body2 = resp2.json()
+    assert body2["intent"] == "next_match"
