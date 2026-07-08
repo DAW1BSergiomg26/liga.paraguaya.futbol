@@ -31,3 +31,21 @@ async def test_extract_fecha_keyword():
 async def test_extract_no_clubes():
     result = await CerezoEntityExtractor.extract("Cómo viene la tabla", "table_position")
     assert result["clubes"] == []
+
+
+@pytest.mark.asyncio
+async def test_extract_siguiente_keyword():
+    result = await CerezoEntityExtractor.extract("Próximos partidos", "next_match")
+    assert result["fecha"] == "proximo"
+
+
+@pytest.mark.asyncio
+async def test_extract_hoy_keyword():
+    result = await CerezoEntityExtractor.extract("Partido de hoy", "match_result")
+    assert result["fecha"] == "hoy"
+
+
+@pytest.mark.asyncio
+async def test_extract_copa_keyword():
+    result = await CerezoEntityExtractor.extract("Copa Libertadores", "club_info")
+    assert result["torneo"] is not None

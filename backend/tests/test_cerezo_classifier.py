@@ -32,3 +32,28 @@ async def test_classify_prediction():
 async def test_classify_unknown():
     result = await CerezoIntentClassifier.classify("xyzzy flurbo garplax")
     assert result["intent"] == "unknown"
+
+
+@pytest.mark.asyncio
+async def test_classify_club_comparison():
+    result = await CerezoIntentClassifier.classify("Quién tiene más títulos")
+    assert result["intent"] == "club_comparison"
+    assert result["confidence"] >= 0.5
+
+
+@pytest.mark.asyncio
+async def test_classify_next_match():
+    result = await CerezoIntentClassifier.classify("Cuándo juega Olimpia")
+    assert result["intent"] == "next_match"
+
+
+@pytest.mark.asyncio
+async def test_classify_next_match_simple():
+    result = await CerezoIntentClassifier.classify("Próximo partido")
+    assert result["intent"] == "next_match"
+
+
+@pytest.mark.asyncio
+async def test_classify_form():
+    result = await CerezoIntentClassifier.classify("Últimos resultados de Olimpia")
+    assert result["intent"] == "match_result"
