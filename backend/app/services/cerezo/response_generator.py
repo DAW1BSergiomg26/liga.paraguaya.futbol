@@ -13,8 +13,8 @@ _TEMPLATES: dict[str, list[str]] = {
         "{club[nombre]} juega en {club[estadio]}, fundado en {club[fundacion]}. {titulos_resumen}",
     ],
     "table_position": [
-        "Acá va la tabla: {tabla_resumen}.",
-        "Mirá cómo viene la cosa: {tabla_resumen}.",
+        "Acá va la tabla. Consultame por algún club en particular para más detalles.",
+        "Mirá la tabla general. Decime un club para saber su posición exacta.",
     ],
     "prediction": [
         "Según los datos, {local} tiene {local_pct}% de ganar, {draw_pct}% empate, {visitante_pct}% {visitante}. Confianza: {confidence}.",
@@ -24,7 +24,7 @@ _TEMPLATES: dict[str, list[str]] = {
         "En los últimos {total} partidos: {local_nombre} ganó {local_wins}, {visitante_nombre} ganó {vis_wins}, {draws} empates.",
     ],
     "match_result": [
-        "Los últimos partidos: {resumen_partidos}",
+        "Los últimos partidos: revisá la tabla de partidos para más detalles.",
     ],
     "top_scorer": [
         "Todavía no tengo datos de goleadores actualizados al instante. Preguntame sobre clubes o partidos.",

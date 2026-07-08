@@ -1,147 +1,122 @@
-# Task 3: WebSocket ConnectionManager + Chat API Router
+# Task 3: DataFetcher
 
 ## Files
-- Create: `backend/app/api/chat.py`
-- Modify: `backend/app/main.py`
+- Create: `backend/app/services/cerezo/data_fetcher.py`
+- Create: `backend/tests/test_cerezo_data_fetcher.py`
 
-## Exact Code
+## Interface
+- `CerezoDataFetcher.fetch(intent: str, entities: dict, db: AsyncSession) -> dict`
+  - Returns data relevant to the intent (club detail, match results, table, etc.)
+- Consumes: ClubService, PartidoService, TablaService
 
-### backend/app/api/chat.py
+## Test Code
+
 ```python
-import json
-from fastapi import APIRouter, Depends, Query, WebSocket, WebSocketDisconnect
+import pytest
+from backend.app.services.cerezo.data_fetcher import CerezoDataFetcher
+from backend.tests.conftest import seed_test_data
+
+
+@pytest.mark.asyncio
+async def test_fetch_club_info(db_session):
+    await seed_test_data(db_session)
+    result = await CerezoDataFetcher.fetch(
+        "club_info", {"clubes": ["olimpia"], "fecha": None, "torneo": None}, db_session
+    )
+    assert result is not None
+    assert result.get("club") is not None
+    assert result["club"]["nombre"] == "Club Olimpia"
+
+
+@pytest.mark.asyncio
+async def test_fetch_table_position(db_session):
+    await seed_test_data(db_session)
+    result = await CerezoDataFetcher.fetch(
+        "table_position", {"clubes": [], "fecha": None, "torneo": None}, db_session
+    )
+    assert result is not None
+    assert "tabla" in result
+
+
+@pytest.mark.asyncio
+async def test_fetch_unknown_intent(db_session):
+    result = await CerezoDataFetcher.fetch(
+        "greeting", {"clubes": [], "fecha": None, "torneo": None}, db_session
+    )
+    assert result == {}
+```
+
+## Implementation
+
+**IMPORTANT CORRECTIONS to the plan:**
+1. `TablaService` has `get_table()`, NOT `get_all()`.
+2. All services use `@staticmethod` — call them as `ClubService.get_by_id(db, id)`, NOT `ClubService().get_by_id(db, id)`.
+3. `PartidoService.get_all(db)` returns `list[PartidoOut]` which has `.model_dump()` method.
+
+```python
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.core.dependencies import get_db
-from backend.app.models.user import User
-from backend.app.schemas.chat import MensajeChatCreate, MensajeChatOut
-from backend.app.services.chat_service import ChatService
-
-router = APIRouter(prefix="/api/v1", tags=["chat"])
+from backend.app.services.club_service import ClubService
+from backend.app.services.partido_service import PartidoService
+from backend.app.services.tabla_service import TablaService
 
 
-class ConnectionManager:
-    def __init__(self):
-        self.active: dict[str, set[WebSocket]] = {}
+class CerezoDataFetcher:
 
-    async def connect(self, partido_id: str, ws: WebSocket):
-        await ws.accept()
-        if partido_id not in self.active:
-            self.active[partido_id] = set()
-        self.active[partido_id].add(ws)
+    @staticmethod
+    async def fetch(intent: str, entities: dict, db: AsyncSession) -> dict:
+        if intent == "club_info" and entities.get("clubes"):
+            club_id = entities["clubes"][0]
+            club = await ClubService.get_by_id(db, club_id)
+            return {"club": club.model_dump() if club else None}
 
-    def disconnect(self, partido_id: str, ws: WebSocket):
-        if partido_id in self.active:
-            self.active[partido_id].discard(ws)
-            if not self.active[partido_id]:
-                del self.active[partido_id]
+        if intent == "match_result" and entities.get("clubes"):
+            clubes = entities["clubes"]
+            local_id = clubes[0]
+            visitante_id = clubes[1] if len(clubes) > 1 else None
+            partidos = await PartidoService.get_all(db)
+            matches = [
+                p.model_dump() for p in partidos
+                if (p.local_id == local_id or p.visitante_id == local_id)
+            ]
+            return {"partidos": matches}
 
-    async def broadcast(self, partido_id: str, data: dict):
-        if partido_id not in self.active:
-            return
-        dead = set()
-        for ws in self.active[partido_id]:
-            try:
-                await ws.send_json(data)
-            except Exception:
-                dead.add(ws)
-        for ws in dead:
-            self.active[partido_id].discard(ws)
+        if intent == "head_to_head" and len(entities.get("clubes", [])) >= 2:
+            club_a, club_b = entities["clubes"][0], entities["clubes"][1]
+            partidos = await PartidoService.get_all(db)
+            h2h = [
+                p.model_dump() for p in partidos
+                if (p.local_id == club_a and p.visitante_id == club_b)
+                or (p.local_id == club_b and p.visitante_id == club_a)
+            ]
+            return {"head_to_head": h2h}
 
+        if intent == "table_position":
+            tabla = await TablaService.get_table(db)
+            return {"tabla": [t.model_dump() for t in tabla]}
 
-manager = ConnectionManager()
+        if intent == "prediction" and entities.get("clubes"):
+            clubes_ids = entities["clubes"]
+            partidos = await PartidoService.get_all(db)
+            upcoming = [
+                p for p in partidos
+                if p.estado == "programado"
+                and (not clubes_ids or p.local_id in clubes_ids or p.visitante_id in clubes_ids)
+            ]
+            return {"proximos": [p.model_dump() for p in upcoming]}
 
-
-async def get_user_from_token(db: AsyncSession, token: str) -> User | None:
-    from sqlalchemy import select
-    from backend.app.models.user import User
-    result = await db.execute(select(User).where(User.token == token))
-    return result.scalar_one_or_none()
-
-
-@router.get("/partidos/{partido_id}/chat", response_model=list[MensajeChatOut])
-async def get_chat_history(
-    partido_id: str,
-    limit: int = Query(default=50, ge=1, le=200),
-    offset: int = Query(default=0, ge=0),
-    db: AsyncSession = Depends(get_db),
-):
-    return await ChatService.obtener_historial(db, partido_id, limit, offset)
-
-
-@router.websocket("/ws/partidos/{partido_id}")
-async def websocket_endpoint(
-    websocket: WebSocket,
-    partido_id: str,
-    token: str = Query(...),
-    db: AsyncSession = Depends(get_db),
-):
-    user = await get_user_from_token(db, token)
-    if not user:
-        await websocket.close(code=4001)
-        return
-
-    from sqlalchemy import select
-    from backend.app.models.partido import Partido
-    result = await db.execute(select(Partido).where(Partido.id == partido_id))
-    if not result.scalar_one_or_none():
-        await websocket.close(code=4004)
-        return
-
-    await manager.connect(partido_id, websocket)
-    try:
-        while True:
-            raw = await websocket.receive_text()
-            data = json.loads(raw)
-            if data.get("tipo") != "mensaje":
-                continue
-            msg_in = MensajeChatCreate(contenido=data["contenido"])
-            msg_out = await ChatService.guardar(db, partido_id, user.id, msg_in)
-            await manager.broadcast(
-                partido_id,
-                {
-                    "tipo": "mensaje_nuevo",
-                    "id": msg_out.id,
-                    "user_id": msg_out.user_id,
-                    "username": msg_out.username,
-                    "nombre": msg_out.nombre,
-                    "imagen": msg_out.imagen,
-                    "contenido": msg_out.mensaje,
-                    "created_at": msg_out.created_at.isoformat(),
-                },
-            )
-    except WebSocketDisconnect:
-        manager.disconnect(partido_id, websocket)
-    except Exception:
-        manager.disconnect(partido_id, websocket)
+        return {}
 ```
 
-### Edit backend/app/main.py
-Import and register three new routers:
-```python
-from backend.app.api.chat import router as chat_router
-from backend.app.api.notificaciones import router as notificaciones_router
-from backend.app.api.cron import router as cron_router
+## Steps
 
-app.include_router(chat_router)
-app.include_router(notificaciones_router)
-app.include_router(cron_router)
-```
-
-Find the existing router registration block in main.py and add these.
-
-## Global Constraints
-- WebSocket validation uses token via query param + manual validation (no Depends available in WS)
-- Token auth reuses same `User.token` lookup pattern
-- Match existing `main.py` patterns
-
-## Commits
+1. Write test file
+2. Run: `cd backend && $env:PYTHONPATH=".." && python -m pytest tests/test_cerezo_data_fetcher.py -v`
+   Expected: FAIL (module not found)
+3. Write implementation (use the corrected code above)
+4. Run test again — Expected: 3 PASS
+5. Commit:
 ```bash
-git add backend/app/api/chat.py
-git commit -m "feat: add WebSocket chat endpoint with ConnectionManager"
-git add backend/app/main.py
-git commit -m "feat: register chat, notificaciones, and cron routers"
+git add backend/app/services/cerezo/data_fetcher.py backend/tests/test_cerezo_data_fetcher.py
+git commit -m "feat: Cerezo DataFetcher — integrate club/partido/tabla services"
 ```
-
-## Report File
-`.superpowers/sdd/task-3-report.md`

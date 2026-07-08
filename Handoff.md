@@ -17,7 +17,6 @@ Plataforma web para el seguimiento de la Primera División paraguaya de fútbol.
 ## Rama activa
 
 - **`main`** — producción. Todo el trabajo se hace aquí.
-- `feature/frontend-react-v1` — obsoleta, mergeada a main.
 
 ## Estructura
 
@@ -34,12 +33,12 @@ liga.paraguaya.futbol/
 │   │   ├── services/         # Lógica de negocio
 │   │   └── main.py           # Entry point
 │   ├── scripts/              # Scrapers (Wikipedia, RSSSF)
-│   └── tests/                # 38 tests (pytest)
+│   └── tests/                # 64 tests (pytest)
 ├── frontend/
 │   ├── public/sw.js          # Service Worker (push + PWA)
 │   └── src/                  # Next.js App Router
 ├── data/
-│   ├── clubes_paraguay.json  # 10 clubes con datos enrichidos
+│   ├── clubes_paraguay.json  # 16 clubes con datos enrichidos
 │   ├── partidos_demo.json
 │   ├── tabla_posiciones_demo.json
 │   └── partidos_historicos/  # Temporadas 2020-2026
@@ -52,7 +51,7 @@ liga.paraguaya.futbol/
 ## Funcionalidades implementadas
 
 ### Fase 1 — Predicciones + Autenticación
-- [x] Autenticación Google OAuth
+- [x] Autenticación por email + nombre (sin contraseña)
 - [x] Predicciones en vivo (local/empate/visitante)
 - [x] Sistema de puntuación (3 pts exacto, 1 tendencia)
 - [x] Leaderboard con ranking
@@ -76,26 +75,43 @@ liga.paraguaya.futbol/
 - [x] Seed automático al iniciar la app
 - [x] Tabla histórica reconstruible
 
-### API Pública (recién implementada)
+### API Pública
 - [x] `APIKey` model + schema + middleware
 - [x] Rate limiting (100 req/ventana de 60s por key)
 - [x] Admin endpoints: CRUD de API Keys
 - [x] Migración Alembic 003_add_api_keys
 - [x] Middleware opcional (frontend no necesita key)
 
+### UI/UX — Frontend Pulido (Julio 2026)
+- [x] Navbar responsive con menú hamburguesa en mobile
+- [x] Errores visibles en Home con banners individuales
+- [x] Loading skeletons para cards, tablas y detalle
+- [x] Página `/login` con formulario email+nombre
+- [x] Botón Ingresar/Salir según sesión en Navbar
+- [x] Fix localStorage key `auth_token` → `user_token`
+
+### Calidad Interna (Julio 2026)
+- [x] Migración `datetime.utcnow()` → `datetime.now(timezone.utc)` (3 archivos)
+- [x] Tests nuevos: `test_admin.py` (5), `test_cron.py` (2), `test_api_key.py` (8)
+- [x] `rate_limit_info()` refactorizada con `db: AsyncSession | None` opcional
+- [x] Fix startup en Windows/SQLite: `subprocess.run` + `PRAGMA table_info`
+- [x] Total: 64 tests pasando, 0 errores, 0 utcnow warnings
+- [x] TanStack Query: `staleTime: 30s` default, 60s para datos estáticos
+- [x] `refetchOnWindowFocus: false`
+
+### Clubes — Datos Enriquecidos
+- [x] 16 clubes con escudo, sitio web, descripción, títulos
+- [x] Página de detalle con toda la info visible
+- [x] Tipos TypeScript actualizados (`Club` + `ClubDetail`)
+
 ## Pendientes / Issues conocidos
 
 ### Frontend compatibility
-- El middleware de API Key es **optativo** — si no se envía `X-API-Key`, la request pasa igual. Esto mantiene la compatibilidad con el frontend actual. Si se desea requerir key para terceros, el frontend debe actualizarse para enviar una key o usar un dominio/path separado.
-
-### Spec vs implementación
-- El spec dice "sin key → 401" pero se implementó como optativo para no romper el frontend. Decidir si se quiere strictly public API o mantener dual access.
+- El middleware de API Key es **optativo** — si no se envía `X-API-Key`, la request pasa igual. Si se desea requerir key para terceros, el frontend debe actualizarse.
 
 ### Deuda técnica
-- El middleware de API Key crea una conexión DB separada por request (no reusa el pool de `async_session`). Esto es aceptable para MVP pero conviene migrar a inyección de dependencias.
-- `datetime.utcnow()` está deprecado en Python 3.14. Migrar a `datetime.now(datetime.UTC)`.
-- Hay funcionalidades sin tests (admin panel, cron, API Key en sí).
-- Los `feature/frontend-react-v1` están mergeados pero la rama remota sigue existiendo.
+- El middleware de API Key crea una conexión DB separada por request (no reusa el pool de `async_session`). Aceptable para MVP.
+- Mejorar la cobertura de tests en el frontend.
 
 ### En producción (Railway + Vercel)
 - Backend: https://backend-production-0b7d.up.railway.app
@@ -108,7 +124,7 @@ liga.paraguaya.futbol/
 ```bash
 cd backend
 $env:PYTHONPATH=".."
-python -m pytest tests/ -v    # 38 tests
+python -m pytest tests/ -v    # 64 tests
 ```
 
 | Archivo | Tests | Qué cubre |
@@ -122,14 +138,15 @@ python -m pytest tests/ -v    # 38 tests
 | `test_scraper_clubes.py` | 2 | Parse Wikipedia, enrich JSON |
 | `test_scraper_historico.py` | 3 | Parse RSSSF, alias, múltiples tablas |
 | `test_seed_historico.py` | 3 | Insert, dedup, sin archivos |
+| `test_admin.py` | 5 | Update partido, validación, API Key |
+| `test_cron.py` | 2 | Cierre automático de predicciones |
+| `test_api_key.py` | 8 | CRUD, rate limiting, admin endpoints |
 
 ## Variables de entorno
 
 ```bash
 # Backend
 DATABASE_URL=sqlite+aiosqlite:///./data/liga.db   # Railway setea PostgreSQL
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
 SECRET_KEY=
 VAPID_PUBLIC_KEY=
 VAPID_PRIVATE_KEY=
@@ -155,10 +172,6 @@ Toda en `docs/superpowers/`:
 | Scraper engine + DB | `specs/2026-07-07-scraper-engine-database-design.md` |
 | API Pública | `specs/2026-07-07-api-publica-design.md` |
 
-## Último commit
-
-`95e4089 docs: spec API Pública — diseño completo` (más implementación actual)
-
 ## Para correr local
 
 ```bash
@@ -167,12 +180,12 @@ cd backend
 pip install -r requirements.txt
 $env:PYTHONPATH=".."
 python -m alembic upgrade head
-uvicorn backend.app.main:app --reload
+python -m uvicorn backend.app.main:app --reload --port 8000
 
 # Frontend
 cd frontend
 npm install
-npm run dev
+npx next dev
 
 # O ambos con Docker
 docker compose up --build

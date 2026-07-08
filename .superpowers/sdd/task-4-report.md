@@ -1,40 +1,28 @@
-# Task 4 Report: Push Service + Subscription Endpoints
+# Task 4: PredictionEngine — Report
 
-## What I Implemented
-- Added `pywebpush>=1.0.0` to `backend/requirements.txt`
-- Added VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, and VAPID_CLAIM_EMAIL to Settings class in `backend/app/core/config.py`
-- Created `backend/app/schemas/push_subscription.py` with `PushSubscriptionCreate` schema (endpoint, p256dh, auth)
-- Created `backend/app/services/push_service.py` with `PushService` class:
-  - `suscribir` / `desuscribir` methods for managing push subscriptions
-  - `_enviar` internal method using pywebpush (try/except guard)
-  - `enviar_a_partido` to notify all users who predicted a match
-  - `enviar_a_usuario` to notify a specific user
-  - `obtener_recordatorios` to find matches within next 30 minutes
-- Overwrote `backend/app/api/notificaciones.py` with full implementation:
-  - `POST /suscribir` — save a push subscription
-  - `DELETE /suscribir` — remove a push subscription
-  - `GET /vapid-public-key` — expose VAPID public key to clients
+## Status
+**Complete** — 3/3 tests passing, committed.
 
-## Test Results
-All 18 existing tests pass:
-```
-18 passed in 0.56s
-```
+## Commits
+- `4b8e2a9` feat: Cerezo PredictionEngine — H2H statistical predictions
 
-## Files Changed
-- `backend/requirements.txt` — appended pywebpush dep
-- `backend/app/core/config.py` — added 3 VAPID fields
-- `backend/app/schemas/push_subscription.py` — new file (schema)
-- `backend/app/services/push_service.py` — new file (service logic)
-- `backend/app/api/notificaciones.py` — overwrite stub with full impl
+## Test Summary
+| Test | Result |
+|---|---|
+| `test_predict_with_entities` | PASS — handles H2H lookup, keys present, confidence valid |
+| `test_predict_no_data_returns_low_confidence` | PASS — returns "baja" when no matches exist |
+| `test_predict_sums_to_100` | PASS — percentages sum to 100 (±1) |
 
-## Self-Review Findings
-- ✅ Code matches brief exactly — no deviations
-- ✅ pywebpush import is guarded with try/except (graceful degradation when not installed)
-- ✅ Subscription id pattern matches spec: `f"sub_{uuid.uuid4().hex[:12]}"`
-- ✅ Token auth via `get_current_user` dependency on all protected endpoints
-- ✅ Follows existing service patterns (static methods, async session)
-- ✅ All 18 existing tests still pass
+## Files Created
+- `backend/app/services/cerezo/prediction_engine.py` — CerezoPredictionEngine with `predict()` static method
+- `backend/tests/test_cerezo_prediction_engine.py` — 3 async integration tests
+
+## Self-Review
+- Raw SQLAlchemy queries on Partido model as specified (no PartidoService usage)
+- Handles: fewer than 2 clubs, no H2H data, no goals data, edge cases for home/away swap
+- Confidence levels: alta (≥5 matches), media (≥3), baja (<3)
+- Percentages rounded to 1 decimal, sum guaranteed via division from same `total`
+- No unused imports, follows existing service patterns
 
 ## Concerns
 None.

@@ -1,211 +1,139 @@
-# Task 4: Push Service + Subscription Endpoints
+# Task 4: PredictionEngine
 
 ## Files
-- Modify: `backend/requirements.txt` (add pywebpush)
-- Modify: `backend/app/core/config.py` (add VAPID env vars)
-- Create: `backend/app/schemas/push_subscription.py`
-- Create: `backend/app/services/push_service.py`
-- Create: `backend/app/api/notificaciones.py` (overwrite existing stub)
+- Create: `backend/app/services/cerezo/prediction_engine.py`
+- Create: `backend/tests/test_cerezo_prediction_engine.py`
 
-## Exact Code
+## Interface
+- `CerezoPredictionEngine.predict(db: AsyncSession, entities: dict) -> dict`
+  - Returns: `{ local_win_pct: float, draw_pct: float, visitor_win_pct: float, confidence: str }`
 
-### backend/requirements.txt — Append
-```
-pywebpush>=1.0.0
-```
+## Test Code
 
-### backend/app/core/config.py — Add to Settings class
 ```python
-    VAPID_PUBLIC_KEY: str = ""
-    VAPID_PRIVATE_KEY: str = ""
-    VAPID_CLAIM_EMAIL: str = "admin@ligapy.app"
+import pytest
+from backend.app.services.cerezo.prediction_engine import CerezoPredictionEngine
+from backend.tests.conftest import seed_test_data
+
+
+@pytest.mark.asyncio
+async def test_predict_with_entities(db_session):
+    await seed_test_data(db_session)
+    result = await CerezoPredictionEngine.predict(
+        db_session, {"clubes": ["olimpia", "cerro-porteno"], "fecha": None, "torneo": None}
+    )
+    assert "local_win_pct" in result
+    assert "draw_pct" in result
+    assert "visitor_win_pct" in result
+    assert result["confidence"] in ("alta", "media", "baja")
+
+
+@pytest.mark.asyncio
+async def test_predict_no_data_returns_low_confidence(db_session):
+    result = await CerezoPredictionEngine.predict(
+        db_session, {"clubes": ["olimpia"], "fecha": None, "torneo": None}
+    )
+    assert result["confidence"] == "baja"
+
+
+@pytest.mark.asyncio
+async def test_predict_sums_to_100(db_session):
+    await seed_test_data(db_session)
+    result = await CerezoPredictionEngine.predict(
+        db_session, {"clubes": ["olimpia", "cerro-porteno"], "fecha": None, "torneo": None}
+    )
+    total = result["local_win_pct"] + result["draw_pct"] + result["visitor_win_pct"]
+    assert abs(total - 100) < 1
 ```
 
-### backend/app/schemas/push_subscription.py
+## Implementation
+
 ```python
-from pydantic import BaseModel
-
-
-class PushSubscriptionCreate(BaseModel):
-    endpoint: str
-    p256dh: str
-    auth: str
-```
-
-### backend/app/services/push_service.py
-```python
-import json
-import uuid
-from datetime import datetime, timezone
-
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.core.config import settings
-from backend.app.models.prediction import Prediction
 from backend.app.models.partido import Partido
-from backend.app.models.push_subscription import PushSubscription as PushSubscriptionModel
-from backend.app.schemas.push_subscription import PushSubscriptionCreate
-
-try:
-    from pywebpush import webpush, WebPushException
-    HAS_PYWEBPUSH = True
-except ImportError:
-    HAS_PYWEBPUSH = False
 
 
-class PushService:
-
-    VAPID_PRIVATE_KEY = settings.VAPID_PRIVATE_KEY
-    VAPID_CLAIM_EMAIL = settings.VAPID_CLAIM_EMAIL
+class CerezoPredictionEngine:
 
     @staticmethod
-    async def suscribir(
-        db: AsyncSession, user_id: str, data: PushSubscriptionCreate
-    ):
-        sub_id = f"sub_{uuid.uuid4().hex[:12]}"
-        sub = PushSubscriptionModel(
-            id=sub_id,
-            user_id=user_id,
-            endpoint=data.endpoint,
-            p256dh=data.p256dh,
-            auth=data.auth,
-            created_at=datetime.now(timezone.utc),
-        )
-        db.add(sub)
-        await db.flush()
+    async def predict(db: AsyncSession, entities: dict) -> dict:
+        clubes = entities.get("clubes", [])
+        if len(clubes) < 2:
+            return {"local_win_pct": 33.3, "draw_pct": 33.3, "visitor_win_pct": 33.3, "confidence": "baja"}
 
-    @staticmethod
-    async def desuscribir(db: AsyncSession, user_id: str, endpoint: str):
-        result = await db.execute(
-            select(PushSubscriptionModel).where(
-                PushSubscriptionModel.user_id == user_id,
-                PushSubscriptionModel.endpoint == endpoint,
-            )
-        )
-        sub = result.scalar_one_or_none()
-        if sub:
-            await db.delete(sub)
-            await db.flush()
+        local_id, visitante_id = clubes[0], clubes[1]
 
-    @staticmethod
-    async def _enviar(sub: PushSubscriptionModel, title: str, body: str, url: str):
-        if not HAS_PYWEBPUSH:
-            return
-        try:
-            webpush(
-                subscription_info={
-                    "endpoint": sub.endpoint,
-                    "keys": {"p256dh": sub.p256dh, "auth": sub.auth},
-                },
-                data=json.dumps({
-                    "title": title,
-                    "body": body,
-                    "icon": "/icon-192.png",
-                    "badge": "/badge-72.png",
-                    "data": {"url": url},
-                }),
-                vapid_private_key=PushService.VAPID_PRIVATE_KEY,
-                vapid_claims={"sub": f"mailto:{PushService.VAPID_CLAIM_EMAIL}"},
-            )
-        except WebPushException:
-            pass
-
-    @staticmethod
-    async def enviar_a_partido(
-        db: AsyncSession, partido_id: str, title: str, body: str, url: str
-    ):
-        result = await db.execute(
-            select(PushSubscriptionModel).where(
-                PushSubscriptionModel.user_id.in_(
-                    select(Prediction.user_id).where(
-                        Prediction.partido_id == partido_id
-                    )
-                )
-            )
-        )
-        subs = result.scalars().all()
-        for sub in subs:
-            await PushService._enviar(sub, title, body, url)
-
-    @staticmethod
-    async def enviar_a_usuario(
-        db: AsyncSession, user_id: str, title: str, body: str, url: str
-    ):
-        result = await db.execute(
-            select(PushSubscriptionModel).where(
-                PushSubscriptionModel.user_id == user_id
-            )
-        )
-        subs = result.scalars().all()
-        for sub in subs:
-            await PushService._enviar(sub, title, body, url)
-
-    @staticmethod
-    async def obtener_recordatorios(db: AsyncSession):
-        from datetime import timedelta
-        ahora = datetime.now(timezone.utc)
-        ventana = ahora + timedelta(minutes=30)
+        # Get H2H matches
         result = await db.execute(
             select(Partido).where(
-                Partido.fecha >= ahora,
-                Partido.fecha <= ventana,
-                Partido.estado == "programado",
-            )
+                Partido.estado == "finalizado",
+                (
+                    (Partido.local_id == local_id) & (Partido.visitante_id == visitante_id)
+                ) | (
+                    (Partido.local_id == visitante_id) & (Partido.visitante_id == local_id)
+                ),
+            ).order_by(Partido.fecha.desc()).limit(5)
         )
-        return result.scalars().all()
+        h2h = result.scalars().all()
+
+        if not h2h:
+            return {"local_win_pct": 33.3, "draw_pct": 33.3, "visitor_win_pct": 33.3, "confidence": "baja"}
+
+        local_wins = 0
+        visitor_wins = 0
+        draws = 0
+
+        for p in h2h:
+            if p.goles_local is None or p.goles_visitante is None:
+                continue
+            if p.goles_local > p.goles_visitante:
+                if p.local_id == local_id:
+                    local_wins += 1
+                else:
+                    visitor_wins += 1
+            elif p.goles_visitante > p.goles_local:
+                if p.visitante_id == visitante_id:
+                    visitor_wins += 1
+                else:
+                    local_wins += 1
+            else:
+                draws += 1
+
+        total = local_wins + visitor_wins + draws
+        if total == 0:
+            return {"local_win_pct": 33.3, "draw_pct": 33.3, "visitor_win_pct": 33.3, "confidence": "baja"}
+
+        local_pct = round((local_wins / total) * 100, 1)
+        draw_pct = round((draws / total) * 100, 1)
+        visitor_pct = round((visitor_wins / total) * 100, 1)
+
+        if total >= 5:
+            confidence = "alta"
+        elif total >= 3:
+            confidence = "media"
+        else:
+            confidence = "baja"
+
+        return {
+            "local_win_pct": local_pct,
+            "draw_pct": draw_pct,
+            "visitor_win_pct": visitor_pct,
+            "confidence": confidence,
+            "total_partidos": total,
+        }
 ```
 
-### backend/app/api/notificaciones.py
-```python
-from fastapi import APIRouter, Depends
-from sqlalchemy.ext.asyncio import AsyncSession
+## Steps
 
-from backend.app.core.config import settings
-from backend.app.core.dependencies import get_current_user, get_db
-from backend.app.models.user import User
-from backend.app.schemas.push_subscription import PushSubscriptionCreate
-from backend.app.services.push_service import PushService
-
-router = APIRouter(prefix="/api/v1/notificaciones", tags=["notificaciones"])
-
-
-@router.post("/suscribir")
-async def suscribir(
-    data: PushSubscriptionCreate,
-    user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
-):
-    await PushService.suscribir(db, user.id, data)
-    return {"ok": True}
-
-
-@router.delete("/suscribir")
-async def desuscribir(
-    endpoint: str,
-    user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
-):
-    await PushService.desuscribir(db, user.id, endpoint)
-    return {"ok": True}
-
-
-@router.get("/vapid-public-key")
-async def get_vapid_public_key():
-    return {"publicKey": settings.VAPID_PUBLIC_KEY}
-```
-
-## Global Constraints
-- `pywebpush` imported with try/except guard (graceful if not installed)
-- Subscription id pattern: `f"sub_{uuid.uuid4().hex[:12]}"`
-- Token auth via `get_current_user` dependency
-- Follow existing service patterns
-
-## Commit
+1. Write test file
+2. Run: `cd backend && $env:PYTHONPATH=".." && python -m pytest tests/test_cerezo_prediction_engine.py -v`
+   Expected: FAIL
+3. Write implementation
+4. Run test again — Expected: 3 PASS
+5. Commit:
 ```bash
-git add backend/requirements.txt backend/app/core/config.py backend/app/schemas/push_subscription.py backend/app/services/push_service.py backend/app/api/notificaciones.py
-git commit -m "feat: add push notification service and subscription endpoints"
+git add backend/app/services/cerezo/prediction_engine.py backend/tests/test_cerezo_prediction_engine.py
+git commit -m "feat: Cerezo PredictionEngine — H2H statistical predictions"
 ```
-
-## Report File
-`.superpowers/sdd/task-4-report.md`

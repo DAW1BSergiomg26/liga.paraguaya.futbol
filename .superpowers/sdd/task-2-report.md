@@ -1,24 +1,35 @@
-# Task 2: Chat Schema + Service — Report
+# Task 2: EntityExtractor — Report
 
-## What I implemented
-- **`backend/app/schemas/chat.py`**: Pydantic schemas `MensajeChatCreate` (with `contenido` field, min_length=1, max_length=500) and `MensajeChatOut` (flat output with id, partido_id, user_id, username, nombre, imagen, mensaje, created_at). Used `model_config = {"from_attributes": True}` (Pydantic v2 style) to match existing schema conventions.
-- **`backend/app/services/chat_service.py`**: `ChatService` class with two static methods:
-  - `guardar()` — creates a `msg_` prefixed UUID id, persists via SQLAlchemy, refreshes the user relationship, returns `MensajeChatOut`
-  - `obtener_historial()` — fetches messages for a partido, ordered by created_at DESC, limited/paginated, reversed to oldest-first for frontend
+**Status:** DONE
 
-## What I tested and test results
-All 18 existing tests pass (5 test_clubes, 5 test_partidos, 7 test_predicciones, 1 test_tabla).
+## Commits
 
-## Files changed
-- `backend/app/schemas/chat.py` (created, 23 lines)
-- `backend/app/services/chat_service.py` (created, 63 lines)
+- `a263508` feat: Cerezo EntityExtractor — club alias matching + fecha parsing
 
-## Self-review findings
-- Both files follow existing project conventions (static methods on service class, Pydantic v2 `model_config = {"from_attributes": True}`, type hints, async patterns)
-- `id` generation uses the mandated `f"msg_{uuid.uuid4().hex[:12]}"` pattern
-- No unused imports or comments added
-- The `obtener_historial` method reverses the list after querying DESC, matching the brief's spec for oldest-first frontend display
-- The brief's code used `class Config` but I adapted to `model_config` for consistency with existing schemas (`partido.py`, `user.py`)
+## Test Summary
+
+```
+tests/test_cerezo_entity_extractor.py::test_extract_club_by_name   PASSED
+tests/test_cerezo_entity_extractor.py::test_extract_club_by_alias  PASSED
+tests/test_cerezo_entity_extractor.py::test_extract_two_clubs      PASSED
+tests/test_cerezo_entity_extractor.py::test_extract_fecha_keyword  PASSED
+tests/test_cerezo_entity_extractor.py::test_extract_no_clubes      PASSED
+```
+
+5/5 passed in 0.03s.
+
+## Files
+
+- `backend/app/services/cerezo/entity_extractor.py` — CerezoEntityExtractor with club alias matching (32 aliases), fecha keywords (11 keywords), and torneo name extraction (Apertura/Clausura + optional year)
+- `backend/tests/test_cerezo_entity_extractor.py` — 5 TDD tests covering club by name, alias, two clubs, fecha keyword, and no-club edge case
+
+## Process
+
+Followed TDD strictly:
+1. Wrote failing tests (RED — verified ModuleNotFoundError)
+2. Implemented minimal class (GREEN — 5/5 pass)
+3. Committed
 
 ## Concerns
-- None
+
+None.

@@ -1,42 +1,24 @@
-# Task 3 Report: WebSocket ConnectionManager + Chat API Router
+# Task 3: DataFetcher — Report
 
-## What Was Implemented
-
-- **`backend/app/api/chat.py`** — Full WebSocket chat endpoint with:
-  - `ConnectionManager` class with `connect`, `disconnect`, `broadcast` methods
-  - `GET /api/v1/partidos/{partido_id}/chat` — REST chat history endpoint
-  - `WS /api/v1/ws/partidos/{partido_id}` — WebSocket endpoint with token auth
-  - Token-based user lookup and partido existence validation
-- **`backend/app/main.py`** — Added imports and registrations for chat, notificaciones, and cron routers
-- **`backend/app/api/notificaciones.py`** — Minimal stub (empty router, needed for main.py imports)
-- **`backend/app/api/cron.py`** — Minimal stub (empty router, needed for main.py imports)
-
-## Testing
-
-- Ran `python -m pytest backend/tests/ -v`
-- **18/18 tests passed** (all existing clubes, partidos, predicciones, tabla tests)
-
-## Files Changed
-
-| File | Change |
-|------|--------|
-| `backend/app/api/chat.py` | Created (106 lines) — ConnectionManager + GET chat history + WS endpoint |
-| `backend/app/main.py` | Edited (3 import lines + 3 router registrations) |
-| `backend/app/api/notificaciones.py` | Created (3 lines) — stub for main.py import |
-| `backend/app/api/cron.py` | Created (3 lines) — stub for main.py import |
+## Status
+**Complete**
 
 ## Commits
+- `0af48a0` feat: Cerezo DataFetcher — integrate club/partido/tabla services
 
-1. `4e8f46e` — `feat: add WebSocket chat endpoint with ConnectionManager`
-2. `80447e9` — `feat: register chat, notificaciones, and cron routers`
+## Files
+- `backend/app/services/cerezo/data_fetcher.py` — `CerezoDataFetcher` class with static `fetch()` method
+- `backend/tests/test_cerezo_data_fetcher.py` — 3 tests (club_info, table_position, unknown_intent)
 
-## Self-Review Findings
+## Test Summary
+- 3/3 new tests PASS
+- 74/74 existing tests PASS (no regressions)
+- Total: 77 PASS, 0 failures
 
-- Code matches the brief exactly — no deviations from the provided implementation
-- The `notificaciones` and `cron` modules don't exist yet, so minimal stubs were created to satisfy the imports in `main.py`; these will be filled in by subsequent tasks
-- The `notificaciones` stub uses `prefix="/api/v1"` and `tags=["notificaciones"]` to match conventions; `cron` has no prefix (cron endpoints typically don't need `/api/v1/`)
-- WebSocket token auth correctly uses `Query(...)` parameter and manual `get_user_from_token` as required by the Global Constraints
+## Implementation Notes
+- Used corrected service calls: `ClubService.get_by_id(db, ...)`, `PartidoService.get_all(db)`, `TablaService.get_table(db)`
+- Followed the TDD cycle: wrote tests → verified RED (ModuleNotFoundError) → implemented → verified GREEN
+- Supports all 5 intents: club_info, match_result, head_to_head, table_position, prediction
 
 ## Concerns
-
-None. All 18 existing tests pass.
+None.
