@@ -145,11 +145,11 @@ export default async function HomePage() {
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Link href="/clubes" className="p-6 rounded-xl border border-borde-sutil bg-bg-secundario/60 hover:bg-bg-secundario transition">
+        <Link href="/clubes" className="p-6 rounded-xl border border-borde-sutil bg-bg-secundario/60 hover:bg-bg-secundario hover:border-l-py-rojo transition-all duration-200 border-l-3">
           <h3 className="text-lg font-bold mb-2">Clubes</h3>
           <p className="text-texto-secundario text-sm">Explora todos los clubes de la liga paraguaya</p>
         </Link>
-        <Link href="/partidos" className="p-6 rounded-xl border border-borde-sutil bg-bg-secundario/60 hover:bg-bg-secundario transition">
+        <Link href="/partidos" className="p-6 rounded-xl border border-borde-sutil bg-bg-secundario/60 hover:bg-bg-secundario hover:border-l-py-rojo transition-all duration-200 border-l-3">
           <h3 className="text-lg font-bold mb-2">Partidos</h3>
           <p className="text-texto-secundario text-sm">Calendario y resultados de la temporada</p>
         </Link>
