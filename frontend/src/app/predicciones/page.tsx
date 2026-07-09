@@ -29,13 +29,31 @@ export default function PrediccionesPage() {
     queryFn: () => getLeaderboard(),
   });
 
+  if (error) {
+    const hasToken = getSavedToken();
+    if (!hasToken) {
+      return (
+        <div className="max-w-6xl mx-auto px-4 py-12 text-center">
+          <h1 className="text-3xl font-bold mb-4">Mis Predicciones</h1>
+          <div className="p-8 rounded-xl border border-borde-sutil bg-bg-secundario/60">
+            <p className="text-gray-400 mb-4">Sesión expirada. Iniciá sesión de nuevo</p>
+            <Link href="/login" className="inline-block px-6 py-3 rounded-xl bg-py-rojo text-black font-semibold">
+              Iniciar sesión
+            </Link>
+          </div>
+        </div>
+      );
+    }
+    return <ErrorMessage message="Error al cargar predicciones" />;
+  }
+
   if (!loggedIn) {
     return (
       <div className="max-w-6xl mx-auto px-4 py-12 text-center">
         <h1 className="text-3xl font-bold mb-4">Mis Predicciones</h1>
-        <div className="p-8 rounded-xl border border-white/10 bg-[#0a1628]/60">
+        <div className="p-8 rounded-xl border border-borde-sutil bg-bg-secundario/60">
           <p className="text-gray-400 mb-4">Iniciá sesión para ver tus predicciones</p>
-          <Link href="/login" className="inline-block px-6 py-3 rounded-xl bg-[#76e4f7] text-black font-semibold">
+          <Link href="/login" className="inline-block px-6 py-3 rounded-xl bg-py-rojo text-black font-semibold">
             Iniciar sesión
           </Link>
         </div>
@@ -51,9 +69,9 @@ export default function PrediccionesPage() {
       <h1 className="text-3xl font-bold mb-8">Mis Predicciones</h1>
 
       {(!predicciones || predicciones.length === 0) ? (
-        <div className="p-8 rounded-xl border border-white/10 bg-[#0a1628]/60 text-center mb-8">
+        <div className="p-8 rounded-xl border border-borde-sutil bg-bg-secundario/60 text-center mb-8">
           <p className="text-gray-400">Todavía no hiciste predicciones.</p>
-          <Link href="/partidos" className="text-[#76e4f7] hover:underline mt-2 inline-block">
+          <Link href="/partidos" className="text-py-rojo hover:underline mt-2 inline-block">
             Ir a partidos →
           </Link>
         </div>
@@ -61,7 +79,7 @@ export default function PrediccionesPage() {
         <div className="space-y-3 mb-12">
           {predicciones.map((p) => (
             <Link key={p.id} href={`/partidos/${p.partido_id}`}
-              className="block p-4 rounded-xl border border-white/10 bg-[#0a1628]/60 hover:bg-[#0a1628] transition">
+              className="block p-4 rounded-xl border border-borde-sutil bg-bg-secundario/60 hover:bg-bg-secundario transition">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-400">{p.torneo} · J{p.jornada}</p>
@@ -87,10 +105,10 @@ export default function PrediccionesPage() {
       {/* Leaderboard */}
       <h2 className="text-2xl font-bold mb-4">🏆 Leaderboard</h2>
       {leaderboard && leaderboard.length > 0 ? (
-        <div className="overflow-x-auto rounded-xl border border-white/10 bg-[#0a1628]/60">
+        <div className="overflow-x-auto rounded-xl border border-borde-sutil bg-bg-secundario/60">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-white/10 text-gray-400 uppercase text-xs">
+              <tr className="border-b border-borde-sutil text-gray-400 uppercase text-xs">
                 <th className="p-4 text-left">#</th>
                 <th className="p-4 text-left">Usuario</th>
                 <th className="p-4 text-center">Pts</th>
@@ -111,7 +129,7 @@ export default function PrediccionesPage() {
                       <span className="text-gray-500 text-xs">@{entry.username}</span>
                     </div>
                   </td>
-                  <td className="p-4 text-center font-bold text-[#76e4f7]">{entry.puntos}</td>
+                  <td className="p-4 text-center font-bold text-py-rojo">{entry.puntos}</td>
                   <td className="p-4 text-center text-green-400">{entry.aciertos}</td>
                   <td className="p-4 text-center text-gray-400">{entry.predicciones}</td>
                 </tr>
@@ -120,7 +138,7 @@ export default function PrediccionesPage() {
           </table>
         </div>
       ) : (
-        <div className="p-8 rounded-xl border border-white/10 bg-[#0a1628]/60 text-center">
+        <div className="p-8 rounded-xl border border-borde-sutil bg-bg-secundario/60 text-center">
           <p className="text-gray-500">Todavía no hay participantes.</p>
         </div>
       )}

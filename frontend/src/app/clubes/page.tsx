@@ -37,7 +37,7 @@ export default function ClubesPage() {
           <Link
             key={club.id}
             href={`/clubes/${club.id}`}
-            className="p-6 rounded-xl border border-white/10 bg-[#0a1628]/60 hover:bg-[#0a1628] transition block"
+            className="p-6 rounded-xl border border-borde-sutil bg-bg-secundario/60 hover:bg-bg-secundario transition block"
           >
             <div className="flex items-center gap-4 mb-3">
               {club.escudo && (

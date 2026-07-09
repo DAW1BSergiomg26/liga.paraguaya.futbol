@@ -27,7 +27,7 @@ export default function Pagination({ page, totalPages, onPageChange }: Paginatio
       <button
         onClick={() => onPageChange(page - 1)}
         disabled={page <= 1}
-        className="px-3 py-1.5 rounded-lg border border-white/10 text-sm text-gray-400 hover:text-white transition disabled:opacity-30 disabled:cursor-not-allowed"
+        className="px-3 py-1.5 rounded-lg border border-borde-sutil text-sm text-gray-400 hover:text-white transition disabled:opacity-30 disabled:cursor-not-allowed"
       >
         Anterior
       </button>
@@ -40,8 +40,8 @@ export default function Pagination({ page, totalPages, onPageChange }: Paginatio
             onClick={() => onPageChange(p)}
             className={`w-9 h-9 rounded-lg text-sm font-medium transition ${
               p === page
-                ? "bg-[#76e4f7] text-black"
-                : "border border-white/10 text-gray-400 hover:text-white"
+                ? "bg-py-rojo text-black"
+                : "border border-borde-sutil text-gray-400 hover:text-white"
             }`}
           >
             {p}
@@ -51,7 +51,7 @@ export default function Pagination({ page, totalPages, onPageChange }: Paginatio
       <button
         onClick={() => onPageChange(page + 1)}
         disabled={page >= totalPages}
-        className="px-3 py-1.5 rounded-lg border border-white/10 text-sm text-gray-400 hover:text-white transition disabled:opacity-30 disabled:cursor-not-allowed"
+        className="px-3 py-1.5 rounded-lg border border-borde-sutil text-sm text-gray-400 hover:text-white transition disabled:opacity-30 disabled:cursor-not-allowed"
       >
         Siguiente
       </button>

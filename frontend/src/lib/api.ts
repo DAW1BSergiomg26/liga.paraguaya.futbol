@@ -43,6 +43,10 @@ export async function getTabla(torneo?: string): Promise<TablaRow[]> {
   return fetchJSON<TablaRow[]>(`/api/v1/tabla${params}`);
 }
 
+export async function getTorneos(): Promise<string[]> {
+  return fetchJSON<string[]>("/api/v1/tabla/torneos");
+}
+
 let authToken: string | null = null;
 
 export function setAuthToken(token: string | null) {
@@ -64,6 +68,10 @@ async function authFetchJSON<T>(path: string, options?: RequestInit): Promise<T>
   if (token) headers["Authorization"] = `Bearer ${token}`;
   const res = await fetch(`${API_URL}${path}`, { ...options, headers });
   if (!res.ok) {
+    if (res.status === 401) {
+      localStorage.removeItem("user_token");
+      authToken = null;
+    }
     const err = await res.json().catch(() => ({ detail: "Error desconocido" }));
     throw new Error(err.detail || `Error ${res.status}`);
   }

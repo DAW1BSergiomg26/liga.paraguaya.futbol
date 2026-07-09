@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Barlow_Condensed } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -7,6 +7,11 @@ import Providers from "./providers";
 import PushSetup from "@/components/PushSetup";
 
 const inter = Inter({ subsets: ["latin"] });
+const barlowCondensed = Barlow_Condensed({
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
+  variable: "--font-barlow-condensed",
+});
 
 export const metadata: Metadata = {
   title: "Liga Paraguaya de Fútbol",
@@ -18,7 +23,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="es">
-      <body className={`${inter.className} bg-[#07111f] text-[#f8fafc] min-h-screen flex flex-col`}>
+      <body className={`${inter.className} ${barlowCondensed.variable} bg-bg-primario text-texto-principal min-h-screen flex flex-col`}>
         <Providers>
           <Navbar />
           <main className="flex-1">{children}</main>

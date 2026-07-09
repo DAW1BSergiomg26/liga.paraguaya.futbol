@@ -103,3 +103,74 @@ export interface LeaderboardEntry {
   aciertos: number;
   predicciones: number;
 }
+
+export interface ClubDetailData {
+  type: "club_detail";
+  club: {
+    nombre: string;
+    escudo: string;
+    ciudad: string;
+    estadio: string;
+    capacidad: number;
+    fundacion: number;
+    titulos_liga: number;
+    descripcion: string;
+  };
+  titulos: { torneo: string; cantidad: number }[];
+}
+
+export interface MatchFormData {
+  type: "match_form";
+  club: string;
+  last5: { rival: string; resultado: string; goles_local: number | null; goles_visit: number | null }[];
+  wins: number;
+  draws: number;
+  losses: number;
+}
+
+export interface H2HData {
+  type: "h2h";
+  club1: { nombre: string; escudo: string };
+  club2: { nombre: string; escudo: string };
+  total: number;
+  wins1: number;
+  draws: number;
+  wins2: number;
+  ultimos: { fecha: string; goles1: number; goles2: number }[];
+}
+
+export interface MiniTableData {
+  type: "mini_table";
+  torneo: string;
+  jornada: number;
+  clubes: { pos: number; nombre: string; escudo: string; pj: number; pg: number; pe: number; pp: number; pts: number }[];
+  club_destacado: { pos: number; nombre: string; escudo: string; pj: number; pg: number; pe: number; pp: number; pts: number } | null;
+}
+
+export interface ComparisonData {
+  type: "comparison";
+  club1: { nombre: string; escudo: string; titulos: number; fundacion: number };
+  club2: { nombre: string; escudo: string; titulos: number; fundacion: number };
+  advantages: string[];
+}
+
+export interface NextMatchData {
+  type: "next_match";
+  club: string;
+  rival: string;
+  escudo_rival?: string;
+  fecha: string;
+  torneo: string;
+  estadio?: string;
+}
+
+export interface PredictionData {
+  type: "prediction";
+  local_win_pct: number;
+  draw_pct: number;
+  visitor_win_pct: number;
+  confidence: string;
+  total_partidos?: number;
+}
+
+export type StructuredData = ClubDetailData | MatchFormData | H2HData | MiniTableData | ComparisonData | NextMatchData | PredictionData | { type: "greeting" | "unknown" };

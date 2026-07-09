@@ -21,14 +21,14 @@ export default function LeaderboardPage() {
       <h1 className="text-3xl font-bold mb-8">🏆 Leaderboard</h1>
 
       {!leaderboard || leaderboard.length === 0 ? (
-        <div className="p-8 rounded-xl border border-white/10 bg-[#0a1628]/60 text-center">
+        <div className="p-8 rounded-xl border border-borde-sutil bg-bg-secundario/60 text-center">
           <p className="text-gray-500">Todavía no hay participantes.</p>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-white/10 bg-[#0a1628]/60">
+        <div className="overflow-x-auto rounded-xl border border-borde-sutil bg-bg-secundario/60">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-white/10 text-gray-400 uppercase text-xs">
+              <tr className="border-b border-borde-sutil text-gray-400 uppercase text-xs">
                 <th className="p-4 text-left">#</th>
                 <th className="p-4 text-left">Usuario</th>
                 <th className="p-4 text-center">Pts</th>
@@ -49,7 +49,7 @@ export default function LeaderboardPage() {
                       <span className="text-gray-500 text-xs">@{entry.username}</span>
                     </div>
                   </td>
-                  <td className="p-4 text-center font-bold text-[#76e4f7]">{entry.puntos}</td>
+                  <td className="p-4 text-center font-bold text-py-rojo">{entry.puntos}</td>
                   <td className="p-4 text-center text-green-400">{entry.aciertos}</td>
                   <td className="p-4 text-center text-gray-400">{entry.predicciones}</td>
                 </tr>
