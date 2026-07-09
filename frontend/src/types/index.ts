@@ -173,4 +173,18 @@ export interface PredictionData {
   total_partidos?: number;
 }
 
+export interface Noticia {
+  titulo: string;
+  fuente: string;
+  url: string;
+  pub_date: string | null;
+  resumen: string;
+}
+
+export interface NoticiasResponse {
+  noticias: Noticia[];
+  fuentes: string[];
+  actualizado: string;
+}
+
 export type StructuredData = ClubDetailData | MatchFormData | H2HData | MiniTableData | ComparisonData | NextMatchData | PredictionData | { type: "greeting" | "unknown" };
