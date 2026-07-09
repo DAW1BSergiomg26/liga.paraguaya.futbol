@@ -25,7 +25,7 @@ export default function ClubDetailPage() {
   if (isLoading) return (
     <div className="max-w-6xl mx-auto px-4 py-12">
       <div className="h-4 bg-white/10 rounded animate-pulse w-24 mb-8" />
-      <div className="p-8 rounded-2xl border border-white/10 bg-[#0a1628]/80">
+      <div className="p-8 rounded-2xl border border-borde-sutil bg-bg-secundario/80">
         <div className="flex items-start gap-6 mb-6">
           <div className="w-20 h-20 rounded-full bg-white/10 animate-pulse shrink-0" />
           <div className="flex-1 space-y-3">
@@ -50,7 +50,7 @@ export default function ClubDetailPage() {
   if (!club) {
     return (
       <div className="max-w-6xl mx-auto px-4 py-12">
-        <Link href="/clubes" className="text-sm text-[#76e4f7] hover:underline mb-6 inline-block">
+        <Link href="/clubes" className="text-sm text-py-rojo hover:underline mb-6 inline-block">
           ← Volver a clubes
         </Link>
         <div className="text-center py-16 text-gray-400">
@@ -66,11 +66,11 @@ export default function ClubDetailPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-12">
-      <Link href="/clubes" className="text-sm text-[#76e4f7] hover:underline mb-6 inline-block">
+      <Link href="/clubes" className="text-sm text-py-rojo hover:underline mb-6 inline-block">
         ← Volver a clubes
       </Link>
 
-      <div className="p-8 rounded-2xl border border-white/10 bg-[#0a1628]/80 shadow-xl">
+      <div className="p-8 rounded-2xl border border-borde-sutil bg-bg-secundario/80 shadow-xl">
         <div className="flex items-start gap-6 mb-6">
           {club.escudo && (
             <img src={club.escudo} alt={club.nombre} className="w-20 h-20 object-contain shrink-0" />
@@ -94,7 +94,7 @@ export default function ClubDetailPage() {
         </div>
 
         {club.descripcion && (
-          <p className="text-gray-400 text-sm leading-relaxed mb-6 border-t border-white/10 pt-6">
+          <p className="text-gray-400 text-sm leading-relaxed mb-6 border-t border-borde-sutil pt-6">
             {club.descripcion}
           </p>
         )}
@@ -135,7 +135,7 @@ export default function ClubDetailPage() {
             <div>
               <span className="text-gray-500 text-sm block">Sitio web</span>
               <a href={club.sitio_web} target="_blank" rel="noopener noreferrer"
-                className="text-[#76e4f7] hover:underline text-sm font-medium">
+                className="text-py-rojo hover:underline text-sm font-medium">
                 {club.sitio_web.replace(/^https?:\/\//, "")} ↗
               </a>
             </div>
@@ -168,7 +168,7 @@ export default function ClubDetailPage() {
               <Link
                 key={p.id}
                 href={`/partidos/${p.id}`}
-                className="p-4 rounded-xl border border-white/10 bg-[#0a1628]/60 hover:bg-[#0a1628] transition block"
+                className="p-4 rounded-xl border border-borde-sutil bg-bg-secundario/60 hover:bg-bg-secundario transition block"
               >
                 <div className="flex items-center justify-between">
                   <div>
@@ -197,7 +197,7 @@ export default function ClubDetailPage() {
             ))}
           </div>
         ) : (
-          <div className="p-8 rounded-xl border border-white/10 bg-[#0a1628]/60 text-center">
+          <div className="p-8 rounded-xl border border-borde-sutil bg-bg-secundario/60 text-center">
             <p className="text-gray-500">No hay partidos registrados para este club.</p>
           </div>
         )}

@@ -1,1 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">⚽</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <clipPath id="s">
+      <path d="M50 2L92 16v41c0 27-17 41-42 56-25-15-42-29-42-56V16z"/>
+    </clipPath>
+  </defs>
+  <path d="M50 2L92 16v41c0 27-17 41-42 56-25-15-42-29-42-56V16z" fill="#D52B1E"/>
+  <g clip-path="url(#s)">
+    <polygon points="-10,25 30,0 110,50 110,65 60,105 -10,60" fill="#fff" opacity=".92"/>
+    <polygon points="-10,55 15,40 110,80 110,95 50,120 -10,75" fill="#0038A8" opacity=".92"/>
+  </g>
+  <text x="50" y="67" text-anchor="middle" fill="#fff" font-size="34" font-weight="800" font-family="system-ui,sans-serif">LP</text>
+</svg>

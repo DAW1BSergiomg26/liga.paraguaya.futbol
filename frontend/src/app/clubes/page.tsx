@@ -22,7 +22,7 @@ export default function ClubesPage() {
     return (
       <div className="max-w-6xl mx-auto px-4 py-12">
         <h1 className="text-3xl font-bold mb-8">Club de la Liga Paraguaya</h1>
-        <div className="text-center py-16 text-gray-400">
+        <div className="text-center py-16 text-texto-secundario">
           <p>No hay clubes registrados actualmente.</p>
         </div>
       </div>
@@ -37,7 +37,7 @@ export default function ClubesPage() {
           <Link
             key={club.id}
             href={`/clubes/${club.id}`}
-            className="p-6 rounded-xl border border-white/10 bg-[#0a1628]/60 hover:bg-[#0a1628] transition block"
+            className="p-6 rounded-xl border border-borde-sutil bg-bg-secundario/60 hover:bg-bg-secundario transition block"
           >
             <div className="flex items-center gap-4 mb-3">
               {club.escudo && (
@@ -45,14 +45,14 @@ export default function ClubesPage() {
               )}
               <h2 className="text-xl font-bold">{club.nombre}</h2>
             </div>
-            <div className="space-y-2 text-sm text-gray-400">
-              <p><span className="text-gray-500">Ciudad:</span> {club.ciudad}</p>
-              <p><span className="text-gray-500">Apodo:</span> {club.apodo}</p>
-              <p><span className="text-gray-500">Estadio:</span> {club.estadio}</p>
-              <p><span className="text-gray-500">Capacidad:</span> {club.capacidad.toLocaleString()} espectadores</p>
-              <p><span className="text-gray-500">Fundación:</span> {club.fundacion}</p>
+            <div className="space-y-2 text-sm text-texto-secundario">
+              <p><span className="text-texto-apagado">Ciudad:</span> {club.ciudad}</p>
+              <p><span className="text-texto-apagado">Apodo:</span> {club.apodo}</p>
+              <p><span className="text-texto-apagado">Estadio:</span> {club.estadio}</p>
+              <p><span className="text-texto-apagado">Capacidad:</span> {club.capacidad.toLocaleString()} espectadores</p>
+              <p><span className="text-texto-apagado">Fundación:</span> {club.fundacion}</p>
               <div className="flex items-center gap-2 pt-2">
-                <span className="text-gray-500">Colores:</span>
+                <span className="text-texto-apagado">Colores:</span>
                 {(club.colores || []).map((color, i) => (
                   <span
                     key={i}
@@ -63,7 +63,7 @@ export default function ClubesPage() {
                 ))}
               </div>
               <div className="flex items-center gap-3 pt-2 border-t border-white/5">
-                <span className="text-sm text-gray-500">🏆 {club.titulos_liga} nacionales</span>
+                <span className="text-sm text-texto-apagado">🏆 {club.titulos_liga} nacionales</span>
                 {club.titulos_internacionales?.length > 0 && (
                   <span className="text-sm text-yellow-400 font-medium">
                     🌍 {club.titulos_internacionales.reduce((s, t) => s + t.cantidad, 0)} internacionales

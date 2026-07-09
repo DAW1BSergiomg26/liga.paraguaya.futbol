@@ -103,7 +103,7 @@ export default function AdminPartidosPage() {
         <h1 className="text-3xl font-bold">Admin - Partidos</h1>
         <button
           onClick={() => { localStorage.removeItem("admin_api_key"); router.push("/admin"); }}
-          className="text-sm text-gray-400 hover:text-white transition"
+          className="text-sm text-texto-secundario hover:text-white transition"
         >
           Cerrar sesión
         </button>
@@ -123,7 +123,7 @@ export default function AdminPartidosPage() {
         <select
           value={filtroTorneo}
           onChange={(e) => handleFilterChange("torneo", e.target.value)}
-          className="px-3 py-2 rounded-lg bg-[#1a2a3a] border border-white/10 text-white text-sm"
+          className="px-3 py-2 rounded-lg bg-bg-terciario border border-borde-sutil text-white text-sm"
         >
           <option value="">Todos los torneos</option>
           <option value="Apertura 2026">Apertura 2026</option>
@@ -132,7 +132,7 @@ export default function AdminPartidosPage() {
         <select
           value={filtroEstado}
           onChange={(e) => handleFilterChange("estado", e.target.value)}
-          className="px-3 py-2 rounded-lg bg-[#1a2a3a] border border-white/10 text-white text-sm"
+          className="px-3 py-2 rounded-lg bg-bg-terciario border border-borde-sutil text-white text-sm"
         >
           <option value="">Todos los estados</option>
           <option value="programado">Programado</option>
@@ -154,13 +154,13 @@ export default function AdminPartidosPage() {
             {(pageData?.data || []).map((p) => (
               <div
                 key={p.id}
-                className={`p-4 rounded-xl border border-white/10 transition-colors ${
-                  editingId === p.id ? "bg-[#0a2a1a]/60 border-green-700/30" : "bg-[#0a1628]/60"
+                className={`p-4 rounded-xl border border-borde-sutil transition-colors ${
+                  editingId === p.id ? "bg-[#0a2a1a]/60 border-green-700/30" : "bg-bg-secundario/60"
                 }`}
               >
                 {editingId === p.id ? (
                   <div className="space-y-3">
-                    <div className="text-sm text-gray-400">
+                    <div className="text-sm text-texto-secundario">
                       {p.torneo} · Jornada {p.jornada} · {new Date(p.fecha).toLocaleDateString("es-PY")}
                     </div>
                     <div className="flex items-center gap-4">
@@ -168,15 +168,15 @@ export default function AdminPartidosPage() {
                       <input
                         type="number"
                         min="0"
-                        className="w-16 px-3 py-2 rounded-lg bg-[#1a2a3a] border border-white/10 text-white text-center"
+                        className="w-16 px-3 py-2 rounded-lg bg-bg-terciario border border-borde-sutil text-white text-center"
                         value={form.goles_local}
                         onChange={(e) => setForm({ ...form, goles_local: e.target.value })}
                       />
-                      <span className="text-gray-400">vs</span>
+                      <span className="text-texto-secundario">vs</span>
                       <input
                         type="number"
                         min="0"
-                        className="w-16 px-3 py-2 rounded-lg bg-[#1a2a3a] border border-white/10 text-white text-center"
+                        className="w-16 px-3 py-2 rounded-lg bg-bg-terciario border border-borde-sutil text-white text-center"
                         value={form.goles_visitante}
                         onChange={(e) => setForm({ ...form, goles_visitante: e.target.value })}
                       />
@@ -184,7 +184,7 @@ export default function AdminPartidosPage() {
                       <select
                         value={form.estado}
                         onChange={(e) => setForm({ ...form, estado: e.target.value })}
-                        className="px-3 py-2 rounded-lg bg-[#1a2a3a] border border-white/10 text-white text-sm"
+                        className="px-3 py-2 rounded-lg bg-bg-terciario border border-borde-sutil text-white text-sm"
                       >
                         <option value="programado">Programado</option>
                         <option value="finalizado">Finalizado</option>
@@ -192,13 +192,13 @@ export default function AdminPartidosPage() {
                       <button
                         onClick={() => handleSave(p.id)}
                         disabled={saving}
-                        className="px-4 py-2 rounded-lg bg-[#76e4f7] text-black font-semibold text-sm hover:bg-[#5ac8df] transition disabled:opacity-50"
+                        className="px-4 py-2 rounded-lg bg-py-rojo text-black font-semibold text-sm hover:bg-py-rojo-oscuro transition disabled:opacity-50"
                       >
                         {saving ? "Guardando..." : "Guardar"}
                       </button>
                       <button
                         onClick={() => setEditingId(null)}
-                        className="px-4 py-2 rounded-lg border border-white/10 text-gray-400 text-sm hover:text-white transition"
+                        className="px-4 py-2 rounded-lg border border-borde-sutil text-texto-secundario text-sm hover:text-white transition"
                       >
                         Cancelar
                       </button>
@@ -215,7 +215,7 @@ export default function AdminPartidosPage() {
                         <span className="text-white font-medium w-40">{clubMap.get(p.visitante_id) || p.visitante_id}</span>
                       </div>
                       <div className="flex items-center gap-3 text-sm">
-                        <span className="text-gray-500">{p.torneo} · J{p.jornada}</span>
+                        <span className="text-texto-apagado">{p.torneo} · J{p.jornada}</span>
                         <span className={`px-2 py-0.5 rounded-full text-xs ${
                           p.estado === "finalizado"
                             ? "bg-green-900/30 text-green-300"
@@ -223,7 +223,7 @@ export default function AdminPartidosPage() {
                         }`}>
                           {p.estado}
                         </span>
-                        <span className="text-[#76e4f7] text-xs">Editar</span>
+                        <span className="text-py-rojo text-xs">Editar</span>
                       </div>
                     </div>
                   </button>

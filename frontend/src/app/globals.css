@@ -1,7 +1,58 @@
 @import "tailwindcss";
 
+@theme {
+  /* Colores primarios - Bandera y camiseta */
+  --color-py-rojo: #D52B1E;
+  --color-py-rojo-oscuro: #A11D14;
+  --color-py-azul: #0038A8;
+  --color-py-azul-oscuro: #001F5C;
+  --color-py-blanco: #FFFFFF;
+
+  /* Fondo base */
+  --color-bg-primario: #0A0E1A;
+  --color-bg-secundario: #10162B;
+  --color-bg-terciario: #1A2140;
+
+  /* Texto */
+  --color-texto-principal: #F5F6FA;
+  --color-texto-secundario: #9AA3C0;
+  --color-texto-apagado: #5C6690;
+
+  /* Semáforo de resultados */
+  --color-victoria: #16C784;
+  --color-empate: #F2B90C;
+  --color-derrota: #E5484D;
+
+  /* Acento dorado solo para medallas/podio */
+  --color-dorado-medalla: #D4AF37;
+
+  /* Bordes */
+  --color-borde-sutil: rgba(255, 255, 255, 0.08);
+  --color-borde-marca: rgba(213, 43, 30, 0.35);
+
+  /* Tipografía */
+  --font-barlow: var(--font-barlow-condensed);
+}
+
 body {
   margin: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Tipografía deportiva para títulos */
+h1, h2, h3, .titulo-modulo {
+  font-family: var(--font-barlow-condensed), sans-serif;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+/* Alineación tabular para números en columnas */
+table, .dato-numerico {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Transiciones globales suaves */
+a, button, tr {
+  transition: all 150ms ease;
 }

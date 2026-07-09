@@ -34,29 +34,29 @@ export default function LoginPage() {
   return (
     <div className="max-w-md mx-auto px-4 py-20">
       <h1 className="text-3xl font-bold mb-2">Iniciar sesión</h1>
-      <p className="text-gray-400 mb-8">Ingresá tu email y nombre para empezar</p>
+      <p className="text-texto-secundario mb-8">Ingresá tu email y nombre para empezar</p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="email" className="block text-sm text-gray-400 mb-1">Email</label>
+          <label htmlFor="email" className="block text-sm text-texto-secundario mb-1">Email</label>
           <input
             id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-lg bg-[#1a2a3a] border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-[#76e4f7]"
+            className="w-full px-4 py-2.5 rounded-lg bg-bg-terciario border border-borde-sutil text-white placeholder-gray-500 focus:outline-none focus:border-py-rojo"
             placeholder="tu@email.com"
             autoComplete="email"
           />
         </div>
         <div>
-          <label htmlFor="name" className="block text-sm text-gray-400 mb-1">Nombre</label>
+          <label htmlFor="name" className="block text-sm text-texto-secundario mb-1">Nombre</label>
           <input
             id="name"
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-lg bg-[#1a2a3a] border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-[#76e4f7]"
+            className="w-full px-4 py-2.5 rounded-lg bg-bg-terciario border border-borde-sutil text-white placeholder-gray-500 focus:outline-none focus:border-py-rojo"
             placeholder="Tu nombre"
             autoComplete="name"
           />
@@ -69,14 +69,14 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={saving}
-          className="w-full py-2.5 rounded-lg bg-[#76e4f7] text-black font-semibold hover:brightness-110 transition disabled:opacity-50"
+          className="w-full py-2.5 rounded-lg bg-py-rojo text-black font-semibold hover:brightness-110 transition disabled:opacity-50"
         >
           {saving ? "Ingresando..." : "Ingresar"}
         </button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-gray-500">
-        <Link href="/" className="text-[#76e4f7] hover:underline">← Volver al inicio</Link>
+      <p className="mt-6 text-center text-sm text-texto-apagado">
+        <Link href="/" className="text-py-rojo hover:underline">← Volver al inicio</Link>
       </p>
     </div>
   );

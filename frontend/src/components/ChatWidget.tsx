@@ -34,7 +34,6 @@ export default function ChatWidget({ partidoId }: ChatWidgetProps) {
     tokenRef.current = token;
   }, [token]);
 
-  // Load history
   useEffect(() => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://backend-production-0b7d.up.railway.app";
     fetch(`${apiUrl}/api/v1/partidos/${partidoId}/chat?limit=50`)
@@ -46,7 +45,6 @@ export default function ChatWidget({ partidoId }: ChatWidgetProps) {
       .catch(() => setLoading(false));
   }, [partidoId]);
 
-  // WebSocket connection
   useEffect(() => {
     if (!token) return;
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://backend-production-0b7d.up.railway.app";
@@ -74,19 +72,19 @@ export default function ChatWidget({ partidoId }: ChatWidgetProps) {
   }, [input]);
 
   return (
-    <div className="mt-6 border border-gray-700 rounded-xl overflow-hidden">
-      <div className="bg-gray-800/50 px-4 py-2 border-b border-gray-700 flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-gray-200">Chat en Vivo</h3>
-        <span className={`w-2 h-2 rounded-full ${connected ? "bg-green-500" : "bg-red-500"}`} />
+    <div className="mt-6 border border-borde-sutil rounded-xl overflow-hidden">
+      <div className="bg-bg-terciario/50 px-4 py-2 border-b border-borde-sutil flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-texto-principal">Chat en Vivo</h3>
+        <span className={`w-2 h-2 rounded-full ${connected ? "bg-victoria" : "bg-derrota"}`} />
       </div>
 
-      <div className="h-72 overflow-y-auto bg-gray-900/50">
+      <div className="h-72 overflow-y-auto bg-bg-primario/50">
         {loading ? (
-          <div className="flex items-center justify-center h-full text-gray-500 text-sm">
+          <div className="flex items-center justify-center h-full text-texto-apagado text-sm">
             Cargando mensajes...
           </div>
         ) : messages.length === 0 ? (
-          <div className="flex items-center justify-center h-full text-gray-500 text-sm">
+          <div className="flex items-center justify-center h-full text-texto-apagado text-sm">
             No hay mensajes aún. ¡Sé el primero!
           </div>
         ) : (
@@ -97,7 +95,7 @@ export default function ChatWidget({ partidoId }: ChatWidgetProps) {
         <div ref={bottomRef} />
       </div>
 
-      <div className="flex gap-2 p-3 border-t border-gray-700 bg-gray-800/30">
+      <div className="flex gap-2 p-3 border-t border-borde-sutil bg-bg-terciario/30">
         <input
           type="text"
           value={input}
@@ -105,12 +103,12 @@ export default function ChatWidget({ partidoId }: ChatWidgetProps) {
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
           placeholder="Escribe un mensaje..."
           maxLength={500}
-          className="flex-1 bg-gray-700 text-sm text-white rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500 placeholder-gray-400"
+          className="flex-1 bg-bg-terciario text-sm text-texto-principal rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-py-rojo placeholder-texto-apagado"
         />
         <button
           onClick={sendMessage}
           disabled={!input.trim() || !connected}
-          className="px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="px-4 py-2 bg-py-rojo text-white text-sm rounded-lg hover:bg-py-rojo-oscuro disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           Enviar
         </button>
