@@ -1,3 +1,4 @@
+import time
 from datetime import datetime, timezone
 
 import feedparser
@@ -13,6 +14,9 @@ FUENTES = [
 
 MAX_NOTICIAS = 5
 TIMEOUT = 10
+CACHE_TTL = 300  # 5 minutes
+
+_cache: dict = {"data": None, "timestamp": 0.0}
 
 
 async def _fetch_fuente(nombre: str, url: str) -> list[dict]:
@@ -25,7 +29,7 @@ async def _fetch_fuente(nombre: str, url: str) -> list[dict]:
 
     feed = feedparser.parse(resp.text)
     items = []
-    for entry in feed.entries[:5]:
+    for entry in feed.entries[:MAX_NOTICIAS]:
         pub_date = None
         if hasattr(entry, "published_parsed") and entry.published_parsed:
             pub_date = datetime(*entry.published_parsed[:6], tzinfo=timezone.utc).isoformat()
@@ -40,7 +44,11 @@ async def _fetch_fuente(nombre: str, url: str) -> list[dict]:
 
 
 @router.get("")
-async def get_noticias():
+async def get_noticias() -> dict:
+    now = time.monotonic()
+    if _cache["data"] and (now - _cache["timestamp"]) < CACHE_TTL:
+        return _cache["data"]
+
     todas = []
     for fuente in FUENTES:
         items = await _fetch_fuente(fuente["nombre"], fuente["url"])
@@ -48,8 +56,12 @@ async def get_noticias():
 
     todas.sort(key=lambda x: x.get("pub_date") or "", reverse=True)
 
-    return {
+    result = {
         "noticias": todas[:MAX_NOTICIAS],
         "fuentes": [f["nombre"] for f in FUENTES],
         "actualizado": datetime.now(timezone.utc).isoformat(),
     }
+
+    _cache["data"] = result
+    _cache["timestamp"] = now
+    return result
