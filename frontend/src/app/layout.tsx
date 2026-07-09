@@ -16,6 +16,15 @@ const barlowCondensed = Barlow_Condensed({
 export const metadata: Metadata = {
   title: "Liga Paraguaya de Fútbol",
   description: "Clubes, partidos, tabla de posiciones y datos base del fútbol paraguayo.",
+  icons: "/favicon.svg",
+  metadataBase: new URL("https://ligapy.com"),
+  openGraph: {
+    title: "Liga Paraguaya de Fútbol",
+    description: "Clubes, partidos, tabla de posiciones y datos base del fútbol paraguayo.",
+    siteName: "Liga PY",
+    locale: "es_PY",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
