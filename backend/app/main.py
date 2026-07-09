@@ -10,6 +10,7 @@ from backend.app.api.cerezo import router as cerezo_router
 from backend.app.api.chat import router as chat_router
 from backend.app.api.notificaciones import router as notificaciones_router
 from backend.app.api.cron import router as cron_router
+from backend.app.api.noticias import router as noticias_router
 from backend.app.core.api_key import RATE_LIMIT_MAX, rate_limit_info
 from backend.app.core.config import settings
 from backend.app.core.database import async_session, run_alembic_upgrade
@@ -81,6 +82,7 @@ app.include_router(cerezo_router)
 app.include_router(chat_router)
 app.include_router(notificaciones_router)
 app.include_router(cron_router)
+app.include_router(noticias_router)
 
 
 @app.get("/")
