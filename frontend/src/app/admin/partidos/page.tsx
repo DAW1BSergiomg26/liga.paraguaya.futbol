@@ -103,7 +103,7 @@ export default function AdminPartidosPage() {
         <h1 className="text-3xl font-bold">Admin - Partidos</h1>
         <button
           onClick={() => { localStorage.removeItem("admin_api_key"); router.push("/admin"); }}
-          className="text-sm text-gray-400 hover:text-white transition"
+          className="text-sm text-texto-secundario hover:text-white transition"
         >
           Cerrar sesión
         </button>
@@ -160,7 +160,7 @@ export default function AdminPartidosPage() {
               >
                 {editingId === p.id ? (
                   <div className="space-y-3">
-                    <div className="text-sm text-gray-400">
+                    <div className="text-sm text-texto-secundario">
                       {p.torneo} · Jornada {p.jornada} · {new Date(p.fecha).toLocaleDateString("es-PY")}
                     </div>
                     <div className="flex items-center gap-4">
@@ -172,7 +172,7 @@ export default function AdminPartidosPage() {
                         value={form.goles_local}
                         onChange={(e) => setForm({ ...form, goles_local: e.target.value })}
                       />
-                      <span className="text-gray-400">vs</span>
+                      <span className="text-texto-secundario">vs</span>
                       <input
                         type="number"
                         min="0"
@@ -198,7 +198,7 @@ export default function AdminPartidosPage() {
                       </button>
                       <button
                         onClick={() => setEditingId(null)}
-                        className="px-4 py-2 rounded-lg border border-borde-sutil text-gray-400 text-sm hover:text-white transition"
+                        className="px-4 py-2 rounded-lg border border-borde-sutil text-texto-secundario text-sm hover:text-white transition"
                       >
                         Cancelar
                       </button>
@@ -215,7 +215,7 @@ export default function AdminPartidosPage() {
                         <span className="text-white font-medium w-40">{clubMap.get(p.visitante_id) || p.visitante_id}</span>
                       </div>
                       <div className="flex items-center gap-3 text-sm">
-                        <span className="text-gray-500">{p.torneo} · J{p.jornada}</span>
+                        <span className="text-texto-apagado">{p.torneo} · J{p.jornada}</span>
                         <span className={`px-2 py-0.5 rounded-full text-xs ${
                           p.estado === "finalizado"
                             ? "bg-green-900/30 text-green-300"

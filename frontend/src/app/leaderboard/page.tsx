@@ -22,13 +22,13 @@ export default function LeaderboardPage() {
 
       {!leaderboard || leaderboard.length === 0 ? (
         <div className="p-8 rounded-xl border border-borde-sutil bg-bg-secundario/60 text-center">
-          <p className="text-gray-500">Todavía no hay participantes.</p>
+          <p className="text-texto-apagado">Todavía no hay participantes.</p>
         </div>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-borde-sutil bg-bg-secundario/60">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-borde-sutil text-gray-400 uppercase text-xs">
+              <tr className="border-b border-borde-sutil text-texto-secundario uppercase text-xs">
                 <th className="p-4 text-left">#</th>
                 <th className="p-4 text-left">Usuario</th>
                 <th className="p-4 text-center">Pts</th>
@@ -46,12 +46,12 @@ export default function LeaderboardPage() {
                         <img src={entry.image} alt="" className="w-8 h-8 rounded-full" />
                       )}
                       <span className="text-white font-medium">{entry.name}</span>
-                      <span className="text-gray-500 text-xs">@{entry.username}</span>
+                      <span className="text-texto-apagado text-xs">@{entry.username}</span>
                     </div>
                   </td>
                   <td className="p-4 text-center font-bold text-py-rojo">{entry.puntos}</td>
                   <td className="p-4 text-center text-green-400">{entry.aciertos}</td>
-                  <td className="p-4 text-center text-gray-400">{entry.predicciones}</td>
+                  <td className="p-4 text-center text-texto-secundario">{entry.predicciones}</td>
                 </tr>
               ))}
             </tbody>

@@ -36,7 +36,7 @@ export default function PrediccionesPage() {
         <div className="max-w-6xl mx-auto px-4 py-12 text-center">
           <h1 className="text-3xl font-bold mb-4">Mis Predicciones</h1>
           <div className="p-8 rounded-xl border border-borde-sutil bg-bg-secundario/60">
-            <p className="text-gray-400 mb-4">Sesión expirada. Iniciá sesión de nuevo</p>
+            <p className="text-texto-secundario mb-4">Sesión expirada. Iniciá sesión de nuevo</p>
             <Link href="/login" className="inline-block px-6 py-3 rounded-xl bg-py-rojo text-black font-semibold">
               Iniciar sesión
             </Link>
@@ -52,7 +52,7 @@ export default function PrediccionesPage() {
       <div className="max-w-6xl mx-auto px-4 py-12 text-center">
         <h1 className="text-3xl font-bold mb-4">Mis Predicciones</h1>
         <div className="p-8 rounded-xl border border-borde-sutil bg-bg-secundario/60">
-          <p className="text-gray-400 mb-4">Iniciá sesión para ver tus predicciones</p>
+          <p className="text-texto-secundario mb-4">Iniciá sesión para ver tus predicciones</p>
           <Link href="/login" className="inline-block px-6 py-3 rounded-xl bg-py-rojo text-black font-semibold">
             Iniciar sesión
           </Link>
@@ -70,7 +70,7 @@ export default function PrediccionesPage() {
 
       {(!predicciones || predicciones.length === 0) ? (
         <div className="p-8 rounded-xl border border-borde-sutil bg-bg-secundario/60 text-center mb-8">
-          <p className="text-gray-400">Todavía no hiciste predicciones.</p>
+          <p className="text-texto-secundario">Todavía no hiciste predicciones.</p>
           <Link href="/partidos" className="text-py-rojo hover:underline mt-2 inline-block">
             Ir a partidos →
           </Link>
@@ -82,18 +82,18 @@ export default function PrediccionesPage() {
               className="block p-4 rounded-xl border border-borde-sutil bg-bg-secundario/60 hover:bg-bg-secundario transition">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-400">{p.torneo} · J{p.jornada}</p>
+                  <p className="text-sm text-texto-secundario">{p.torneo} · J{p.jornada}</p>
                   <p className="text-white font-medium mt-1">
                     {p.local_nombre} {p.goles_local}-{p.goles_visitante} {p.visitante_nombre}
                   </p>
                 </div>
                 <div className="text-right">
                   {p.estado === "finalizado" ? (
-                    <span className={`text-sm font-bold ${p.puntos === 3 ? "text-green-400" : p.puntos === 2 ? "text-yellow-400" : "text-gray-500"}`}>
+                    <span className={`text-sm font-bold ${p.puntos === 3 ? "text-green-400" : p.puntos === 2 ? "text-yellow-400" : "text-texto-apagado"}`}>
                       +{p.puntos} pts
                     </span>
                   ) : (
-                    <span className="text-xs text-gray-500">Pendiente</span>
+                    <span className="text-xs text-texto-apagado">Pendiente</span>
                   )}
                 </div>
               </div>
@@ -108,7 +108,7 @@ export default function PrediccionesPage() {
         <div className="overflow-x-auto rounded-xl border border-borde-sutil bg-bg-secundario/60">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-borde-sutil text-gray-400 uppercase text-xs">
+              <tr className="border-b border-borde-sutil text-texto-secundario uppercase text-xs">
                 <th className="p-4 text-left">#</th>
                 <th className="p-4 text-left">Usuario</th>
                 <th className="p-4 text-center">Pts</th>
@@ -126,12 +126,12 @@ export default function PrediccionesPage() {
                         <img src={entry.image} alt="" className="w-8 h-8 rounded-full" />
                       )}
                       <span className="text-white font-medium">{entry.name}</span>
-                      <span className="text-gray-500 text-xs">@{entry.username}</span>
+                      <span className="text-texto-apagado text-xs">@{entry.username}</span>
                     </div>
                   </td>
                   <td className="p-4 text-center font-bold text-py-rojo">{entry.puntos}</td>
                   <td className="p-4 text-center text-green-400">{entry.aciertos}</td>
-                  <td className="p-4 text-center text-gray-400">{entry.predicciones}</td>
+                  <td className="p-4 text-center text-texto-secundario">{entry.predicciones}</td>
                 </tr>
               ))}
             </tbody>
@@ -139,7 +139,7 @@ export default function PrediccionesPage() {
         </div>
       ) : (
         <div className="p-8 rounded-xl border border-borde-sutil bg-bg-secundario/60 text-center">
-          <p className="text-gray-500">Todavía no hay participantes.</p>
+          <p className="text-texto-apagado">Todavía no hay participantes.</p>
         </div>
       )}
     </div>

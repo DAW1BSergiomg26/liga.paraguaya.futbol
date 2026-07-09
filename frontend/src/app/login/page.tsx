@@ -34,11 +34,11 @@ export default function LoginPage() {
   return (
     <div className="max-w-md mx-auto px-4 py-20">
       <h1 className="text-3xl font-bold mb-2">Iniciar sesión</h1>
-      <p className="text-gray-400 mb-8">Ingresá tu email y nombre para empezar</p>
+      <p className="text-texto-secundario mb-8">Ingresá tu email y nombre para empezar</p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="email" className="block text-sm text-gray-400 mb-1">Email</label>
+          <label htmlFor="email" className="block text-sm text-texto-secundario mb-1">Email</label>
           <input
             id="email"
             type="email"
@@ -50,7 +50,7 @@ export default function LoginPage() {
           />
         </div>
         <div>
-          <label htmlFor="name" className="block text-sm text-gray-400 mb-1">Nombre</label>
+          <label htmlFor="name" className="block text-sm text-texto-secundario mb-1">Nombre</label>
           <input
             id="name"
             type="text"
@@ -75,7 +75,7 @@ export default function LoginPage() {
         </button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-gray-500">
+      <p className="mt-6 text-center text-sm text-texto-apagado">
         <Link href="/" className="text-py-rojo hover:underline">← Volver al inicio</Link>
       </p>
     </div>

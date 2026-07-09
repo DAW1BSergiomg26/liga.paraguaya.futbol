@@ -21,7 +21,7 @@ export default function AdminLoginPage() {
         <h1 className="text-2xl font-bold mb-6">Admin</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="text-sm text-gray-400 block mb-1">API Key</label>
+            <label className="text-sm text-texto-secundario block mb-1">API Key</label>
             <input
               type="password"
               value={key}

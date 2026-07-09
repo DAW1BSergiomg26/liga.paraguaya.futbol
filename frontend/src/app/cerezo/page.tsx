@@ -64,7 +64,7 @@ export default function CerezoPage() {
     <div className="max-w-3xl mx-auto px-4 py-8 flex flex-col h-[calc(100vh-12rem)]">
       <div className="mb-6">
         <h1 className="text-2xl font-bold">Cerezo Digital</h1>
-        <p className="text-sm text-gray-400">Asistente de la Liga Paraguaya</p>
+        <p className="text-sm text-texto-secundario">Asistente de la Liga Paraguaya</p>
       </div>
 
       <div className="flex-1 overflow-y-auto space-y-4 pr-2 scrollbar-thin">

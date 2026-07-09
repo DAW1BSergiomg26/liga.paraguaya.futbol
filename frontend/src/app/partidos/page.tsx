@@ -24,7 +24,7 @@ function EstadoBadge({ estado }: { estado: string }) {
     programado: "Programado",
     en_vivo: "En vivo",
   };
-  const cls = styles[estado] || "bg-gray-800 text-gray-300";
+  const cls = styles[estado] || "bg-gray-800 text-texto-secundario";
   return (
     <span className={`text-xs px-2 py-0.5 rounded-full ${cls}`}>
       {labels[estado] || estado}
@@ -90,7 +90,7 @@ function PartidosContent() {
 
       <div className="flex flex-wrap gap-4 mb-8">
         <div>
-          <label className="text-sm text-gray-400 block mb-1">Torneo</label>
+          <label className="text-sm text-texto-secundario block mb-1">Torneo</label>
           <input
             type="text"
             value={torneo}
@@ -100,7 +100,7 @@ function PartidosContent() {
           />
         </div>
         <div>
-          <label className="text-sm text-gray-400 block mb-1">Estado</label>
+          <label className="text-sm text-texto-secundario block mb-1">Estado</label>
           <select
             value={estado}
             onChange={(e) => setFilter("estado", e.target.value)}
@@ -115,14 +115,14 @@ function PartidosContent() {
       </div>
 
       {!partidos || partidos.length === 0 ? (
-        <div className="text-center py-16 text-gray-400">
+        <div className="text-center py-16 text-texto-secundario">
           <p>No hay partidos registrados actualmente.</p>
         </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-borde-sutil text-gray-400 uppercase tracking-wide text-xs">
+              <tr className="border-b border-borde-sutil text-texto-secundario uppercase tracking-wide text-xs">
                 <th className="text-left py-3 px-2">Fecha</th>
                 <th className="text-left py-3 px-2">Local</th>
                 <th className="text-center py-3 px-2">Resultado</th>
@@ -143,7 +143,7 @@ function PartidosContent() {
                     key={p.id}
                     className="border-b border-white/5 hover:bg-white/5 transition"
                   >
-                    <td className="py-3 px-2 text-gray-400">
+                    <td className="py-3 px-2 text-texto-secundario">
                       {new Date(p.fecha).toLocaleDateString("es-PY")}
                     </td>
                     <td className="py-3 px-2">
@@ -185,7 +185,7 @@ function PartidosContent() {
                         </button>
                       )}
                     </td>
-                    <td className="py-3 px-2 text-center text-gray-400">
+                    <td className="py-3 px-2 text-center text-texto-secundario">
                       {p.jornada}
                     </td>
                   </tr>
