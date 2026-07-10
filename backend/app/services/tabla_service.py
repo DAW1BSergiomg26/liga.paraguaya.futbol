@@ -41,3 +41,9 @@ class TablaService:
             )
             for r in rows
         ]
+
+    @staticmethod
+    async def get_torneos(db: AsyncSession) -> list[str]:
+        stmt = select(TablaPosicion.torneo).distinct().order_by(TablaPosicion.torneo)
+        result = await db.execute(stmt)
+        return result.scalars().all()

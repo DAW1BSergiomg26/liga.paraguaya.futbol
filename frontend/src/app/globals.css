@@ -12,6 +12,7 @@
   --color-bg-primario: #0A0E1A;
   --color-bg-secundario: #10162B;
   --color-bg-terciario: #1A2140;
+  --color-bg-noche: #05070F;
 
   /* Texto */
   --color-texto-principal: #F5F6FA;
@@ -55,4 +56,93 @@ table, .dato-numerico {
 /* Transiciones globales suaves */
 a, button, tr {
   transition: all 150ms ease;
+}
+
+/* === GARRA GUARANÍ === */
+
+/* Fondo de franjas diagonales fijo con viñeta radial */
+.stripes-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-color: #05070F;
+  background-image:
+    repeating-linear-gradient(
+      115deg,
+      rgba(213, 43, 30, 0.08) 0px,
+      rgba(213, 43, 30, 0.08) 40px,
+      rgba(245, 246, 250, 0.04) 40px,
+      rgba(245, 246, 250, 0.04) 80px,
+      rgba(0, 56, 168, 0.06) 80px,
+      rgba(0, 56, 168, 0.06) 120px
+    ),
+    radial-gradient(ellipse at center, transparent 50%, rgba(5, 7, 15, 0.85) 100%);
+  will-change: transform;
+}
+
+/* Keyframes */
+@keyframes shine {
+  0% { background-position: 0% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes pulse-lider {
+  0%, 100% { box-shadow: inset 0 0 8px rgba(212, 175, 55, 0.08); }
+  50% { box-shadow: inset 0 0 24px rgba(212, 175, 55, 0.15); }
+}
+
+@keyframes row-enter {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Utility classes */
+.text-gradient-shine {
+  background: linear-gradient(90deg, #F5F6FA, #D52B1E, #F5F6FA, #D52B1E, #F5F6FA);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-shine.animate-shine {
+  animation: shine 8s linear infinite;
+}
+
+.animate-pulse-lider {
+  animation: pulse-lider 2.4s ease-in-out infinite;
+}
+
+.animate-row-enter {
+  animation: row-enter 0.5s ease-out forwards;
+}
+
+/* Navbar glassmorphism */
+.navbar-blur {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background-color: rgba(16, 22, 43, 0.85);
+}
+
+/* prefers-reduced-motion: apaga todo lo animado */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .stripes-bg {
+    transform: none !important;
+  }
+  .animate-row-enter {
+    opacity: 1;
+    animation: none;
+  }
 }

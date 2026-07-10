@@ -16,3 +16,8 @@ async def obtener_tabla(
     db: AsyncSession = Depends(get_db),
 ):
     return await TablaService.get_table(db, torneo=torneo)
+
+
+@router.get("/torneos", response_model=list[str])
+async def listar_torneos(db: AsyncSession = Depends(get_db)):
+    return await TablaService.get_torneos(db)

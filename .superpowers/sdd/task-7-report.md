@@ -1,21 +1,17 @@
-# Task 7 Report: Frontend Chat Components
+# Task 7 Report: Modify /tabla page layout
 
-## Implemented
-- `frontend/src/components/ChatMessage.tsx` — renders individual chat messages with avatar, name, timestamp, and content
-- `frontend/src/components/ChatWidget.tsx` — chat widget with message history fetch, WebSocket live connection, send message input, connection status indicator
+## Changes Made
 
-## Test Results
-- `npm run build` — Compiled successfully, TypeScript finished in 3.4s, no errors
+- **Modified**: `frontend/src/app/tabla/page.tsx`
+  - Added `import Sidebar from "@/components/sidebar/Sidebar"` at line 9
+  - Wrapped table content in grid: `lg:grid lg:grid-cols-[1fr_320px] lg:gap-8`
+  - Left column: table/empty state; Right column: `<Sidebar />` with `mt-8 lg:mt-0`
+  - Hero section remains outside the grid (full-width)
 
-## Files Changed
-- `frontend/src/components/ChatMessage.tsx` (created, 40 lines)
-- `frontend/src/components/ChatWidget.tsx` (created, 130 lines)
+## Verification
 
-## Self-Review Findings
-- Code matches brief exactly
-- Uses existing project conventions (Tailwind CSS, dark theme, `"use client"`, functional components)
-- No emoji in ChatWidget title per constraints
-- ChatWidget gracefully handles missing auth token (no WebSocket connection, history still loads)
+- `npx tsc --noEmit`: Only pre-existing error (`useLiveScore` hook), no new errors
 
-## Concerns
-- None
+## Commit
+
+- `5a3b175` - `feat(frontend): add sidebar layout to /tabla page`

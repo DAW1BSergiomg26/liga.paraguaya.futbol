@@ -51,7 +51,7 @@ export default function ClubesPage() {
               >
                 <div className="flex items-center gap-4 mb-3">
                   {club.escudo && (
-                    <img src={club.escudo} alt={club.nombre} className="w-12 h-12 object-contain" />
+                    <img src={club.escudo} alt={club.nombre} loading="lazy" className="w-12 h-12 object-contain" />
                   )}
                   <h2 className="text-xl font-bold">{club.nombre}</h2>
                 </div>

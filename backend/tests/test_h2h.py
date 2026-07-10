@@ -52,3 +52,10 @@ class TestH2HService:
         assert result.club_b.id == "c2"
         assert result.partidos == []
         assert result.resumen["pj"] == 0
+        assert result.resumen["victorias_a"] == 0
+        assert result.resumen["empates"] == 0
+        assert result.resumen["victorias_b"] == 0
+        assert result.resumen["goles_a"] == 0
+        assert result.resumen["goles_b"] == 0
+        assert result.resumen["mayor_goleada_a"] is None
+        assert result.resumen["mayor_goleada_b"] is None

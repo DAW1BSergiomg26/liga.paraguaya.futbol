@@ -56,15 +56,14 @@ function PartidosContent() {
   }
 
   const queryClient = useQueryClient();
-  const [userToken, setUserToken] = useState<string | null>(null);
+  const [userToken] = useState<string | null>(() => {
+    try { return getSavedToken(); } catch { return null; }
+  });
   const [predictionPartido, setPredictionPartido] = useState<Partido | null>(null);
 
   useEffect(() => {
     const token = getSavedToken();
-    if (token) {
-      setAuthToken(token);
-      setUserToken(token);
-    }
+    if (token) setAuthToken(token);
   }, []);
 
   const setFilter = useCallback(

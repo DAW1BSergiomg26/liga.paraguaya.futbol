@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getTabla, getTorneos } from "@/lib/api";
 import type { TablaRow } from "@/types";
@@ -30,6 +30,47 @@ export default function TablaPage() {
     staleTime: 60_000,
   });
 
+  const [visible, setVisible] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const tiltRefs = useRef<(HTMLTableRowElement | null)[]>([]);
+  const tiltEnabled = useRef(false);
+
+  useEffect(() => {
+    tiltEnabled.current = window.matchMedia("(hover: hover)").matches;
+  }, []);
+
+  useEffect(() => {
+    const el = wrapperRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          obs.unobserve(el);
+        }
+      },
+      { threshold: 0.08 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  function handleTilt(e: React.MouseEvent, index: number) {
+    if (!tiltEnabled.current) return;
+    const row = tiltRefs.current[index];
+    if (!row) return;
+    const rect = row.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    row.style.transform = `perspective(600px) rotateX(${-y * 3}deg) rotateY(${x * 3}deg)`;
+  }
+
+  function handleUntilt(index: number) {
+    const row = tiltRefs.current[index];
+    if (!row) return;
+    row.style.transform = "perspective(600px) rotateX(0deg) rotateY(0deg)";
+  }
+
   if (isLoading) return <TableSkeleton rows={12} cols={10} />;
 
   if (error) return <ErrorMessage message="Error al cargar la tabla de posiciones" />;
@@ -43,7 +84,7 @@ export default function TablaPage() {
           <path d="M 15.5 190 L 63.8 190 L 83.5 190 L 92.3 181.2 L 103.3 176.8 L 114.3 174.6 L 120.9 170.2 L 125.2 163.7 L 129.6 157.1 L 136.2 148.3 L 142.8 141.7 L 151.6 135.1 L 158.2 130.7 L 164.8 124.1 L 169.1 119.8 L 173.5 113.2 L 180.1 104.4 L 184.5 97.8 L 184.5 91.2 L 180.1 82.4 L 180.1 75.9 L 180.1 69.3 L 180.1 64.9 L 175.7 58.3 L 173.5 53.9 L 169.1 47.3 L 164.8 42.9 L 158.2 36.3 L 151.6 32 L 147.2 25.4 L 142.8 21 L 136.2 16.6 L 129.6 12.2 L 125.2 10 L 120.9 12.2 L 114.3 16.6 L 107.7 18.8 L 103.3 21 L 98.9 25.4 L 92.3 32 L 92.3 38.5 L 85.7 47.3 L 81.3 53.9 L 74.8 60.5 L 70.4 64.9 L 63.8 69.3 L 59.4 75.9 L 55 82.4 L 48.4 86.8 L 48.4 91.2 L 41.8 97.8 L 37.4 104.4 L 33 108.8 L 26.5 113.2 L 26.5 119.8 L 19.9 126.3 L 19.9 135.1 L 19.9 141.7 L 15.5 152.7 L 15.5 163.7 L 15.5 174.6 L 15.5 185.6 L 15.5 190 Z" fill="currentColor" className="text-py-rojo/5" />
         </svg>
         <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <h1 className="text-3xl font-bold titulo-modulo">Tabla de Posiciones</h1>
+          <h1 className="text-3xl font-bold titulo-modulo text-gradient-shine">Tabla de Posiciones</h1>
           <select
             value={torneo}
             onChange={(e) => setTorneo(e.target.value)}
@@ -57,7 +98,7 @@ export default function TablaPage() {
       </div>
 
       <div className="lg:grid lg:grid-cols-[1fr_320px] lg:gap-8">
-        <div>
+        <div ref={wrapperRef}>
           {!filas || filas.length === 0 ? (
             <div className="text-center py-16 text-texto-secundario">
               <p>No hay datos disponibles para {torneo}.</p>
@@ -96,8 +137,12 @@ export default function TablaPage() {
 
                     return (
                       <tr
-                        key={row.club_id}
-                        className={`${rowBg} ${leftBorder} border-b border-borde-sutil transition-all duration-150 hover:bg-bg-terciario hover:translate-x-0.5`}
+                        key={`${row.club_id}-${row.posicion}`}
+                        ref={(el) => { tiltRefs.current[i] = el; }}
+                        className={`${rowBg} ${leftBorder} border-b border-borde-sutil transition-all duration-150 hover:bg-bg-terciario hover:translate-x-0.5 ${visible ? "animate-row-enter" : "opacity-0"} ${row.posicion === 1 ? "animate-pulse-lider" : ""}`}
+                        style={{ animationDelay: visible ? `${i * 40}ms` : "0ms" }}
+                        onMouseMove={(e) => handleTilt(e, i)}
+                        onMouseLeave={() => handleUntilt(i)}
                       >
                         <td className={`py-3 px-4 font-bold ${esPodio ? "text-dorado-medalla" : "text-texto-principal"}`}>
                           <Medalla pos={row.posicion} />
@@ -109,7 +154,8 @@ export default function TablaPage() {
                               <img
                                 src={row.escudo}
                                 alt=""
-                                className="w-6 h-6 object-contain shrink-0 rounded-sm shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
+                                loading="lazy"
+                                className="w-6 h-6 object-contain shrink-0 rounded-sm shadow-[0_1px_3px_rgba(0,0,0,0.3)] transition-transform duration-200 ease-out hover:scale-110 hover:-rotate-3"
                               />
                             )}
                             {row.club}

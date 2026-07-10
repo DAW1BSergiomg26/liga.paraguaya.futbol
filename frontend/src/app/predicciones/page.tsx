@@ -8,14 +8,13 @@ import Link from "next/link";
 import ErrorMessage from "@/components/ui/ErrorMessage";
 
 export default function PrediccionesPage() {
-  const [loggedIn, setLoggedIn] = useState(false);
+  const [loggedIn] = useState(() => {
+    try { return !!getSavedToken(); } catch { return false; }
+  });
 
   useEffect(() => {
     const token = getSavedToken();
-    if (token) {
-      setAuthToken(token);
-      setLoggedIn(true);
-    }
+    if (token) setAuthToken(token);
   }, []);
 
   const { data: predicciones, isLoading, error } = useQuery<PredictionDetail[]>({
@@ -123,7 +122,7 @@ export default function PrediccionesPage() {
                   <td className="p-4">
                     <div className="flex items-center gap-3">
                       {entry.image && (
-                        <img src={entry.image} alt="" className="w-8 h-8 rounded-full" />
+                        <img src={entry.image} alt="" loading="lazy" className="w-8 h-8 rounded-full" />
                       )}
                       <span className="text-white font-medium">{entry.name}</span>
                       <span className="text-texto-apagado text-xs">@{entry.username}</span>

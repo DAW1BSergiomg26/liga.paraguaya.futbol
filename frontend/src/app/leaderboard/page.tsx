@@ -43,7 +43,7 @@ export default function LeaderboardPage() {
                   <td className="p-4">
                     <div className="flex items-center gap-3">
                       {entry.image && (
-                        <img src={entry.image} alt="" className="w-8 h-8 rounded-full" />
+                        <img src={entry.image} alt="" loading="lazy" className="w-8 h-8 rounded-full" />
                       )}
                       <span className="text-white font-medium">{entry.name}</span>
                       <span className="text-texto-apagado text-xs">@{entry.username}</span>

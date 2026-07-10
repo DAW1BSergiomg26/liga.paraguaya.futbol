@@ -8,11 +8,11 @@ from fastapi import APIRouter
 router = APIRouter(prefix="/api/v1/noticias", tags=["noticias"])
 
 FUENTES = [
-    {"nombre": "ABC Color", "url": "https://www.abc.com.py/rss/deportes.xml"},
-    {"nombre": "Última Hora", "url": "https://www.ultimahora.com/rss/deportes.xml"},
+    {"nombre": "ABC Color", "url": "https://www.abc.com.py/arc/outboundfeeds/rss/deportes/futbol/"},
+    {"nombre": "APF", "url": "https://apf.org.py/rss/"},
 ]
 
-MAX_NOTICIAS = 5
+MAX_NOTICIAS = 6
 TIMEOUT = 10
 CACHE_TTL = 300  # 5 minutes
 
@@ -50,9 +50,13 @@ async def get_noticias() -> dict:
         return _cache["data"]
 
     todas = []
+    seen_urls = set()
     for fuente in FUENTES:
         items = await _fetch_fuente(fuente["nombre"], fuente["url"])
-        todas.extend(items)
+        for item in items:
+            if item["url"] not in seen_urls:
+                seen_urls.add(item["url"])
+                todas.append(item)
 
     todas.sort(key=lambda x: x.get("pub_date") or "", reverse=True)
 

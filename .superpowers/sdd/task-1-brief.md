@@ -1,130 +1,107 @@
-# Task 1: IntentClassifier
+### Task 1: Backend schemas — H2HOut
 
-## Files
-- Create: `backend/app/services/cerezo/__init__.py` (empty)
-- Create: `backend/app/services/cerezo/classifier.py`
-- Create: `backend/tests/test_cerezo_classifier.py`
+**Files:**
+- Modify: `backend/app/schemas/partido.py`
+- Test: `backend/tests/test_h2h.py`
 
-## Interface
-- `CerezoIntentClassifier.classify(message: str) -> dict`
-  - Returns `{ intent: str, confidence: float, entities: dict }`
-  - intent is one of: club_info, match_result, head_to_head, table_position, prediction, top_scorer, greeting, unknown
-  - confidence is 0.0–1.0
+**Interfaces:**
+- Consumes: `Partido` model fields, `Club.nombre`, `Club.escudo`
+- Produces: `ClubResumen`, `MayorGoleada`, `H2HPartidoItem`, `H2HOut` Pydantic models
 
-## Test Code
+#### Step 1: Write the failing test
 
 ```python
+# backend/tests/test_h2h.py
 import pytest
-from backend.app.services.cerezo.classifier import CerezoIntentClassifier
+from backend.app.schemas.partido import H2HOut, ClubResumen, MayorGoleada, H2HPartidoItem
 
 
-@pytest.mark.asyncio
-async def test_classify_greeting():
-    result = await CerezoIntentClassifier.classify("Hola Cerezo")
-    assert result["intent"] == "greeting"
-    assert result["confidence"] >= 0.5
+class TestH2HSchemas:
+    def test_club_resumen_fields(self):
+        c = ClubResumen(id="c1", nombre="Olimpia", escudo="https://example.com/escudo.svg")
+        assert c.id == "c1"
+        assert c.nombre == "Olimpia"
+        assert c.escudo == "https://example.com/escudo.svg"
 
+    def test_mayor_goleada_fields(self):
+        m = MayorGoleada(goles=5, fecha="2024-03-10", goles_recibidos=1)
+        assert m.goles == 5
+        assert m.goles_recibidos == 1
 
-@pytest.mark.asyncio
-async def test_classify_club_info():
-    result = await CerezoIntentClassifier.classify("Datos de Olimpia")
-    assert result["intent"] == "club_info"
-    assert result["confidence"] >= 0.5
+    def test_h2h_partido_item_fields(self):
+        p = H2HPartidoItem(
+            id="p1", torneo="Apertura", jornada=5, fecha="2024-03-10",
+            estado="finalizado", goles_local=2, goles_visitante=1,
+            local_id="c1", visitante_id="c2"
+        )
+        assert p.goles_local == 2
 
-
-@pytest.mark.asyncio
-async def test_classify_table_position():
-    result = await CerezoIntentClassifier.classify("Cómo viene la tabla")
-    assert result["intent"] == "table_position"
-
-
-@pytest.mark.asyncio
-async def test_classify_prediction():
-    result = await CerezoIntentClassifier.classify("Quién gana el próximo partido")
-    assert result["intent"] == "prediction"
-
-
-@pytest.mark.asyncio
-async def test_classify_unknown():
-    result = await CerezoIntentClassifier.classify("xyzzy flurbo garplax")
-    assert result["intent"] == "unknown"
+    def test_h2h_out_structure(self):
+        ca = ClubResumen(id="c1", nombre="Olimpia", escudo="")
+        cb = ClubResumen(id="c2", nombre="Cerro", escudo="")
+        resumen = {"pj": 10, "victorias_a": 4, "empates": 2, "victorias_b": 4,
+                    "goles_a": 12, "goles_b": 11,
+                    "mayor_goleada_a": MayorGoleada(goles=3, fecha="2024-01-01", goles_recibidos=0),
+                    "mayor_goleada_b": None}
+        h2h = H2HOut(club_a=ca, club_b=cb, resumen=resumen, partidos=[])
+        assert h2h.club_a.nombre == "Olimpia"
+        assert h2h.resumen["pj"] == 10
 ```
 
-## Implementation
+#### Step 2: Run test to verify it fails
 
-**Important:** There is NO ONNX embedding infrastructure in this project. Use a **keyword-based classifier** instead. Each intent has a list of trigger keywords. Score by counting keyword matches per intent.
+Run from `C:\Users\astur\Desktop\liga.paraguaya.futbol\backend`:
+```bash
+$env:PYTHONPATH="C:\Users\astur\Desktop\liga.paraguaya.futbol"; python -m pytest tests/test_h2h.py -v
+```
+Expected: FAIL — `H2HOut` not defined.
+
+#### Step 3: Write schemas
 
 ```python
-_KEYWORDS: dict[str, list[str]] = {
-    "club_info": ["datos", "información", "informacion", "cómo es", "como es", "historia", "detalles", "informacion del club"],
-    "match_result": ["ganó", "gano", "resultado", "cómo quedó", "como quedo", "último partido", "ultimo partido", "último clásico", "ultimo clasico"],
-    "head_to_head": ["historial", "cómo le fue", "como le fue", "contra", "versus", "enfrentaron", "clásicos", "clasicos"],
-    "table_position": ["tabla", "posiciones", "lidera", "posición", "posicion", "campeonato"],
-    "prediction": ["gana", "próximo", "proximo", "predicción", "prediccion", "pronóstico", "pronostico", "va a ganar"],
-    "top_scorer": ["goleador", "artillero", "máximo", "maximo", "goleadores"],
-    "greeting": ["hola", "buenas", "buen", "cómo estás", "como estas", "buen día", "buen dia", "qué tal", "que tal"],
-}
+# Add to backend/app/schemas/partido.py (after line 38)
+class ClubResumen(BaseModel):
+    id: str
+    nombre: str
+    escudo: str
 
 
-class CerezoIntentClassifier:
+class MayorGoleada(BaseModel):
+    goles: int
+    fecha: str
+    goles_recibidos: int
 
-    @staticmethod
-    async def classify(message: str) -> dict:
-        text_lower = message.lower()
-        scores: dict[str, int] = {}
-        for intent, keywords in _KEYWORDS.items():
-            count = sum(1 for kw in keywords if kw in text_lower)
-            if count > 0:
-                scores[intent] = count
 
-        if not scores:
-            return {"intent": "unknown", "confidence": 0.0, "entities": {}}
+class H2HPartidoItem(BaseModel):
+    id: str
+    torneo: str
+    jornada: int
+    fecha: str
+    estado: str
+    goles_local: Optional[int] = None
+    goles_visitante: Optional[int] = None
+    local_id: str
+    visitante_id: str
 
-        best_intent = max(scores, key=scores.get)
-        best_score = scores[best_intent]
 
-        confidence = min(round(best_score * 0.35, 4), 0.95)
-
-        return {"intent": best_intent, "confidence": confidence, "entities": {}}
+class H2HOut(BaseModel):
+    club_a: ClubResumen
+    club_b: ClubResumen
+    resumen: dict
+    partidos: list[H2HPartidoItem]
 ```
 
-The confidence formula ensures:
-- 1 match → confidence ≈ 0.35 < 0.5 ❌
-- 2 matches → confidence ≈ 0.7 ≥ 0.5 ✓
-- 3+ matches → caps at 0.95
-
-Wait — test_classify_greeting expects confidence >= 0.5 for "Hola Cerezo" which has only 1 keyword match ("hola"). So we need a higher base confidence.
-
-Let me use a formula that gives >= 0.5 for a single match:
-- 1 match → 0.55
-- 2 matches → 0.75
-- 3+ matches → 0.9
-
-```python
-confidence_map = {1: 0.55, 2: 0.75, 3: 0.85}
-confidence = confidence_map.get(best_score, min(best_score * 0.3, 0.95))
-# But if best_score > 3, cap at 0.95
-```
-
-Actually simpler: `min(0.5 + (best_score - 1) * 0.2, 0.95)`:
-- 1 match → 0.5
-- 2 matches → 0.7
-- 3 matches → 0.9
-- 4+ matches → 0.95
-
-This meets all test criteria.
-
-## Steps
-
-1. Create `__init__.py` (empty file)
-2. Write the test file above
-3. Run: `cd backend && $env:PYTHONPATH=".." && python -m pytest tests/test_cerezo_classifier.py -v`
-   Expected: FAIL (no module named classifier)
-4. Write the implementation with keyword-based classifier
-5. Run the test again — Expected: 5 PASS
-6. Commit both files:
+#### Step 4: Run test to verify it passes
 
 ```bash
-git add backend/app/services/cerezo/__init__.py backend/app/services/cerezo/classifier.py backend/tests/test_cerezo_classifier.py
-git commit -m "feat: Cerezo IntentClassifier — keyword-based intent classification"
+$env:PYTHONPATH="C:\Users\astur\Desktop\liga.paraguaya.futbol"; python -m pytest tests/test_h2h.py::TestH2HSchemas -v
+```
+Expected: PASS
+
+#### Step 5: Commit
+
+```bash
+cd C:\Users\astur\Desktop\liga.paraguaya.futbol
+git add backend/app/schemas/partido.py backend/tests/test_h2h.py
+git commit -m "feat(h2h): add H2HOut schemas"
 ```

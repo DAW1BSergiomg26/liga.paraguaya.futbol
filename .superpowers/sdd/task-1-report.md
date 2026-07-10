@@ -1,50 +1,45 @@
-# Task 1: IntentClassifier — Report
+# Task 1 Report: Backend schemas — H2HOut
 
-## What was implemented
+## What I implemented
 
-A keyword-based `CerezoIntentClassifier` service that classifies user messages into one of 8 intents (club_info, match_result, head_to_head, table_position, prediction, top_scorer, greeting, unknown). Uses simple substring matching against keyword lists per intent, scored by match count.
+Added four Pydantic v2 models to `backend/app/schemas/partido.py`:
+- **ClubResumen** — id, nombre, escudo
+- **MayorGoleada** — goles, fecha, goles_recibidos
+- **H2HPartidoItem** — id, torneo, jornada, fecha, estado, goles_local (Optional[int]), goles_visitante (Optional[int]), local_id, visitante_id
+- **H2HOut** — club_a, club_b (ClubResumen), resumen (dict), partidos (list[H2HPartidoItem])
 
-Files created:
-- `backend/app/services/cerezo/__init__.py` — empty package init
-- `backend/app/services/cerezo/classifier.py` — `CerezoIntentClassifier` with `@staticmethod async def classify(message: str) -> dict`
-- `backend/tests/test_cerezo_classifier.py` — 5 test cases
-
-## Confidence formula
-
-`confidence = min(round(0.5 + (best_score - 1) * 0.2, 4), 0.95)`
-- 1 match → 0.5
-- 2 matches → 0.7
-- 3 matches → 0.9
-- 4+ matches → 0.95 (capped)
+Created `backend/tests/test_h2h.py` with `TestH2HSchemas` (4 tests).
 
 ## TDD Evidence
 
-### RED: Failing test output (before implementation)
-
+**RED** — before schemas existed:
 ```
-ERROR collecting tests/test_cerezo_classifier.py
-ModuleNotFoundError: No module named 'backend.app.services.cerezo.classifier'
+ImportError: cannot import name 'H2HOut' from 'backend.app.schemas.partido'
 ```
 
-### GREEN: Passing test output (after implementation)
+**GREEN** — after adding schemas:
+```
+backend/tests/test_h2h.py::TestH2HSchemas::test_club_resumen_fields PASSED
+backend/tests/test_h2h.py::TestH2HSchemas::test_mayor_goleada_fields PASSED
+backend/tests/test_h2h.py::TestH2HSchemas::test_h2h_partido_item_fields PASSED
+backend/tests/test_h2h.py::TestH2HSchemas::test_h2h_out_structure PASSED
+============================== 4 passed in 0.03s
+```
 
-```
-tests/test_cerezo_classifier.py::test_classify_greeting PASSED
-tests/test_cerezo_classifier.py::test_classify_club_info PASSED
-tests/test_cerezo_classifier.py::test_classify_table_position PASSED
-tests/test_cerezo_classifier.py::test_classify_prediction PASSED
-tests/test_cerezo_classifier.py::test_classify_unknown PASSED
-5 passed in 0.02s
-```
+## Files changed
+
+| File | Action |
+|------|--------|
+| `backend/app/schemas/partido.py` | Modified — added 4 new schema classes (52 lines) |
+| `backend/tests/test_h2h.py` | Created — TestH2HSchemas with 4 test methods (48 lines) |
 
 ## Self-review findings
 
-- No linting available (no ruff/pyright in project config) — code is minimal and clean
-- The corrected confidence formula matches the brief's resolved spec exactly
-- Tests cover all intents including the "unknown" fallback
-- Entities dict is returned empty per spec — will be populated in future tasks
-- Static method approach is consistent with other services in the project
+- Match existing conventions: used `Optional[int]` (already imported), `BaseModel` (already imported), no `model_config`.
+- `H2HOut.resumen` uses `dict` (generic) as specified — intentionally loose to accommodate computed stats.
+- Tests cover field access and structural composition (nested dict with `MayorGoleada`).
+- `MayorGoleada.fecha` is `str` not `date` — matches the brief; could be refined later if date formatting is needed.
 
-## Concerns
+## Issues/Concerns
 
-None. Simple, correct, well-tested.
+None.

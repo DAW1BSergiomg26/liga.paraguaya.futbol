@@ -1,9 +1,28 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { usePathname } from "next/navigation";
 import { getSavedToken, setAuthToken } from "@/lib/api";
+
+const AUTH_EVENT = "auth-changed";
+
+function authSubscribe(onChange: () => void): () => void {
+  window.addEventListener(AUTH_EVENT, onChange);
+  window.addEventListener("storage", onChange);
+  return () => {
+    window.removeEventListener(AUTH_EVENT, onChange);
+    window.removeEventListener("storage", onChange);
+  };
+}
+
+function getToken(): string | null {
+  try { return getSavedToken() ?? null; } catch { return null; }
+}
+
+function getIsAdmin(): boolean {
+  try { return !!localStorage.getItem("admin_api_key"); } catch { return false; }
+}
 
 function NavLink({ href, children, active, onClick }: { href: string; children: React.ReactNode; active: boolean; onClick: () => void }) {
   return (
@@ -24,18 +43,13 @@ function NavLink({ href, children, active, onClick }: { href: string; children: 
 
 export default function Navbar() {
   const pathname = usePathname();
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [token, setTokenState] = useState<string | null>(null);
+  const token = useSyncExternalStore(authSubscribe, getToken, () => null);
+  const isAdmin = useSyncExternalStore(authSubscribe, getIsAdmin, () => false);
   const [menuOpen, setMenuOpen] = useState(false);
-
-  useEffect(() => {
-    setIsAdmin(!!localStorage.getItem("admin_api_key"));
-    setTokenState(getSavedToken());
-  }, []);
 
   function handleLogout() {
     setAuthToken(null);
-    setTokenState(null);
+    window.dispatchEvent(new CustomEvent(AUTH_EVENT));
     setMenuOpen(false);
   }
 
@@ -85,7 +99,7 @@ export default function Navbar() {
   );
 
   return (
-    <nav className="bg-bg-secundario" style={{ borderBottom: "2px solid", borderImage: "linear-gradient(90deg, #D52B1E, #FFFFFF, #0038A8) 1" }}>
+    <nav className="navbar-blur sticky top-0 z-50" style={{ borderBottom: "2px solid", borderImage: "linear-gradient(90deg, #D52B1E, #FFFFFF, #0038A8) 1" }}>
       <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
         <Link href="/" className="text-xl font-bold tracking-tight relative">
           ⚽ Liga PY
@@ -115,7 +129,7 @@ export default function Navbar() {
 
       {/* Mobile */}
       {menuOpen && (
-        <div className="md:hidden border-t border-borde-sutil px-4 py-4 flex flex-col gap-4 text-sm font-medium bg-bg-secundario">
+        <div className="md:hidden border-t border-borde-sutil px-4 py-4 flex flex-col gap-4 text-sm font-medium navbar-blur">
           {navLinks}
         </div>
       )}

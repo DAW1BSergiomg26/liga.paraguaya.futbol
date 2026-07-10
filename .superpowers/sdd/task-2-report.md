@@ -1,34 +1,40 @@
-# Task 2: EntityExtractor — Report
+# Task 2 Report — Backend service `get_h2h()`
 
-**Status:** DONE
+## What was implemented
 
-## Commits
+Added `PartidoService.get_h2h(db, club_a, club_b) -> H2HOut` to `backend/app/services/partido_service.py`. Method:
+1. Fetches `Club` objects for both IDs via `db.get()`
+2. Queries `Partido` table for matches between the two clubs (any direction), ordered by date desc
+3. Builds `H2HPartidoItem` list from results
+4. Computes summary stats (wins, draws, goals, biggest wins) from finalized matches
+5. Returns an `H2HOut` with club summaries, resumen dict, and partidos list
 
-- `a263508` feat: Cerezo EntityExtractor — club alias matching + fecha parsing
+## TDD Evidence
 
-## Test Summary
-
+**RED** — Before implementation:
 ```
-tests/test_cerezo_entity_extractor.py::test_extract_club_by_name   PASSED
-tests/test_cerezo_entity_extractor.py::test_extract_club_by_alias  PASSED
-tests/test_cerezo_entity_extractor.py::test_extract_two_clubs      PASSED
-tests/test_cerezo_entity_extractor.py::test_extract_fecha_keyword  PASSED
-tests/test_cerezo_entity_extractor.py::test_extract_no_clubes      PASSED
+FAILED test_get_h2h_empty - AttributeError: type object 'PartidoService' has no attribute 'get_h2h'
 ```
 
-5/5 passed in 0.03s.
+**GREEN** — After implementation:
+```
+5 passed in 0.05s
+```
 
-## Files
+## Files changed
 
-- `backend/app/services/cerezo/entity_extractor.py` — CerezoEntityExtractor with club alias matching (32 aliases), fecha keywords (11 keywords), and torneo name extraction (Apertura/Clausura + optional year)
-- `backend/tests/test_cerezo_entity_extractor.py` — 5 TDD tests covering club by name, alias, two clubs, fecha keyword, and no-club edge case
+| File | Change |
+|------|--------|
+| `backend/app/services/partido_service.py` | Added imports (`Club`, schemas) and `get_h2h()` static method |
+| `backend/tests/test_h2h.py` | Added `TestH2HService` class with `test_get_h2h_empty` test |
 
-## Process
+## Self-review findings
 
-Followed TDD strictly:
-1. Wrote failing tests (RED — verified ModuleNotFoundError)
-2. Implemented minimal class (GREEN — 5/5 pass)
-3. Committed
+- Matches existing code patterns: `@staticmethod`, `AsyncSession`, `select()` usage, `result.scalars().all()` pattern
+- Schema imports fine at top-level (same as existing `PartidoOut`/`PartidoDetailOut`)
+- Test uses `AsyncMock` + `MagicMock` correctly, following unittest.mock patterns
+- Edge cases handled: None goles, non-finalized matches, missing Club records (falls back to raw id / empty escudo)
+- **No concerns** — implementation straightforward, test covers the empty path
 
 ## Concerns
 

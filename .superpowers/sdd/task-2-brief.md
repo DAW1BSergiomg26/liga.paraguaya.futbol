@@ -1,138 +1,173 @@
-# Task 2: EntityExtractor
+### Task 2: Backend service — get_h2h()
 
-## Files
-- Create: `backend/app/services/cerezo/entity_extractor.py`
-- Create: `backend/tests/test_cerezo_entity_extractor.py`
+**Files:**
+- Modify: `backend/app/services/partido_service.py`
+- Test: `backend/tests/test_h2h.py` (append)
 
-## Interface
-- `CerezoEntityExtractor.extract(text: str, intent: str) -> dict`
-  - Returns: `{ clubes: list[str], fecha: str | None, torneo: str | None }`
+**Interfaces:**
+- Consumes: `Partido` model, `Club` model (via eager loading), `H2HOut`, `ClubResumen`, `H2HPartidoItem`, `MayorGoleada`
+- Produces: `PartidoService.get_h2h(db, club_a, club_b) -> H2HOut`
 
-## Test Code
+#### Step 1: Write the failing test
 
 ```python
+# Add to backend/tests/test_h2h.py
 import pytest
-from backend.app.services.cerezo.entity_extractor import CerezoEntityExtractor
+from unittest.mock import AsyncMock, MagicMock
+from datetime import date
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from backend.app.services.partido_service import PartidoService
+from backend.app.models.partido import Partido
+from backend.app.models.club import Club
 
 
 @pytest.mark.asyncio
-async def test_extract_club_by_name():
-    result = await CerezoEntityExtractor.extract("Datos de Olimpia", "club_info")
-    assert "olimpia" in result["clubes"]
+async def test_get_h2h_empty():
+    db = AsyncMock(spec=AsyncSession)
+    mock_result = MagicMock()
+    mock_result.scalars.return_value.all.return_value = []
+    db.execute = AsyncMock(return_value=mock_result)
 
-
-@pytest.mark.asyncio
-async def test_extract_club_by_alias():
-    result = await CerezoEntityExtractor.extract("Cómo le fue al Ciclón", "head_to_head")
-    assert "cerro-porteno" in result["clubes"]
-
-
-@pytest.mark.asyncio
-async def test_extract_two_clubs():
-    result = await CerezoEntityExtractor.extract("Olimpia vs Cerro Porteño", "match_result")
-    assert "olimpia" in result["clubes"]
-    assert "cerro-porteno" in result["clubes"]
-
-
-@pytest.mark.asyncio
-async def test_extract_fecha_keyword():
-    result = await CerezoEntityExtractor.extract("Quién ganó el último partido", "match_result")
-    assert result["fecha"] == "ultimo"
-
-
-@pytest.mark.asyncio
-async def test_extract_no_clubes():
-    result = await CerezoEntityExtractor.extract("Cómo viene la tabla", "table_position")
-    assert result["clubes"] == []
+    result = await PartidoService.get_h2h(db, "c1", "c2")
+    assert result.club_a.id == "c1"
+    assert result.club_b.id == "c2"
+    assert result.partidos == []
+    assert result.resumen["pj"] == 0
 ```
 
-## Implementation
+#### Step 2: Run test to verify it fails
+
+```bash
+$env:PYTHONPATH="C:\Users\astur\Desktop\liga.paraguaya.futbol"; python -m pytest backend/tests/test_h2h.py::test_get_h2h_empty -v
+```
+Expected: FAIL — `PartidoService.get_h2h` not defined.
+
+#### Step 3: Implement get_h2h()
 
 ```python
-_CLUB_ALIASES: dict[str, str] = {
-    "olimpia": "olimpia",
-    "el decano": "olimpia",
-    "decano": "olimpia",
-    "cerro porteño": "cerro-porteno",
-    "cerro porteno": "cerro-porteno",
-    "cerro": "cerro-porteno",
-    "el ciclón": "cerro-porteno",
-    "el ciclon": "cerro-porteno",
-    "ciclón": "cerro-porteno",
-    "ciclon": "cerro-porteno",
-    "libertad": "libertad",
-    "gumarelo": "libertad",
-    "guaraní": "guarani",
-    "guarani": "guarani",
-    "el aborigen": "guarani",
-    "aborigen": "guarani",
-    "nacional": "nacional",
-    "tricolor": "nacional",
-    "sol de américa": "sol-de-america",
-    "sol de america": "sol-de-america",
-    "sol": "sol-de-america",
-    "luqueño": "sportivo-luqueno",
-    "sportivo luqueño": "sportivo-luqueno",
-    "sportivo luqueno": "sportivo-luqueno",
-    "luque": "sportivo-luqueno",
-    "capiatá": "deportivo-capiat",
-    "deportivo capiatá": "deportivo-capiat",
-    "tacuary": "tacuary",
-    "tacua": "tacuary",
-}
+# Add to backend/app/services/partido_service.py (after line 74 or last method)
 
-_FECHA_KEYWORDS: dict[str, str] = {
-    "último": "ultimo",
-    "ultimo": "ultimo",
-    "última": "ultimo",
-    "ultima": "ultimo",
-    "próximo": "proximo",
-    "proximo": "proximo",
-    "próxima": "proximo",
-    "proxima": "proximo",
-    "ayer": "ayer",
-    "pasado": "ultimo",
-    "anterior": "ultimo",
-}
+@staticmethod
+async def get_h2h(
+    db: AsyncSession,
+    club_a: str,
+    club_b: str,
+) -> "H2HOut":
+    from backend.app.schemas.partido import ClubResumen, H2HOut, H2HPartidoItem, MayorGoleada
 
+    # Fetch club info
+    from backend.app.models.club import Club
+    club_a_obj = await db.get(Club, club_a)
+    club_b_obj = await db.get(Club, club_b)
 
-class CerezoEntityExtractor:
+    # Fetch matches between these two clubs
+    stmt = (
+        select(Partido)
+        .where(
+            ((Partido.local_id == club_a) & (Partido.visitante_id == club_b)) |
+            ((Partido.local_id == club_b) & (Partido.visitante_id == club_a))
+        )
+        .order_by(Partido.fecha.desc())
+    )
+    result = await db.execute(stmt)
+    partidos = result.scalars().all()
 
-    @staticmethod
-    async def extract(text: str, intent: str) -> dict:
-        text_lower = text.lower()
-        clubes = []
-        for alias, club_id in _CLUB_ALIASES.items():
-            if alias in text_lower and club_id not in clubes:
-                clubes.append(club_id)
+    # Build partido items
+    items = []
+    for p in partidos:
+        items.append(H2HPartidoItem(
+            id=p.id,
+            torneo=p.torneo,
+            jornada=p.jornada,
+            fecha=p.fecha.isoformat() if p.fecha else "",
+            estado=p.estado,
+            goles_local=p.goles_local,
+            goles_visitante=p.goles_visitante,
+            local_id=p.local_id,
+            visitante_id=p.visitante_id,
+        ))
 
-        fecha = None
-        for keyword, value in _FECHA_KEYWORDS.items():
-            if keyword in text_lower:
-                fecha = value
-                break
+    # Compute summary
+    victorias_a = 0
+    victorias_b = 0
+    empates = 0
+    goles_a = 0
+    goles_b = 0
+    mayor_a_goles = 0
+    mayor_a_recibidos = 0
+    mayor_a_fecha = ""
+    mayor_b_goles = 0
+    mayor_b_recibidos = 0
+    mayor_b_fecha = ""
 
-        torneo = None
-        for t in ["apertura", "clausura"]:
-            if t in text_lower:
-                import re
-                match = re.search(rf"{t}\s*(\d{{4}})?", text_lower)
-                if match:
-                    year = match.group(1) or ""
-                    torneo = f"{t.capitalize()} {year}".strip()
+    for p in partidos:
+        if p.goles_local is None or p.goles_visitante is None:
+            continue
+        if p.estado != "finalizado":
+            continue
 
-        return {"clubes": clubes, "fecha": fecha, "torneo": torneo}
+        if p.local_id == club_a:
+            ga, gb = p.goles_local, p.goles_visitante
+        else:
+            ga, gb = p.goles_visitante, p.goles_local
+
+        goles_a += ga
+        goles_b += gb
+
+        if ga > gb:
+            victorias_a += 1
+            if ga > mayor_a_goles:
+                mayor_a_goles = ga
+                mayor_a_recibidos = gb
+                mayor_a_fecha = p.fecha.isoformat() if p.fecha else ""
+        elif gb > ga:
+            victorias_b += 1
+            if gb > mayor_b_goles:
+                mayor_b_goles = gb
+                mayor_b_recibidos = ga
+                mayor_b_fecha = p.fecha.isoformat() if p.fecha else ""
+        else:
+            empates += 1
+
+    mayor_goleada_a = None
+    if mayor_a_goles > 0:
+        mayor_goleada_a = MayorGoleada(goles=mayor_a_goles, fecha=mayor_a_fecha, goles_recibidos=mayor_a_recibidos)
+
+    mayor_goleada_b = None
+    if mayor_b_goles > 0:
+        mayor_goleada_b = MayorGoleada(goles=mayor_b_goles, fecha=mayor_b_fecha, goles_recibidos=mayor_b_recibidos)
+
+    resumen = {
+        "pj": len(items),
+        "victorias_a": victorias_a,
+        "empates": empates,
+        "victorias_b": victorias_b,
+        "goles_a": goles_a,
+        "goles_b": goles_b,
+        "mayor_goleada_a": mayor_goleada_a,
+        "mayor_goleada_b": mayor_goleada_b,
+    }
+
+    return H2HOut(
+        club_a=ClubResumen(id=club_a, nombre=club_a_obj.nombre if club_a_obj else club_a, escudo=club_a_obj.escudo if club_a_obj else ""),
+        club_b=ClubResumen(id=club_b, nombre=club_b_obj.nombre if club_b_obj else club_b, escudo=club_b_obj.escudo if club_b_obj else ""),
+        resumen=resumen,
+        partidos=items,
+    )
 ```
 
-## Steps
+#### Step 4: Run test to verify it passes
 
-1. Write the test file
-2. Run: `cd backend && $env:PYTHONPATH=".." && python -m pytest tests/test_cerezo_entity_extractor.py -v`
-   Expected: FAIL (module not found)
-3. Write the implementation
-4. Run test again — Expected: 5 PASS
-5. Commit:
 ```bash
-git add backend/app/services/cerezo/entity_extractor.py backend/tests/test_cerezo_entity_extractor.py
-git commit -m "feat: Cerezo EntityExtractor — club alias matching + fecha parsing"
+$env:PYTHONPATH="C:\Users\astur\Desktop\liga.paraguaya.futbol"; python -m pytest backend/tests/test_h2h.py::test_get_h2h_empty -v
+```
+Expected: PASS
+
+#### Step 5: Commit
+
+```bash
+cd C:\Users\astur\Desktop\liga.paraguaya.futbol
+git add backend/app/services/partido_service.py backend/tests/test_h2h.py
+git commit -m "feat(h2h): add PartidoService.get_h2h()"
 ```

@@ -1,179 +1,99 @@
-# Task 7: Frontend Chat Components (ChatWidget + ChatMessage)
+### Task 7: Modify /tabla page layout
 
-## Files to Create
-- `frontend/src/components/ChatMessage.tsx`
-- `frontend/src/components/ChatWidget.tsx`
+**Files:**
+- Modify: `frontend/src/app/tabla/page.tsx`
 
-## Exact Code
+- [ ] **Step 1: Modify layout to add sidebar**
 
-### frontend/src/components/ChatMessage.tsx
+The current outer container is:
 ```tsx
-interface ChatMessageProps {
-  username: string;
-  nombre: string;
-  imagen: string;
-  contenido: string;
-  created_at: string;
-}
+<div className="max-w-6xl mx-auto px-4 py-12">
+```
 
-export default function ChatMessage({ username, nombre, imagen, contenido, created_at }: ChatMessageProps) {
+Replace it with a grid container:
+```tsx
+<div className="max-w-6xl mx-auto px-4 py-12">
+  <div className="lg:grid lg:grid-cols-[1fr_320px] lg:gap-8">
+    <div>
+      {/* existing content */}
+    </div>
+    <div className="mt-8 lg:mt-0">
+      <Sidebar />
+    </div>
+  </div>
+</div>
+```
+
+Specifically, the file currently looks like:
+
+```tsx
+export default function TablaPage() {
+  // ...hooks...
+
   return (
-    <div className="flex gap-2 py-2 px-3 hover:bg-gray-800/30 rounded-lg transition-colors">
-      <img
-        src={imagen || `https://ui-avatars.com/api/?name=${nombre}&background=1f2937&color=fff`}
-        alt={nombre}
-        className="w-8 h-8 rounded-full mt-0.5"
-      />
-      <div className="flex-1 min-w-0">
-        <div className="flex items-baseline gap-2">
-          <span className="text-sm font-semibold text-indigo-400 truncate">
-            {nombre}
-          </span>
-          <span className="text-xs text-gray-500 shrink-0">
-            {new Date(created_at).toLocaleTimeString("es-PY", { hour: "2-digit", minute: "2-digit" })}
-          </span>
+    <div className="max-w-6xl mx-auto px-4 py-12">
+      <div className="bg-gradient-to-br from-bg-secundario/80 to-bg-primario ...">
+        ...hero header...
+      </div>
+
+      {isLoading && <TableSkeleton rows={12} cols={10} />}
+      {error && <ErrorMessage message={error.message} />}
+      {tabla && tabla.length === 0 && <div>...</div>}
+      {tabla && tabla.length > 0 && (
+        <div className="overflow-x-auto rounded-xl border border-borde-sutil">
+          <table>
+            ...
+          </table>
         </div>
-        <p className="text-sm text-gray-200 break-words">{contenido}</p>
-      </div>
+      )}
     </div>
   );
 }
 ```
 
-### frontend/src/components/ChatWidget.tsx
+Change the return to wrap content in a grid. The sidebar goes below the hero but alongside the table:
+
 ```tsx
-"use client";
-
-import { useState, useEffect, useRef, useCallback } from "react";
-import ChatMessage from "./ChatMessage";
-
-interface ChatWidgetProps {
-  partidoId: string;
-}
-
-interface Mensaje {
-  id: string;
-  user_id: string;
-  username: string;
-  nombre: string;
-  imagen: string;
-  contenido: string;
-  created_at: string;
-}
-
-export default function ChatWidget({ partidoId }: ChatWidgetProps) {
-  const [messages, setMessages] = useState<Mensaje[]>([]);
-  const [input, setInput] = useState("");
-  const [connected, setConnected] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const wsRef = useRef<WebSocket | null>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
-  const tokenRef = useRef<string>("");
-
-  const token = typeof window !== "undefined"
-    ? localStorage.getItem("auth_token") || ""
-    : "";
-
-  useEffect(() => {
-    tokenRef.current = token;
-  }, [token]);
-
-  // Load history
-  useEffect(() => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://backend-production-0b7d.up.railway.app";
-    fetch(`${apiUrl}/api/v1/partidos/${partidoId}/chat?limit=50`)
-      .then((r) => r.json())
-      .then((data) => {
-        setMessages(data.reverse());
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, [partidoId]);
-
-  // WebSocket connection
-  useEffect(() => {
-    if (!token) return;
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://backend-production-0b7d.up.railway.app";
-    const wsUrl = apiUrl.replace(/^http/, "ws");
-    const ws = new WebSocket(`${wsUrl}/api/v1/ws/partidos/${partidoId}?token=${token}`);
-
-    ws.onopen = () => setConnected(true);
-    ws.onclose = () => setConnected(false);
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.tipo === "mensaje_nuevo") {
-        setMessages((prev) => [...prev, data]);
-        setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 50);
-      }
-    };
-
-    wsRef.current = ws;
-    return () => ws.close();
-  }, [partidoId, token]);
-
-  const sendMessage = useCallback(() => {
-    if (!input.trim() || !wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return;
-    wsRef.current.send(JSON.stringify({ tipo: "mensaje", contenido: input.trim() }));
-    setInput("");
-  }, [input]);
-
   return (
-    <div className="mt-6 border border-gray-700 rounded-xl overflow-hidden">
-      <div className="bg-gray-800/50 px-4 py-2 border-b border-gray-700 flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-gray-200">Chat en Vivo</h3>
-        <span className={`w-2 h-2 rounded-full ${connected ? "bg-green-500" : "bg-red-500"}`} />
+    <div className="max-w-6xl mx-auto px-4 py-12">
+      <div className="bg-gradient-to-br from-bg-secundario/80 to-bg-primario ...">
+        ...hero header... (unchanged)
       </div>
 
-      <div className="h-72 overflow-y-auto bg-gray-900/50">
-        {loading ? (
-          <div className="flex items-center justify-center h-full text-gray-500 text-sm">
-            Cargando mensajes...
-          </div>
-        ) : messages.length === 0 ? (
-          <div className="flex items-center justify-center h-full text-gray-500 text-sm">
-            No hay mensajes aún. ¡Sé el primero!
-          </div>
-        ) : (
-          messages.map((msg) => (
-            <ChatMessage key={msg.id} {...msg} />
-          ))
-        )}
-        <div ref={bottomRef} />
-      </div>
+      <div className="lg:grid lg:grid-cols-[1fr_320px] lg:gap-8">
+        <div>
+          {isLoading && <TableSkeleton rows={12} cols={10} />}
+          {error && <ErrorMessage message={error.message} />}
+          {tabla && tabla.length === 0 && (
+            <div className="text-center py-16 text-texto-secundario">
+              No hay datos para este torneo
+            </div>
+          )}
+          {tabla && tabla.length > 0 && (
+            <div className="overflow-x-auto rounded-xl border border-borde-sutil">
+              <table>...</table>
+            </div>
+          )}
+        </div>
 
-      <div className="flex gap-2 p-3 border-t border-gray-700 bg-gray-800/30">
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-          placeholder="Escribe un mensaje..."
-          maxLength={500}
-          className="flex-1 bg-gray-700 text-sm text-white rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500 placeholder-gray-400"
-        />
-        <button
-          onClick={sendMessage}
-          disabled={!input.trim() || !connected}
-          className="px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        >
-          Enviar
-        </button>
+        <div className="mt-8 lg:mt-0">
+          <Sidebar />
+        </div>
       </div>
     </div>
   );
-}
 ```
 
-## Global Constraints
-- Follow existing frontend patterns (Tailwind CSS, dark theme, existing components in `frontend/src/components/`)
-- `"use client"` directive required for ChatWidget (uses hooks)
-- No emoji in code - already removed from ChatWidget title
+Add the Sidebar import at the top:
+```tsx
+import Sidebar from "@/components/sidebar/Sidebar";
+```
 
-## Commit
+- [ ] **Step 2: Commit**
+
 ```bash
-git add frontend/src/components/ChatMessage.tsx frontend/src/components/ChatWidget.tsx
-git commit -m "feat: add ChatWidget and ChatMessage components"
+git add frontend/src/app/tabla/page.tsx
+git commit -m "feat(frontend): add sidebar layout to /tabla page"
 ```
 
-## Report File
-`.superpowers/sdd/task-7-report.md`
+---

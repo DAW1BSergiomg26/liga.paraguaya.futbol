@@ -3,6 +3,7 @@ import { Inter, Barlow_Condensed } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import StripesBackground from "@/components/layout/StripesBackground";
 import Providers from "./providers";
 import PushSetup from "@/components/PushSetup";
 
@@ -33,6 +34,7 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={`${inter.className} ${barlowCondensed.variable} bg-bg-primario text-texto-principal min-h-screen flex flex-col`}>
+        <StripesBackground />
         <Providers>
           <Navbar />
           <main className="flex-1">{children}</main>

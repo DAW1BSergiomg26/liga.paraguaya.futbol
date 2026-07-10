@@ -1,6 +1,8 @@
+from datetime import date, datetime, timezone
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.app.core.dependencies import get_db
@@ -8,6 +10,12 @@ from backend.app.schemas.partido import PartidoDetailOut, PartidoOut, PartidoPag
 from backend.app.services.partido_service import PartidoService
 
 router = APIRouter(prefix="/api/v1/partidos", tags=["partidos"])
+
+
+class MarcadorOut(BaseModel):
+    goles_local: Optional[int] = None
+    goles_visitante: Optional[int] = None
+    minuto: int = 0
 
 
 @router.get("", response_model=PartidoPage)
@@ -33,6 +41,31 @@ async def listar_partidos(
         page=page,
         per_page=per_page,
         total_pages=(total + per_page - 1) // per_page if total > 0 else 1,
+    )
+
+
+@router.get("/{partido_id}/marcador", response_model=MarcadorOut)
+async def marcador_partido(
+    partido_id: str,
+    db: AsyncSession = Depends(get_db),
+):
+    partido = await PartidoService.get_by_id(db, partido_id)
+    if not partido:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"No se encontró el partido con id: {partido_id}",
+        )
+    minuto = 0
+    if partido.estado == "finalizado":
+        minuto = 90
+    elif partido.estado == "en_vivo" and isinstance(partido.fecha, date):
+        match_start = datetime.combine(partido.fecha, datetime.min.time(), tzinfo=timezone.utc)
+        delta = datetime.now(timezone.utc) - match_start
+        minuto = min(max(int(delta.total_seconds() // 60), 0), 120)
+    return MarcadorOut(
+        goles_local=partido.goles_local,
+        goles_visitante=partido.goles_visitante,
+        minuto=minuto,
     )
 
 

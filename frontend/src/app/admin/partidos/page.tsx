@@ -10,7 +10,9 @@ import Pagination from "@/components/Pagination";
 export default function AdminPartidosPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const [apiKey, setApiKey] = useState<string | null>(null);
+  const [apiKey] = useState<string | null>(() => {
+    try { return localStorage.getItem("admin_api_key"); } catch { return null; }
+  });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({ goles_local: "", goles_visitante: "", estado: "programado" });
   const [filtroTorneo, setFiltroTorneo] = useState("");
@@ -21,10 +23,8 @@ export default function AdminPartidosPage() {
   const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
   useEffect(() => {
-    const key = localStorage.getItem("admin_api_key");
-    if (!key) router.push("/admin");
-    else setApiKey(key);
-  }, [router]);
+    if (!apiKey) router.push("/admin");
+  }, [apiKey, router]);
 
   const showToast = useCallback((type: "success" | "error", message: string) => {
     setToast({ type, message });

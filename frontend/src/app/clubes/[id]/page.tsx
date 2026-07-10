@@ -1,15 +1,47 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getClub, getPartidos } from "@/lib/api";
-import type { Club, ClubDetail, Partido, PartidoPage } from "@/types";
+import { getClub, getPartidos, getTabla, getTorneos } from "@/lib/api";
+import type { Club, ClubDetail, Partido, PartidoPage, TablaRow } from "@/types";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import ErrorMessage from "@/components/ui/ErrorMessage";
 
+function torneoActual(torneos: string[]): string | null {
+  if (torneos.length === 0) return null;
+  const yearRegex = /\b(20\d{2})\b/;
+  const conAnio = torneos.filter(t => yearRegex.test(t));
+  if (conAnio.length === 0) return torneos[0];
+  return conAnio.sort((a, b) => {
+    const yearA = parseInt(a.match(yearRegex)![1]);
+    const yearB = parseInt(b.match(yearRegex)![1]);
+    if (yearA !== yearB) return yearB - yearA;
+    const apertura = /apertura/i;
+    const aIsApertura = apertura.test(a) ? 0 : 1;
+    const bIsApertura = apertura.test(b) ? 0 : 1;
+    return aIsApertura - bIsApertura;
+  })[0];
+}
+
 export default function ClubDetailPage() {
   const params = useParams();
   const id = params.id as string;
+  const [visible, setVisible] = useState(false);
+  const partidosRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = partidosRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) { setVisible(true); obs.unobserve(el); }
+      },
+      { threshold: 0.08 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
 
   const { data: club, isLoading, error } = useQuery<ClubDetail>({
     queryKey: ["club", id],
@@ -21,6 +53,24 @@ export default function ClubDetailPage() {
     queryFn: () => getPartidos(),
   });
   const partidos = partidosPage?.data;
+
+  const { data: torneos } = useQuery<string[]>({
+    queryKey: ["torneos"],
+    queryFn: () => getTorneos(),
+    staleTime: 300_000,
+  });
+  const torneo = torneos ? torneoActual(torneos) : null;
+
+  const { data: tabla } = useQuery<TablaRow[]>({
+    queryKey: ["tabla", torneo ?? ""],
+    queryFn: () => getTabla(torneo ?? undefined),
+    enabled: !!torneo,
+    staleTime: 60_000,
+  });
+
+  const posClub = tabla?.find((r) => r.club_id === id || r.club?.toLowerCase().includes(
+    (club?.nombre || "").toLowerCase()
+  ));
 
   if (isLoading) return (
     <div className="max-w-6xl mx-auto px-4 py-12">
@@ -71,13 +121,18 @@ export default function ClubDetailPage() {
       </Link>
 
       <div className="p-8 rounded-2xl border border-borde-sutil bg-bg-secundario/80 shadow-xl">
-        <div className="flex items-start gap-6 mb-6">
+          <div className="flex items-start gap-6 mb-6">
           {club.escudo && (
             <img src={club.escudo} alt={club.nombre} className="w-20 h-20 object-contain shrink-0" />
           )}
           <div className="flex-1">
-            <div className="flex items-center gap-4">
-              <h1 className="text-3xl font-bold">{club.nombre}</h1>
+            <div className="flex items-center gap-4 flex-wrap">
+              <h1 className="text-3xl font-bold text-gradient-shine">{club.nombre}</h1>
+              {posClub && (
+                <span className="px-3 py-1 rounded-full text-sm font-bold border border-dorado-medalla/40 text-dorado-medalla bg-dorado-medalla/10">
+                  #{posClub.posicion} en tabla
+                </span>
+              )}
               <div className="flex gap-1.5">
                 {(club.colores || []).map((color, i) => (
                   <span
@@ -160,15 +215,16 @@ export default function ClubDetailPage() {
         </div>
       )}
 
-      <section className="mt-10">
-        <h2 className="text-2xl font-bold mb-4">Próximos Partidos</h2>
+      <section className="mt-10" ref={partidosRef}>
+        <h2 className="text-2xl font-bold mb-4 text-gradient-shine">Partidos</h2>
         {clubPartidos.length > 0 ? (
           <div className="grid gap-4">
-            {clubPartidos.map((p) => (
+            {clubPartidos.map((p, i) => (
               <Link
                 key={p.id}
                 href={`/partidos/${p.id}`}
-                className="p-4 rounded-xl border border-borde-sutil bg-bg-secundario/60 hover:bg-bg-secundario transition block"
+                className={`p-4 rounded-xl border border-borde-sutil bg-bg-secundario/60 hover:bg-bg-secundario transition block ${visible ? "animate-row-enter" : "opacity-0"}`}
+                style={{ animationDelay: visible ? `${i * 40}ms` : "0ms" }}
               >
                 <div className="flex items-center justify-between">
                   <div>

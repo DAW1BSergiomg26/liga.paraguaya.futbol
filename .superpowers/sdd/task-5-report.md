@@ -1,22 +1,18 @@
-# Task 5: ResponseGenerator — Report
+# Task 5: FeedNoticias component
 
-## Status
-✅ Complete
+**Status:** Complete
 
-## Commits
-- `1c737ff` feat: Cerezo ResponseGenerator — tiny LLM + template fallback
+## Steps performed
 
-## Test Summary
-```
-tests/test_cerezo_response_generator.py::test_generate_greeting   PASSED
-tests/test_cerezo_response_generator.py::test_generate_club_info  PASSED
-tests/test_cerezo_response_generator.py::test_generate_prediction PASSED
-```
-All 3/3 passing. LLM fallback path exercised (llama-cpp-python not installed).
+1. Created `frontend/src/components/sidebar/FeedNoticias.tsx` with:
+   - `"use client"` directive
+   - `useQuery` from `@tanstack/react-query` calling `getNoticias()` with 5min staleTime and 1 retry
+   - `formatearFecha` helper for relative time display (es-PY locale)
+   - Skeleton loading state (3 animated pulse bars)
+   - Error state → "No hay noticias disponibles"
+   - Empty state → "No hay noticias disponibles"
+   - News items with red left border (`border-py-rojo`), title, source, and relative time
 
-## Concerns
-Minor: `estadio` field is optional in club data but referenced in a template. Handled via `setdefault("estadio", "su estadio")`.
+2. Verified with `npx tsc --noEmit` — only pre-existing error (useLiveScore module not found)
 
-## Files
-- `backend/app/services/cerezo/response_generator.py` — implementation (160 lines)
-- `backend/tests/test_cerezo_response_generator.py` — tests (32 lines)
+3. Committed with: `feat(frontend): add FeedNoticias component with RSS news`

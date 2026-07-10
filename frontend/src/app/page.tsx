@@ -1,6 +1,7 @@
 import { getClubes, getPartidos, getTabla, getTorneos } from "@/lib/api";
 import type { PartidoPage } from "@/types";
 import Link from "next/link";
+import HeroStats from "@/components/HeroStats";
 
 async function safeFetch<T>(fn: () => Promise<T>, fallback: T): Promise<[T, string | null]> {
   try {
@@ -13,7 +14,18 @@ async function safeFetch<T>(fn: () => Promise<T>, fallback: T): Promise<[T, stri
 
 function torneoActual(torneos: string[]): string | null {
   if (torneos.length === 0) return null;
-  return torneos.sort().reverse()[0];
+  const yearRegex = /\b(20\d{2})\b/;
+  const conAnio = torneos.filter(t => yearRegex.test(t));
+  if (conAnio.length === 0) return torneos[0];
+  return conAnio.sort((a, b) => {
+    const yearA = parseInt(a.match(yearRegex)![1]);
+    const yearB = parseInt(b.match(yearRegex)![1]);
+    if (yearA !== yearB) return yearB - yearA;
+    const apertura = /apertura/i;
+    const aIsApertura = apertura.test(a) ? 0 : 1;
+    const bIsApertura = apertura.test(b) ? 0 : 1;
+    return aIsApertura - bIsApertura;
+  })[0];
 }
 
 export default async function HomePage() {
@@ -32,69 +44,17 @@ export default async function HomePage() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-12">
-      <section className="mb-12 p-8 rounded-2xl border border-borde-marca bg-bg-secundario/80 shadow-xl">
-        <p className="text-py-rojo text-sm font-bold uppercase tracking-widest mb-3">
-          Proyecto DAW · Next.js + FastAPI
-        </p>
-        <h1 className="text-4xl sm:text-6xl font-bold leading-tight mb-4 titulo-modulo">
-          Liga Paraguaya de Fútbol
-        </h1>
-        <p className="text-texto-secundario max-w-xl text-lg">
-          Plataforma de datos, clubes, partidos y tabla de posiciones del fútbol paraguayo.
-        </p>
-        {torneo && (
-          <p className="text-texto-apagado text-sm mt-2">
-            Temporada actual: <span className="text-texto-principal font-medium">{torneo}</span>
-          </p>
-        )}
-        {hasErrors ? (
-          <div className="inline-flex items-center gap-2 mt-6 px-4 py-2 rounded-full bg-derrota/20 text-derrota border border-derrota/30 text-sm">
-            <span className="w-2.5 h-2.5 rounded-full bg-derrota shadow-lg shadow-derrota/50" />
-            Error de conexión con el backend
-          </div>
-        ) : (
-          <div className="inline-flex items-center gap-2 mt-6 px-4 py-2 rounded-full bg-victoria/20 text-victoria border border-victoria/30 text-sm">
-            <span className="w-2.5 h-2.5 rounded-full bg-victoria shadow-lg shadow-victoria/50" />
-            Backend activo correctamente
-          </div>
-        )}
-      </section>
-
-      {errClubes && (
-        <div className="mb-4 px-4 py-3 rounded-lg bg-derrota/20 border border-derrota/30 text-derrota text-sm">
-          Error al cargar clubes: {errClubes}
-        </div>
-      )}
-      {errPartidos && (
-        <div className="mb-4 px-4 py-3 rounded-lg bg-derrota/20 border border-derrota/30 text-derrota text-sm">
-          Error al cargar partidos: {errPartidos}
-        </div>
-      )}
-      {errTorneos && (
-        <div className="mb-4 px-4 py-3 rounded-lg bg-derrota/20 border border-derrota/30 text-derrota text-sm">
-          Error al cargar torneos: {errTorneos}
-        </div>
-      )}
-      {errTabla && (
-        <div className="mb-4 px-4 py-3 rounded-lg bg-derrota/20 border border-derrota/30 text-derrota text-sm">
-          Error al cargar tabla: {errTabla}
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-12">
-        <div className="p-6 rounded-xl bg-bg-secundario/60 border border-borde-sutil text-center">
-          <p className="text-3xl font-bold text-py-rojo">{clubes.length}</p>
-          <p className="text-texto-secundario mt-1">Clubes</p>
-        </div>
-        <div className="p-6 rounded-xl bg-bg-secundario/60 border border-borde-sutil text-center">
-          <p className="text-3xl font-bold text-py-rojo">{partidosData.total}</p>
-          <p className="text-texto-secundario mt-1">Partidos</p>
-        </div>
-        <div className="p-6 rounded-xl bg-bg-secundario/60 border border-borde-sutil text-center">
-          <p className="text-3xl font-bold text-py-rojo">{tabla.length}</p>
-          <p className="text-texto-secundario mt-1">Equipos en tabla</p>
-        </div>
-      </div>
+      <HeroStats
+        clubesCount={clubes.length}
+        partidosTotal={partidosData.total}
+        equiposCount={tabla.length}
+        torneoLabel={torneo}
+        hasErrors={!!hasErrors}
+        errClubes={errClubes}
+        errPartidos={errPartidos}
+        errTorneos={errTorneos}
+        errTabla={errTabla}
+      />
 
       {tabla.length > 0 && (
         <section className="mb-12">
@@ -114,8 +74,8 @@ export default async function HomePage() {
                 </tr>
               </thead>
               <tbody>
-                {tabla.slice(0, 4).map((row) => (
-                  <tr key={row.club_id} className="border-b border-borde-sutil transition-all duration-150 hover:bg-bg-terciario hover:translate-x-0.5">
+                {tabla.slice(0, 4).map((row, idx) => (
+                  <tr key={`${row.club_id}-${idx}`} className="border-b border-borde-sutil transition-all duration-150 hover:bg-bg-terciario hover:translate-x-0.5">
                     <td className="p-4 font-bold">{row.posicion}</td>
                     <td className="p-4">
                       <div className="flex items-center gap-2">

@@ -165,7 +165,7 @@ class PartidoService:
             mayor_goleada_b = MayorGoleada(goles=mayor_b_goles, fecha=mayor_b_fecha, goles_recibidos=mayor_b_recibidos)
 
         resumen = {
-            "pj": len(items),
+            "pj": victorias_a + empates + victorias_b,
             "victorias_a": victorias_a,
             "empates": empates,
             "victorias_b": victorias_b,

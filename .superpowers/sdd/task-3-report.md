@@ -1,24 +1,17 @@
-# Task 3: DataFetcher — Report
+# Task 3 Report: Frontend — API function for news
 
-## Status
-**Complete**
+**Status:** Done
 
-## Commits
-- `0af48a0` feat: Cerezo DataFetcher — integrate club/partido/tabla services
+## Changes
 
-## Files
-- `backend/app/services/cerezo/data_fetcher.py` — `CerezoDataFetcher` class with static `fetch()` method
-- `backend/tests/test_cerezo_data_fetcher.py` — 3 tests (club_info, table_position, unknown_intent)
+### `frontend/src/types/index.ts`
+- Added `Noticia` interface (titulo, fuente, url, pub_date, resumen)
+- Added `NoticiasResponse` interface (noticias, fuentes, actualizado)
 
-## Test Summary
-- 3/3 new tests PASS
-- 74/74 existing tests PASS (no regressions)
-- Total: 77 PASS, 0 failures
+### `frontend/src/lib/api.ts`
+- Added `Noticia` and `NoticiasResponse` to the type import
+- Added `getNoticias()` function that calls `GET /api/v1/noticias`
 
-## Implementation Notes
-- Used corrected service calls: `ClubService.get_by_id(db, ...)`, `PartidoService.get_all(db)`, `TablaService.get_table(db)`
-- Followed the TDD cycle: wrote tests → verified RED (ModuleNotFoundError) → implemented → verified GREEN
-- Supports all 5 intents: club_info, match_result, head_to_head, table_position, prediction
-
-## Concerns
-None.
+## Verification
+- `npx tsc --noEmit` passes (only pre-existing error about `@/hooks/useLiveScore`)
+- Commit `9dee40a` with message: `feat(frontend): add Noticia type and getNoticias API function`
