@@ -39,7 +39,11 @@ function PartidosContent() {
   const torneo = searchParams.get("torneo") || "";
   const estado = searchParams.get("estado") || "";
 
-  const { data: partidosPage, isLoading, error } = useQuery<PartidoPage>({
+  const {
+    data: partidosPage,
+    isLoading,
+    error,
+  } = useQuery<PartidoPage>({
     queryKey: ["partidos", torneo, estado],
     queryFn: () => getPartidos(torneo || undefined, estado || undefined),
     refetchInterval: 30000,
@@ -48,9 +52,13 @@ function PartidosContent() {
 
   const sorted = useMemo(() => {
     if (!partidos) return [];
-    const order: Record<string, number> = { en_vivo: 0, programado: 1, finalizado: 2 };
+    const order: Record<string, number> = {
+      en_vivo: 0,
+      programado: 1,
+      finalizado: 2,
+    };
     return [...partidos].sort(
-      (a, b) => (order[a.estado] ?? 9) - (order[b.estado] ?? 9)
+      (a, b) => (order[a.estado] ?? 9) - (order[b.estado] ?? 9),
     );
   }, [partidos]);
 
@@ -59,16 +67,25 @@ function PartidosContent() {
     queryFn: () => getClubes(),
   });
 
-  const clubMap = new Map<string, string>();
-  if (clubes) {
-    clubes.forEach((c) => clubMap.set(c.id, c.nombre));
-  }
+  const clubMap = useMemo(() => {
+    const map = new Map<string, string>();
+    if (clubes) {
+      clubes.forEach((c) => map.set(c.id, c.nombre));
+    }
+    return map;
+  }, [clubes]);
 
   const queryClient = useQueryClient();
   const [userToken] = useState<string | null>(() => {
-    try { return getSavedToken(); } catch { return null; }
+    try {
+      return getSavedToken();
+    } catch {
+      return null;
+    }
   });
-  const [predictionPartido, setPredictionPartido] = useState<Partido | null>(null);
+  const [predictionPartido, setPredictionPartido] = useState<Partido | null>(
+    null,
+  );
 
   useEffect(() => {
     const token = getSavedToken();
@@ -85,9 +102,11 @@ function PartidosContent() {
       } else {
         params.delete(key);
       }
-      router.push(`/partidos${params.toString() ? `?${params.toString()}` : ""}`);
+      router.push(
+        `/partidos${params.toString() ? `?${params.toString()}` : ""}`,
+      );
     },
-    [searchParams, router]
+    [searchParams, router],
   );
 
   if (isLoading) return <TableSkeleton rows={8} cols={7} />;
@@ -103,7 +122,9 @@ function PartidosContent() {
 
       <div className="flex flex-wrap gap-4 mb-8">
         <div>
-          <label className="text-sm text-texto-secundario block mb-1">Torneo</label>
+          <label className="text-sm text-texto-secundario block mb-1">
+            Torneo
+          </label>
           <input
             type="text"
             value={torneo}
@@ -113,7 +134,9 @@ function PartidosContent() {
           />
         </div>
         <div>
-          <label className="text-sm text-texto-secundario block mb-1">Estado</label>
+          <label className="text-sm text-texto-secundario block mb-1">
+            Estado
+          </label>
           <select
             value={estado}
             onChange={(e) => setFilter("estado", e.target.value)}
@@ -141,14 +164,19 @@ function PartidosContent() {
                 <th className="text-center py-3 px-2">Resultado</th>
                 <th className="text-left py-3 px-2">Visitante</th>
                 <th className="text-center py-3 px-2">Estado</th>
-                <th className="text-center py-3 px-2 hidden sm:table-cell">Pronóstico</th>
-                <th className="text-center py-3 px-2 hidden md:table-cell">Jornada</th>
+                <th className="text-center py-3 px-2 hidden sm:table-cell">
+                  Pronóstico
+                </th>
+                <th className="text-center py-3 px-2 hidden md:table-cell">
+                  Jornada
+                </th>
               </tr>
             </thead>
             <tbody>
               {sorted.map((p) => {
                 const localNombre = clubMap.get(p.local_id) || p.local_id;
-                const visitanteNombre = clubMap.get(p.visitante_id) || p.visitante_id;
+                const visitanteNombre =
+                  clubMap.get(p.visitante_id) || p.visitante_id;
                 const tieneResultado =
                   p.goles_local !== null && p.goles_visitante !== null;
                 return (
@@ -178,11 +206,13 @@ function PartidosContent() {
                             ? `${p.goles_local} - ${p.goles_visitante}`
                             : "vs"}
                       </Link>
-                      {p.estado === "en_vivo" && liveScores[p.id] && liveScores[p.id].minuto > 0 && (
-                        <div className="text-xs text-red-400 mt-0.5">
-                          {liveScores[p.id].minuto}'
-                        </div>
-                      )}
+                      {p.estado === "en_vivo" &&
+                        liveScores[p.id] &&
+                        liveScores[p.id].minuto > 0 && (
+                          <div className="text-xs text-red-400 mt-0.5">
+                            {liveScores[p.id].minuto}&apos;
+                          </div>
+                        )}
                     </td>
                     <td className="py-3 px-2">
                       <Link
@@ -219,8 +249,14 @@ function PartidosContent() {
       {predictionPartido && (
         <PredictionModal
           partido={predictionPartido}
-          clubLocal={clubMap.get(predictionPartido.local_id) || predictionPartido.local_id}
-          clubVisitante={clubMap.get(predictionPartido.visitante_id) || predictionPartido.visitante_id}
+          clubLocal={
+            clubMap.get(predictionPartido.local_id) ||
+            predictionPartido.local_id
+          }
+          clubVisitante={
+            clubMap.get(predictionPartido.visitante_id) ||
+            predictionPartido.visitante_id
+          }
           onClose={() => setPredictionPartido(null)}
           onSuccess={() => {
             setPredictionPartido(null);
