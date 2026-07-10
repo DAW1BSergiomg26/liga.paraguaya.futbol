@@ -13,7 +13,7 @@ export default function MatchFormCard({ data }: Props) {
   const total = data.wins + data.draws + data.losses;
   return (
     <div className="max-w-[80%] rounded-2xl p-4 bg-bg-secundario border border-borde-sutil text-sm space-y-3">
-      <p className="text-py-rojo font-semibold text-xs uppercase tracking-wider">Últimos Partidos</p>
+      <p className="text-apf-rojo font-semibold text-xs uppercase tracking-wider">Últimos Partidos</p>
       <div className="flex gap-1.5">
         {data.last5.map((m, i) => (
           <div

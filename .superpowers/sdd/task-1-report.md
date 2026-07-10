@@ -1,49 +1,34 @@
-# Task 1 Report: Backend service method + endpoint + tests for live scores
+# Task 1 Report: Bugfix — Texto en espejo en flip cards
 
 ## What was implemented
 
-- **`PartidoService.get_en_vivo(db)`** in `backend/app/services/partido_service.py` — static method that queries `Partido` rows with `estado == "en_vivo"` and returns a scalar list of ORM objects.
-- **`GET /api/v1/partidos/marcadores`** in `backend/app/api/partidos.py` — returns a `dict[str, MarcadorOut]` mapping match IDs to their live score (goles_local, goles_visitante, minuto calculated from fecha).
+Added a CSS rule forcing GPU composition on children of `.carta-club-dorso` to fix mirrored text on WebKit/Safari:
 
-## What was tested and test results
-
-All 111 tests pass (including the 3 new ones):
-- `test_marcadores_empty_when_no_en_vivo` — endpoint returns `{}` when no live matches exist
-- `test_get_en_vivo_empty` — service returns empty list when no matches
-- `test_get_en_vivo_filters_only_en_vivo` — service only returns matches with `estado == "en_vivo"`
-
-## TDD Evidence
-
-**RED:**
-```
-> python -m pytest tests/test_marcadores.py -v
-tests/test_marcadores.py::TestMarcadorEndpoint::test_marcadores_empty_when_no_en_vivo FAILED [404]
-tests/test_marcadores.py::TestGetEnVivo::test_get_en_vivo_empty FAILED [AttributeError: no attribute 'get_en_vivo']
-tests/test_marcadores.py::TestGetEnVivo::test_get_en_vivo_filters_only_en_vivo FAILED [AttributeError: no attribute 'get_en_vivo']
+```css
+.carta-club-dorso > * {
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
 ```
 
-**GREEN:**
-```
-> python -m pytest tests/test_marcadores.py -v
-tests/test_marcadores.py::TestMarcadorEndpoint::test_marcadores_empty_when_no_en_vivo PASSED
-tests/test_marcadores.py::TestGetEnVivo::test_get_en_vivo_empty PASSED
-tests/test_marcadores.py::TestGetEnVivo::test_get_en_vivo_filters_only_en_vivo PASSED
-```
+This was placed right after the `.carta-club-dorso` block (line 181 in the final file). The rule forces each direct child into its own compositing layer, preventing Safari's renderer from incorrectly mirroring text when `backface-visibility: hidden` and `rotateY(180deg)` interact.
+
+## What was tested
+
+- Visual inspection of `ClubCard.tsx` confirmed **no inline transforms** (no `scaleX`, `scale(-1,1)`, or rogue `style` attributes)
+- Full `npm run build` — **compiled successfully** with no errors or warnings (TypeScript, static generation all passing)
 
 ## Files changed
 
-- `backend/app/services/partido_service.py` — added `get_en_vivo` static method (6 lines)
-- `backend/app/api/partidos.py` — added `marcadores_en_vivo` endpoint (16 lines)
-- `backend/tests/test_marcadores.py` — created with 3 tests (58 lines)
+- `frontend/src/app/globals.css` — Added 4 lines (CSS rule block for `.carta-club-dorso > *`)
 
 ## Self-review findings
 
-- The `MarcadorOut` schema was already defined at `backend/app/api/partidos.py:15-19` and reused directly
-- `date`, `datetime`, `timezone` imports were already present in `partidos.py`
-- `select` is already imported in `partido_service.py`
-- All existing tests continue to pass (111 total)
-- No concerns — implementation is minimal and follows existing patterns
+- The existing flip card CSS uses the standard `rotateY(180deg)` technique, which is correct. The bug is a WebKit compositing quirk, not a logic error.
+- ClubCard.tsx uses `className="carta-club-cara carta-club-dorso"` on the backface div — no inline style overrides.
+- Build succeeds with zero warnings.
+- The `translateZ(0)` approach is minimal, safe, and well-documented for forcing GPU compositing in WebKit.
 
 ## Issues or concerns
 
-None.
+None. The fix is minimal and low-risk.

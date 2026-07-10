@@ -29,9 +29,9 @@ export default function OGImage() {
             display: "flex",
           }}
         >
-          <div style={{ flex: "1 1 0%", background: "#D52B1E" }} />
+          <div style={{ flex: "1 1 0%", background: "#CC001C" }} />
           <div style={{ flex: "1 1 0%", background: "#FFFFFF" }} />
-          <div style={{ flex: "1 1 0%", background: "#0038A8" }} />
+          <div style={{ flex: "1 1 0%", background: "#00619E" }} />
         </div>
 
         <span
@@ -67,9 +67,9 @@ export default function OGImage() {
             display: "flex",
           }}
         >
-          <div style={{ flex: "1 1 0%", background: "#D52B1E" }} />
+          <div style={{ flex: "1 1 0%", background: "#CC001C" }} />
           <div style={{ flex: "1 1 0%", background: "#FFFFFF" }} />
-          <div style={{ flex: "1 1 0%", background: "#0038A8" }} />
+          <div style={{ flex: "1 1 0%", background: "#00619E" }} />
         </div>
       </div>
     ),

@@ -16,7 +16,7 @@ export default function ChatMessage({ username, nombre, imagen, contenido, creat
       />
       <div className="flex-1 min-w-0">
         <div className="flex items-baseline gap-2">
-          <span className="text-sm font-semibold text-py-rojo truncate">
+          <span className="text-sm font-semibold text-apf-rojo truncate">
             {nombre}
           </span>
           <span className="text-xs text-texto-apagado shrink-0">

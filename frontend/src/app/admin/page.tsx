@@ -26,13 +26,13 @@ export default function AdminLoginPage() {
               type="password"
               value={key}
               onChange={(e) => setKey(e.target.value)}
-              className="w-full px-4 py-2 rounded-lg bg-bg-terciario border border-borde-sutil text-white focus:outline-none focus:border-py-rojo"
+              className="w-full px-4 py-2 rounded-lg bg-bg-terciario border border-borde-sutil text-white focus:outline-none focus:border-apf-rojo"
               placeholder="Ingresá tu API Key"
             />
           </div>
           <button
             type="submit"
-            className="w-full py-2 rounded-lg bg-py-rojo text-black font-semibold hover:bg-py-rojo-oscuro transition"
+            className="w-full py-2 rounded-lg bg-apf-rojo text-black font-semibold hover:bg-apf-rojo-oscuro transition"
           >
             Ingresar
           </button>

@@ -1,110 +1,97 @@
-### Task 1: Backend service method + endpoint + tests
+### Task 1: Bugfix — Texto en espejo en flip cards
 
 **Files:**
-- Modify: `backend/app/services/partido_service.py` (add `get_en_vivo`)
-- Modify: `backend/app/api/partidos.py` (add `GET /marcadores`)
-- Create: `backend/tests/test_marcadores.py`
+- Modify: `frontend/src/app/globals.css:136-180`
+- Verify: `frontend/src/components/ui/ClubCard.tsx`
 
-**Interfaces:**
-- Consumes: `Partido` model with `estado`, `goles_local`, `goles_visitante`, `fecha`, `id` fields
-- Produces: `PartidoService.get_en_vivo(db) -> list[Partido]` (scalar list, raw ORM objects), `GET /api/v1/partidos/marcadores -> dict[str, MarcadorOut]`
+**Bug:** El texto "Datos del club" aparece horizontalmente invertido. Causa: `.carta-club-dorso { transform: rotateY(180deg) }` combinado con `backface-visibility` que no funciona correctamente en WebKit.
 
-- [ ] **Step 1: Write the failing tests**
+**Análisis concreto:** La cara frontal (`.carta-club-cara`) no tiene `transform`. El dorso (`.carta-club-dorso`) tiene `transform: rotateY(180deg)` para compensar el giro del contenedor `.carta-club-inner`. Si `backface-visibility: hidden` falla en algún browser, ambas caras son visibles: la frontal normal + el dorso rotado 180° (texto en espejo). La solución: no depender de `rotateY(180deg)` en el dorso, sino usar una técnica más robusta.
 
-Create `backend/tests/test_marcadores.py`:
+- [ ] **Step 1: Reemplazar la técnica de flip en globals.css**
 
-```python
-import pytest
-from httpx import AsyncClient
-from unittest.mock import AsyncMock, MagicMock
-from sqlalchemy.ext.asyncio import AsyncSession
-from datetime import date, datetime, timezone
+Cambiar de `rotateY(180deg)` a usar `scaleX(-1)` para el backface y `scaleX(-1)` para compensar, que es más compatible cross-browser:
 
-from backend.app.services.partido_service import PartidoService
+```css
+/* === 3D FLIP CARD — Fichas de clubes === */
 
+.carta-club {
+  -webkit-perspective: 1000px;
+  perspective: 1000px;
+  height: 320px;
+  width: 100%;
+  max-width: 380px;
+  outline: none;
+}
 
-class TestMarcadorEndpoint:
-    @pytest.mark.asyncio
-    async def test_marcadores_empty_when_no_en_vivo(self, client: AsyncClient):
-        resp = await client.get("/api/v1/partidos/marcadores")
-        assert resp.status_code == 200
-        assert resp.json() == {}
+.carta-club-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+  -webkit-transform-style: preserve-3d;
+  transform-style: preserve-3d;
+}
 
+.carta-club:hover .carta-club-inner,
+.carta-club:focus-visible .carta-club-inner {
+  transform: rotateY(180deg);
+}
 
-class TestGetEnVivo:
-    @pytest.mark.asyncio
-    async def test_get_en_vivo_empty(self):
-        db = AsyncMock(spec=AsyncSession)
-        mock_result = MagicMock()
-        mock_result.scalars.return_value.all.return_value = []
-        db.execute = AsyncMock(return_value=mock_result)
+.carta-club-cara {
+  position: absolute;
+  inset: 0;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  border-radius: 14px;
+  background: var(--color-bg-carta);
+  border: 1px solid var(--color-borde-sutil);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
 
-        result = await PartidoService.get_en_vivo(db)
-        assert result == []
-
-    @pytest.mark.asyncio
-    async def test_get_en_vivo_filters_only_en_vivo(self):
-        from backend.app.models.partido import Partido
-
-        db = AsyncMock(spec=AsyncSession)
-        live = MagicMock(spec=Partido, id="p1", estado="en_vivo", goles_local=1, goles_visitante=0,
-                         fecha=date.today())
-        mock_result = MagicMock()
-        mock_result.scalars.return_value.all.return_value = [live]
-        db.execute = AsyncMock(return_value=mock_result)
-
-        result = await PartidoService.get_en_vivo(db)
-        assert len(result) == 1
-        assert result[0].id == "p1"
+.carta-club-dorso {
+  transform: rotateY(180deg);
+  justify-content: flex-start;
+  text-align: left;
+  overflow-y: auto;
+}
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+El `rotateY(180deg)` en el dorso y en el hover del inner es la técnica estándar. Para reforzar, se agrega un wrapper de texto con `-webkit-transform: translateZ(0)` para forzar aceleración GPU:
 
-Run: `cd backend && $env:PYTHONPATH="C:\Users\astur\Desktop\liga.paraguaya.futbol"; python -m pytest tests/test_marcadores.py -v`
-Expected: FAIL with "PartidoService has no attribute 'get_en_vivo'"
+Agregar después de `.carta-club-dorso { ... }`:
 
-- [ ] **Step 3: Write minimal implementation**
-
-Add `get_en_vivo` to `PartidoService` in `backend/app/services/partido_service.py` before `get_h2h`:
-
-```python
-@staticmethod
-async def get_en_vivo(db: AsyncSession) -> list[Partido]:
-    stmt = select(Partido).where(Partido.estado == "en_vivo")
-    result = await db.execute(stmt)
-    return list(result.scalars().all())
+```css
+.carta-club-dorso > * {
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
 ```
 
-Add to `backend/app/api/partidos.py` before `h2h_partidos`:
+Esto fuerza la composición por GPU en Safari/WebKit, eliminando el mirroring.
 
-```python
-@router.get("/marcadores")
-async def marcadores_en_vivo(db: AsyncSession = Depends(get_db)):
-    partidos = await PartidoService.get_en_vivo(db)
-    now = datetime.now(timezone.utc)
-    result = {}
-    for p in partidos:
-        minuto = 0
-        if isinstance(p.fecha, date):
-            match_start = datetime.combine(p.fecha, datetime.min.time(), tzinfo=timezone.utc)
-            delta = now - match_start
-            minuto = min(max(int(delta.total_seconds() // 60), 0), 120)
-        result[p.id] = MarcadorOut(
-            goles_local=p.goles_local,
-            goles_visitante=p.goles_visitante,
-            minuto=minuto,
-        )
-    return result
-```
+- [ ] **Step 2: Verificar ClubCard.tsx**
 
-- [ ] **Step 4: Run test to verify it passes**
+Confirmar que `ClubCard.tsx` no tiene ningún `style` inline en el dorso que esté aplicando transform incorrecto.
 
-Run: `cd backend && $env:PYTHONPATH="C:\Users\astur\Desktop\liga.paraguaya.futbol"; python -m pytest tests/test_marcadores.py -v`
-Expected: PASS
+Leer el archivo y asegurarse de que no hay `scaleX` ni `scale(-1,1)` en ningún JSX.
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 3: Build para verificar**
 
 ```bash
-git add backend/app/services/partido_service.py backend/app/api/partidos.py backend/tests/test_marcadores.py
-git commit -m "feat: add GET /api/v1/partidos/marcadores batch endpoint"
+cd frontend && npm run build
 ```
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add frontend/src/app/globals.css
+git commit -m "fix: agregar translateZ(0) en dorso de flip card para evitar texto en espejo en WebKit"
+```
+
+---
+

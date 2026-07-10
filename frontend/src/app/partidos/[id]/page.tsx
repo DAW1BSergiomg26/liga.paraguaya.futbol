@@ -62,7 +62,7 @@ export default function PartidoDetailPage() {
   if (!partido) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-12">
-        <Link href="/partidos" className="text-sm text-py-rojo hover:underline mb-6 inline-block">
+        <Link href="/partidos" className="text-sm text-apf-rojo hover:underline mb-6 inline-block">
           ← Volver a partidos
         </Link>
         <div className="text-center py-16 text-gray-400">
@@ -88,7 +88,7 @@ export default function PartidoDetailPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-12">
-      <Link href="/partidos" className="text-sm text-py-rojo hover:underline mb-8 inline-block">
+      <Link href="/partidos" className="text-sm text-apf-rojo hover:underline mb-8 inline-block">
         ← Volver a partidos
       </Link>
 
@@ -164,7 +164,7 @@ export default function PartidoDetailPage() {
           }`}>
             <div className="flex items-center justify-center gap-4 text-2xl font-bold">
               <span>{partido.local_nombre}</span>
-              <span className="text-py-rojo">{prediction.goles_local} - {prediction.goles_visitante}</span>
+              <span className="text-apf-rojo">{prediction.goles_local} - {prediction.goles_visitante}</span>
               <span>{prediction.visitante_nombre}</span>
             </div>
             {prediction.puntos > 0 && (

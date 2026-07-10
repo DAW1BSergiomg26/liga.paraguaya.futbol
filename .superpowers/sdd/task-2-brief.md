@@ -1,67 +1,47 @@
-### Task 2: Frontend `useLiveScores` hook
+### Task 2: Bugfix — Footer roto
 
 **Files:**
-- Create: `frontend/src/hooks/useLiveScores.ts`
+- Modify: `frontend/src/components/layout/Footer.tsx`
+- Modify: `frontend/src/app/layout.tsx` (si es necesario)
 
-**Interfaces:**
-- Consumes: `GET /api/v1/partidos/marcadores` returning `Record<string, {goles_local, goles_visitante, minuto}>`
-- Produces: `useLiveScores() -> Record<string, LiveScore>` with polling every 30s
+**Bug:** El footer se ve descuadrado, texto solapado y línea horizontal cortando el contenido.
 
-- [ ] **Step 1: Write the hook**
+**Análisis:** El footer usa `borderTop: "2px solid"` + `borderImage` con gradiente. `borderImage` anula el borde normal, causando renderizado inconsistente. Además, la línea de gradiente puede renderizarse mal en algunos browsers porque `borderImage` y `borderTop` juntos son conflictivos.
 
-Create `frontend/src/hooks/useLiveScores.ts`:
+- [ ] **Step 1: Corregir Footer.tsx**
 
-```typescript
-import { useState, useEffect } from "react";
+Reemplazar el `style` inline problemático con un `::after` pseudo-elemento usando Tailwind:
 
-interface LiveScore {
-  goles_local: number | null;
-  goles_visitante: number | null;
-  minuto: number;
-}
-
-const POLL_INTERVAL = 30_000;
-
-export function useLiveScores(): Record<string, LiveScore> {
-  const [scores, setScores] = useState<Record<string, LiveScore>>({});
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function poll() {
-      try {
-        const base = process.env.NEXT_PUBLIC_API_URL || "";
-        const res = await fetch(`${base}/api/v1/partidos/marcadores`);
-        if (!res.ok) return;
-        const data = await res.json();
-        if (!cancelled) {
-          setScores(data);
-        }
-      } catch {
-        // ignore poll errors
-      }
-    }
-
-    poll();
-    const id = setInterval(poll, POLL_INTERVAL);
-    return () => {
-      cancelled = true;
-      clearInterval(id);
-    };
-  }, []);
-
-  return scores;
+```tsx
+export default function Footer() {
+  return (
+    <footer className="navbar-blur mt-auto">
+      <div className="relative max-w-6xl mx-auto px-4 py-6 text-center text-sm text-texto-apagado">
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-apf-rojo via-white to-apf-azul" />
+        <p>liga.paraguaya.futbol — Proyecto de datos y seguimiento del fútbol paraguayo</p>
+        <p className="mt-1">
+          <a href="https://github.com/usuario/liga.paraguaya.futbol" className="hover:text-texto-secundario transition" target="_blank" rel="noopener noreferrer">
+            GitHub
+          </a>
+        </p>
+      </div>
+    </footer>
+  );
 }
 ```
 
-- [ ] **Step 2: Verify build still passes**
+- [ ] **Step 2: Build para verificar**
 
-Run: `cd frontend && npm run build`
-Expected: PASS
+```bash
+cd frontend && npm run build
+```
 
 - [ ] **Step 3: Commit**
 
 ```bash
-git add frontend/src/hooks/useLiveScores.ts
-git commit -m "feat: add useLiveScores hook for batch live score polling"
+git add frontend/src/components/layout/Footer.tsx
+git commit -m "fix: reemplazar borderImage conflictiva por gradiente con pseudo-elemento en footer"
 ```
+
+---
+

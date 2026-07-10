@@ -92,24 +92,24 @@ export default async function HomePage() {
                     <td className={`p-4 text-center font-semibold ${row.dg > 0 ? "text-victoria" : row.dg < 0 ? "text-derrota" : "text-texto-principal"}`}>
                       {row.dg > 0 ? `+${row.dg}` : row.dg}
                     </td>
-                    <td className="p-4 text-center font-bold text-py-rojo">{row.puntos}</td>
+                    <td className="p-4 text-center font-bold text-apf-rojo">{row.puntos}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
           <div className="mt-3 text-right">
-            <Link href="/tabla" className="text-sm text-py-rojo hover:underline">Ver tabla completa →</Link>
+            <Link href="/tabla" className="text-sm text-apf-rojo hover:underline">Ver tabla completa →</Link>
           </div>
         </section>
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Link href="/clubes" className="p-6 rounded-xl border border-borde-sutil bg-bg-secundario/60 hover:bg-bg-secundario hover:border-l-py-rojo transition-all duration-200 border-l-3">
+        <Link href="/clubes" className="p-6 rounded-xl border border-borde-sutil bg-bg-secundario/60 hover:bg-bg-secundario hover:border-l-apf-rojo transition-all duration-200 border-l-3">
           <h3 className="text-lg font-bold mb-2">Clubes</h3>
           <p className="text-texto-secundario text-sm">Explora todos los clubes de la liga paraguaya</p>
         </Link>
-        <Link href="/partidos" className="p-6 rounded-xl border border-borde-sutil bg-bg-secundario/60 hover:bg-bg-secundario hover:border-l-py-rojo transition-all duration-200 border-l-3">
+        <Link href="/partidos" className="p-6 rounded-xl border border-borde-sutil bg-bg-secundario/60 hover:bg-bg-secundario hover:border-l-apf-rojo transition-all duration-200 border-l-3">
           <h3 className="text-lg font-bold mb-2">Partidos</h3>
           <p className="text-texto-secundario text-sm">Calendario y resultados de la temporada</p>
         </Link>

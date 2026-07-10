@@ -87,7 +87,7 @@ export default function PredictionModal({
           <button
             onClick={handleSubmit}
             disabled={saving}
-            className="flex-1 px-4 py-3 rounded-xl bg-py-rojo text-black font-semibold hover:bg-py-rojo-oscuro transition disabled:opacity-50"
+            className="flex-1 px-4 py-3 rounded-xl bg-apf-rojo text-black font-semibold hover:bg-apf-rojo-oscuro transition disabled:opacity-50"
           >
             {saving ? "Guardando..." : "Guardar predicción"}
           </button>

@@ -8,6 +8,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense, useCallback, useState, useEffect, useMemo } from "react";
 import { TableSkeleton } from "@/components/ui/Skeleton";
 import ErrorMessage from "@/components/ui/ErrorMessage";
+import PageHeader from "@/components/ui/PageHeader";
 import { getSavedToken, setAuthToken } from "@/lib/api";
 import { useQueryClient } from "@tanstack/react-query";
 import PredictionModal from "@/components/PredictionModal";
@@ -95,7 +96,10 @@ function PartidosContent() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-12">
-      <h1 className="text-3xl font-bold mb-8">Partidos</h1>
+      <PageHeader
+        titulo="Partidos"
+        subtitulo={partidos ? `${partidos.length} partidos` : "Calendario"}
+      />
 
       <div className="flex flex-wrap gap-4 mb-8">
         <div>
@@ -105,7 +109,7 @@ function PartidosContent() {
             value={torneo}
             onChange={(e) => setFilter("torneo", e.target.value)}
             placeholder="Filtrar por torneo..."
-            className="px-3 py-2 rounded-lg border border-borde-sutil bg-bg-secundario/60 text-white text-sm focus:outline-none focus:border-py-rojo"
+            className="px-3 py-2 rounded-lg border border-borde-sutil bg-bg-secundario/60 text-white text-sm focus:outline-none focus:border-apf-rojo"
           />
         </div>
         <div>
@@ -113,7 +117,7 @@ function PartidosContent() {
           <select
             value={estado}
             onChange={(e) => setFilter("estado", e.target.value)}
-            className="px-3 py-2 rounded-lg border border-borde-sutil bg-bg-secundario/60 text-white text-sm focus:outline-none focus:border-py-rojo"
+            className="px-3 py-2 rounded-lg border border-borde-sutil bg-bg-secundario/60 text-white text-sm focus:outline-none focus:border-apf-rojo"
           >
             <option value="">Todos</option>
             <option value="programado">Programado</option>
@@ -137,8 +141,8 @@ function PartidosContent() {
                 <th className="text-center py-3 px-2">Resultado</th>
                 <th className="text-left py-3 px-2">Visitante</th>
                 <th className="text-center py-3 px-2">Estado</th>
-                <th className="text-center py-3 px-2">Pronóstico</th>
-                <th className="text-center py-3 px-2">Jornada</th>
+                <th className="text-center py-3 px-2 hidden sm:table-cell">Pronóstico</th>
+                <th className="text-center py-3 px-2 hidden md:table-cell">Jornada</th>
               </tr>
             </thead>
             <tbody>
@@ -158,7 +162,7 @@ function PartidosContent() {
                     <td className="py-3 px-2">
                       <Link
                         href={`/partidos/${p.id}`}
-                        className="text-white font-medium hover:text-py-rojo transition"
+                        className="text-white font-medium hover:text-apf-rojo transition"
                       >
                         {localNombre}
                       </Link>
@@ -166,7 +170,7 @@ function PartidosContent() {
                     <td className="py-3 px-2 text-center">
                       <Link
                         href={`/partidos/${p.id}`}
-                        className="text-white font-bold hover:text-py-rojo transition"
+                        className="text-white font-bold hover:text-apf-rojo transition"
                       >
                         {p.estado === "en_vivo" && liveScores[p.id]
                           ? `${liveScores[p.id].goles_local ?? p.goles_local ?? "?"} - ${liveScores[p.id].goles_visitante ?? p.goles_visitante ?? "?"}`
@@ -183,7 +187,7 @@ function PartidosContent() {
                     <td className="py-3 px-2">
                       <Link
                         href={`/partidos/${p.id}`}
-                        className="text-white font-medium hover:text-py-rojo transition"
+                        className="text-white font-medium hover:text-apf-rojo transition"
                       >
                         {visitanteNombre}
                       </Link>
@@ -191,17 +195,17 @@ function PartidosContent() {
                     <td className="py-3 px-2 text-center">
                       <EstadoBadge estado={p.estado} />
                     </td>
-                    <td className="py-3 px-2 text-center">
+                    <td className="py-3 px-2 text-center hidden sm:table-cell">
                       {userToken && p.estado === "programado" && (
                         <button
                           onClick={() => setPredictionPartido(p)}
-                          className="text-xs px-2 py-1 rounded-lg bg-bg-terciario border border-borde-sutil text-py-rojo hover:bg-py-rojo hover:text-black transition"
+                          className="text-xs px-2 py-1 rounded-lg bg-bg-terciario border border-borde-sutil text-apf-rojo hover:bg-apf-rojo hover:text-black transition"
                         >
                           🔮 Predecir
                         </button>
                       )}
                     </td>
-                    <td className="py-3 px-2 text-center text-texto-secundario">
+                    <td className="py-3 px-2 text-center text-texto-secundario hidden md:table-cell">
                       {p.jornada}
                     </td>
                   </tr>

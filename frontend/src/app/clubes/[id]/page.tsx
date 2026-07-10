@@ -100,7 +100,7 @@ export default function ClubDetailPage() {
   if (!club) {
     return (
       <div className="max-w-6xl mx-auto px-4 py-12">
-        <Link href="/clubes" className="text-sm text-py-rojo hover:underline mb-6 inline-block">
+        <Link href="/clubes" className="text-sm text-apf-rojo hover:underline mb-6 inline-block">
           ← Volver a clubes
         </Link>
         <div className="text-center py-16 text-gray-400">
@@ -116,7 +116,7 @@ export default function ClubDetailPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-12">
-      <Link href="/clubes" className="text-sm text-py-rojo hover:underline mb-6 inline-block">
+      <Link href="/clubes" className="text-sm text-apf-rojo hover:underline mb-6 inline-block">
         ← Volver a clubes
       </Link>
 
@@ -129,7 +129,7 @@ export default function ClubDetailPage() {
             <div className="flex items-center gap-4 flex-wrap">
               <h1 className="text-3xl font-bold text-gradient-shine">{club.nombre}</h1>
               {posClub && (
-                <span className="px-3 py-1 rounded-full text-sm font-bold border border-dorado-medalla/40 text-dorado-medalla bg-dorado-medalla/10">
+                <span className="px-3 py-1 rounded-full text-sm font-bold border border-apf-amarillo/40 text-apf-amarillo bg-apf-amarillo/10">
                   #{posClub.posicion} en tabla
                 </span>
               )}
@@ -190,7 +190,7 @@ export default function ClubDetailPage() {
             <div>
               <span className="text-gray-500 text-sm block">Sitio web</span>
               <a href={club.sitio_web} target="_blank" rel="noopener noreferrer"
-                className="text-py-rojo hover:underline text-sm font-medium">
+                className="text-apf-rojo hover:underline text-sm font-medium">
                 {club.sitio_web.replace(/^https?:\/\//, "")} ↗
               </a>
             </div>

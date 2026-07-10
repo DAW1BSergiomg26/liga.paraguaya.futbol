@@ -12,7 +12,7 @@ export default function PredictionCard({ data }: Props) {
 
   return (
     <div className="max-w-[80%] rounded-2xl p-4 bg-bg-secundario border border-borde-sutil text-sm space-y-3">
-      <p className="text-py-rojo font-semibold text-xs uppercase tracking-wider">Predicción</p>
+      <p className="text-apf-rojo font-semibold text-xs uppercase tracking-wider">Predicción</p>
       <div className="flex items-center gap-2">
         <div className="flex-1 h-2 rounded-full bg-white/10 overflow-hidden flex">
           <div className="h-full bg-green-500" style={{ width: `${data.local_win_pct}%` }} />

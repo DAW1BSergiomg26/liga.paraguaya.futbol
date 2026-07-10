@@ -6,7 +6,7 @@ interface Props { data: MiniTableData }
 export default function MiniTableCard({ data }: Props) {
   return (
     <div className="max-w-[80%] rounded-2xl p-4 bg-bg-secundario border border-borde-sutil text-sm space-y-2">
-      <p className="text-py-rojo font-semibold text-xs uppercase tracking-wider">
+      <p className="text-apf-rojo font-semibold text-xs uppercase tracking-wider">
         {data.torneo} · J{data.jornada}
       </p>
       <div className="space-y-1">
@@ -15,7 +15,7 @@ export default function MiniTableCard({ data }: Props) {
           return (
             <div
               key={c.pos}
-              className={`flex items-center gap-2 text-xs py-1 px-2 rounded ${isHighlighted ? "bg-py-rojo/10 border border-[#76e4f7]/30" : ""}`}
+              className={`flex items-center gap-2 text-xs py-1 px-2 rounded ${isHighlighted ? "bg-apf-rojo/10 border border-[#76e4f7]/30" : ""}`}
             >
               <span className="w-5 text-center font-bold text-gray-400">{c.pos}</span>
               {c.escudo && (

@@ -192,7 +192,7 @@ export default function AdminPartidosPage() {
                       <button
                         onClick={() => handleSave(p.id)}
                         disabled={saving}
-                        className="px-4 py-2 rounded-lg bg-py-rojo text-black font-semibold text-sm hover:bg-py-rojo-oscuro transition disabled:opacity-50"
+                        className="px-4 py-2 rounded-lg bg-apf-rojo text-black font-semibold text-sm hover:bg-apf-rojo-oscuro transition disabled:opacity-50"
                       >
                         {saving ? "Guardando..." : "Guardar"}
                       </button>
@@ -223,7 +223,7 @@ export default function AdminPartidosPage() {
                         }`}>
                           {p.estado}
                         </span>
-                        <span className="text-py-rojo text-xs">Editar</span>
+                        <span className="text-apf-rojo text-xs">Editar</span>
                       </div>
                     </div>
                   </button>

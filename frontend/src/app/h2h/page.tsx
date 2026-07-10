@@ -6,6 +6,7 @@ import { getClubes, getH2H } from "@/lib/api";
 import type { Club, H2HResponse } from "@/types";
 import { TableSkeleton } from "@/components/ui/Skeleton";
 import ErrorMessage from "@/components/ui/ErrorMessage";
+import PageHeader from "@/components/ui/PageHeader";
 
 export default function H2HPage() {
   const [clubA, setClubA] = useState("");
@@ -30,9 +31,10 @@ export default function H2HPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-12">
-      <h1 className="text-3xl font-bold titulo-modulo text-gradient-shine mb-8">
-        Comparación Head-to-Head
-      </h1>
+      <PageHeader
+        titulo="Head-to-Head"
+        subtitulo="Compará el historial entre dos clubes"
+      />
 
       <div className="flex flex-col sm:flex-row items-end gap-4 mb-8">
         <div className="flex-1 w-full">
@@ -106,15 +108,15 @@ export default function H2HPage() {
               <p className="text-xs text-derrota/80 uppercase tracking-wider">{h2h.club_b.nombre.split(" ")[0]}</p>
             </div>
             <div className="p-4 rounded-xl bg-bg-secundario/60 border border-borde-sutil text-center">
-              <p className="text-2xl font-bold text-py-rojo">{h2h.resumen.goles_a}</p>
+              <p className="text-2xl font-bold text-apf-rojo">{h2h.resumen.goles_a}</p>
               <p className="text-xs text-texto-secundario uppercase tracking-wider">Goles {h2h.club_a.nombre.split(" ")[0]}</p>
             </div>
             <div className="p-4 rounded-xl bg-bg-secundario/60 border border-borde-sutil text-center">
-              <p className="text-2xl font-bold text-py-azul">{h2h.resumen.goles_b}</p>
+              <p className="text-2xl font-bold text-apf-azul">{h2h.resumen.goles_b}</p>
               <p className="text-xs text-texto-secundario uppercase tracking-wider">Goles {h2h.club_b.nombre.split(" ")[0]}</p>
             </div>
             <div className="p-4 rounded-xl bg-bg-secundario/60 border border-borde-sutil text-center col-span-2 lg:col-span-1">
-              <p className="text-2xl font-bold text-dorado-medalla">{h2h.resumen.goles_a - h2h.resumen.goles_b > 0 ? "+" : ""}{h2h.resumen.goles_a - h2h.resumen.goles_b}</p>
+              <p className="text-2xl font-bold text-apf-amarillo">{h2h.resumen.goles_a - h2h.resumen.goles_b > 0 ? "+" : ""}{h2h.resumen.goles_a - h2h.resumen.goles_b}</p>
               <p className="text-xs text-texto-secundario uppercase tracking-wider">Diferencia</p>
             </div>
           </div>

@@ -1,219 +1,77 @@
-### Task 5: Frontend H2H page
+### Task 5: Crear archivo de datos de escudos
 
 **Files:**
-- Create: `frontend/src/app/h2h/page.tsx`
+- Create: `frontend/src/data/escudos.ts`
 
-**Interfaces:**
-- Consumes: `useQuery<Club[]>({ queryKey: ["clubes"] })`, `getH2H(clubA, clubB)`, `getClubes()`
-- Produces: `/h2h` page with selectors, summary card, match table
+- [ ] **Step 1: Crear el archivo con el mapping completo**
 
-#### Step 1: Create the page
-
-```tsx
-// frontend/src/app/h2h/page.tsx
-"use client";
-
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { getClubes, getH2H } from "@/lib/api";
-import type { Club, H2HResponse } from "@/types";
-import { TableSkeleton } from "@/components/ui/Skeleton";
-import ErrorMessage from "@/components/ui/ErrorMessage";
-
-export default function H2HPage() {
-  const [clubA, setClubA] = useState("");
-  const [clubB, setClubB] = useState("");
-
-  const { data: clubes } = useQuery<Club[]>({
-    queryKey: ["clubes"],
-    queryFn: () => getClubes(),
-  });
-
-  const { data: h2h, isLoading, error } = useQuery<H2HResponse>({
-    queryKey: ["h2h", clubA, clubB],
-    queryFn: () => getH2H(clubA, clubB),
-    enabled: !!clubA && !!clubB,
-  });
-
-  function selectOptions() {
-    return (clubes || []).map((c) => (
-      <option key={c.id} value={c.id}>{c.nombre}</option>
-    ));
-  }
-
-  return (
-    <div className="max-w-6xl mx-auto px-4 py-12">
-      <h1 className="text-3xl font-bold titulo-modulo text-gradient-shine mb-8">
-        Comparación Head-to-Head
-      </h1>
-
-      <div className="flex flex-col sm:flex-row items-end gap-4 mb-8">
-        <div className="flex-1 w-full">
-          <label className="block text-sm text-texto-secundario mb-1">Club A</label>
-          <select
-            value={clubA}
-            onChange={(e) => setClubA(e.target.value)}
-            className="w-full px-4 py-2 rounded-lg bg-bg-terciario border border-borde-sutil text-white text-sm"
-          >
-            <option value="">Seleccionar...</option>
-            {selectOptions()}
-          </select>
-        </div>
-        <span className="text-2xl text-texto-apagado pb-1 hidden sm:block">vs</span>
-        <div className="flex-1 w-full">
-          <label className="block text-sm text-texto-secundario mb-1">Club B</label>
-          <select
-            value={clubB}
-            onChange={(e) => setClubB(e.target.value)}
-            className="w-full px-4 py-2 rounded-lg bg-bg-terciario border border-borde-sutil text-white text-sm"
-          >
-            <option value="">Seleccionar...</option>
-            {selectOptions()}
-          </select>
-        </div>
-      </div>
-
-      {!clubA || !clubB ? (
-        <div className="text-center py-16 text-texto-secundario border border-dashed border-borde-sutil rounded-xl">
-          <p className="text-lg">Seleccioná dos clubes para ver su historial.</p>
-        </div>
-      ) : isLoading ? (
-        <TableSkeleton rows={5} cols={4} />
-      ) : error ? (
-        <ErrorMessage message="Error al cargar el historial" />
-      ) : h2h ? (
-        <>
-          {/* Header con escudos */}
-          <div className="flex items-center justify-center gap-6 mb-8 p-6 rounded-2xl border border-borde-sutil bg-bg-secundario/60">
-            <div className="flex flex-col items-center gap-2">
-              {h2h.club_a.escudo && (
-                <img src={h2h.club_a.escudo} alt={h2h.club_a.nombre} className="w-16 h-16 object-contain" />
-              )}
-              <span className="font-bold text-lg text-center">{h2h.club_a.nombre}</span>
-            </div>
-            <span className="text-2xl font-bold text-texto-apagado">VS</span>
-            <div className="flex flex-col items-center gap-2">
-              {h2h.club_b.escudo && (
-                <img src={h2h.club_b.escudo} alt={h2h.club_b.nombre} className="w-16 h-16 object-contain" />
-              )}
-              <span className="font-bold text-lg text-center">{h2h.club_b.nombre}</span>
-            </div>
-          </div>
-
-          {/* Tarjeta de resumen */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3 mb-8">
-            <div className="p-4 rounded-xl bg-bg-secundario/60 border border-borde-sutil text-center">
-              <p className="text-2xl font-bold text-white">{h2h.resumen.pj}</p>
-              <p className="text-xs text-texto-secundario uppercase tracking-wider">Partidos</p>
-            </div>
-            <div className="p-4 rounded-xl bg-victoria/10 border border-victoria/20 text-center">
-              <p className="text-2xl font-bold text-victoria">{h2h.resumen.victorias_a}</p>
-              <p className="text-xs text-victoria/80 uppercase tracking-wider">{h2h.club_a.nombre.split(" ")[0]}</p>
-            </div>
-            <div className="p-4 rounded-xl bg-empate/10 border border-empate/20 text-center">
-              <p className="text-2xl font-bold text-empate">{h2h.resumen.empates}</p>
-              <p className="text-xs text-empate/80 uppercase tracking-wider">Empates</p>
-            </div>
-            <div className="p-4 rounded-xl bg-derrota/10 border border-derrota/20 text-center">
-              <p className="text-2xl font-bold text-derrota">{h2h.resumen.victorias_b}</p>
-              <p className="text-xs text-derrota/80 uppercase tracking-wider">{h2h.club_b.nombre.split(" ")[0]}</p>
-            </div>
-            <div className="p-4 rounded-xl bg-bg-secundario/60 border border-borde-sutil text-center">
-              <p className="text-2xl font-bold text-py-rojo">{h2h.resumen.goles_a}</p>
-              <p className="text-xs text-texto-secundario uppercase tracking-wider">Goles {h2h.club_a.nombre.split(" ")[0]}</p>
-            </div>
-            <div className="p-4 rounded-xl bg-bg-secundario/60 border border-borde-sutil text-center">
-              <p className="text-2xl font-bold text-py-azul">{h2h.resumen.goles_b}</p>
-              <p className="text-xs text-texto-secundario uppercase tracking-wider">Goles {h2h.club_b.nombre.split(" ")[0]}</p>
-            </div>
-            <div className="p-4 rounded-xl bg-bg-secundario/60 border border-borde-sutil text-center col-span-2 lg:col-span-1">
-              <p className="text-2xl font-bold text-dorado-medalla">{h2h.resumen.goles_a - h2h.resumen.goles_b > 0 ? "+" : ""}{h2h.resumen.goles_a - h2h.resumen.goles_b}</p>
-              <p className="text-xs text-texto-secundario uppercase tracking-wider">Diferencia</p>
-            </div>
-          </div>
-
-          {/* Mayor goleada */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-            {h2h.resumen.mayor_goleada_a && (
-              <div className="p-4 rounded-xl border border-victoria/20 bg-victoria/5">
-                <p className="text-xs text-victoria/70 uppercase tracking-wider mb-1">Mayor goleada de {h2h.club_a.nombre.split(" ")[0]}</p>
-                <p className="text-3xl font-bold text-white">{h2h.resumen.mayor_goleada_a.goles} - {h2h.resumen.mayor_goleada_a.goles_recibidos}</p>
-                <p className="text-sm text-texto-secundario">{h2h.resumen.mayor_goleada_a.fecha}</p>
-              </div>
-            )}
-            {h2h.resumen.mayor_goleada_b && (
-              <div className="p-4 rounded-xl border border-derrota/20 bg-derrota/5">
-                <p className="text-xs text-derrota/70 uppercase tracking-wider mb-1">Mayor goleada de {h2h.club_b.nombre.split(" ")[0]}</p>
-                <p className="text-3xl font-bold text-white">{h2h.resumen.mayor_goleada_b.goles} - {h2h.resumen.mayor_goleada_b.goles_recibidos}</p>
-                <p className="text-sm text-texto-secundario">{h2h.resumen.mayor_goleada_b.fecha}</p>
-              </div>
-            )}
-          </div>
-
-          {/* Tabla de enfrentamientos */}
-          <h2 className="text-2xl font-bold titulo-modulo mb-4">Todos los enfrentamientos</h2>
-          {h2h.partidos.length === 0 ? (
-            <div className="text-center py-12 border border-dashed border-borde-sutil rounded-xl text-texto-secundario">
-              No hay enfrentamientos registrados entre estos clubes.
-            </div>
-          ) : (
-            <div className="overflow-x-auto rounded-xl border border-borde-sutil">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="bg-bg-terciario border-b border-borde-sutil">
-                    <th className="text-left py-3 px-4 font-semibold text-texto-secundario uppercase tracking-wider text-xs">Fecha</th>
-                    <th className="text-left py-3 px-4 font-semibold text-texto-secundario uppercase tracking-wider text-xs">Torneo</th>
-                    <th className="text-center py-3 px-4 font-semibold text-texto-secundario uppercase tracking-wider text-xs">Resultado</th>
-                    <th className="text-center py-3 px-3 font-semibold text-texto-secundario uppercase tracking-wider text-xs">Estado</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {h2h.partidos.map((p, i) => {
-                    const gA = p.local_id === clubA ? p.goles_local : p.goles_visitante;
-                    const gB = p.local_id === clubB ? p.goles_local : p.goles_visitante;
-                    const ganóA = gA !== null && gB !== null && gA > gB;
-                    const ganóB = gA !== null && gB !== null && gB > gA;
-                    const bg = i % 2 === 0 ? "bg-bg-secundario/40" : "bg-transparent";
-
-                    return (
-                      <tr key={p.id} className={`${bg} border-b border-borde-sutil transition-all duration-150 hover:bg-bg-terciario`}>
-                        <td className="py-3 px-4 text-texto-principal">{p.fecha}</td>
-                        <td className="py-3 px-4 text-texto-secundario">{p.torneo} <span className="text-texto-apagado">· J{p.jornada}</span></td>
-                        <td className={`py-3 px-4 text-center font-bold text-lg ${ganóA ? "text-victoria" : ganóB ? "text-derrota" : "text-empate"}`}>
-                          {gA !== null && gB !== null ? `${gA} - ${gB}` : "—"}
-                        </td>
-                        <td className="py-3 px-3 text-center">
-                          <span className={`text-xs px-2 py-0.5 rounded-full ${
-                            p.estado === "finalizado" ? "bg-green-900/30 text-green-300" :
-                            p.estado === "en_vivo" ? "bg-red-900/30 text-red-300" :
-                            "bg-blue-900/30 text-blue-300"
-                          }`}>{p.estado}</span>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </>
-      ) : null}
-    </div>
-  );
+```typescript
+interface EscudoInfo {
+  imagen: string;
+  texto: string;
+  detalles?: string[];
 }
+
+export const ESCUDOS_DATA: Record<string, EscudoInfo> = {
+  "Cerro Porteño": {
+    imagen: "/img/cerro-porteno-logo-footylogos.png",
+    texto: "La insignia de Cerro Porteño es un escudo rojo y azul construido alrededor de franjas verticales y un monograma circular blanco central con las iniciales «CCP». El rojo y el azul simbolizan la unidad entre los paraguayos en una época de división política entre las facciones coloradas y liberales. El nombre Cerro Porteño se refiere al Cerro Mbaé, relacionado con una batalla de 1811 entre fuerzas paraguayas y tropas de Buenos Aires.",
+    detalles: ["Apodos: El Ciclón, El Azulgrana, El Club del Pueblo", "Fundado: 1 de octubre de 1912", "Colores: rojo y azul"],
+  },
+  "Libertad": {
+    imagen: "/img/club-libertad-logo-footylogos.png",
+    texto: "La insignia del Club Libertad es un emblema blanco y negro con un sello circular central y alas horizontales. El nombre fue elegido en el ambiente político y social del Paraguay posterior a la revolución de 1904, cuando las ideas de «libertad», «democracia» e «igualdad» estaban ampliamente presentes. Su rivalidad con Olimpia se conoce como el «Clásico Blanco y Negro».",
+    detalles: ["Apodo: El Gumarelo", "Fundado: 30 de julio de 1905", "Colores: blanco y negro"],
+  },
+  "Olimpia": {
+    imagen: "/img/olimpia-logo-footylogos.png",
+    texto: "La insignia del Club Olimpia es un emblema en blanco y negro con una forma exterior festoneada y una «O» central. Fundado el 25 de julio de 1902 por un grupo liderado por William Paats, educador holandés vinculado al desarrollo temprano del fútbol en Paraguay. El nombre «Olimpia» fue inspirado en la antigua tradición deportiva de los Juegos Olímpicos. Es el club de fútbol más antiguo de Paraguay, conocido como El Decano.",
+    detalles: ["Apodo: El Decano, El Rey de Copas", "Fundado: 25 de julio de 1902", "Colores: blanco y negro"],
+  },
+  "Guaraní": {
+    imagen: "/img/guarani-paraguay-logo-footylogos.png",
+    texto: "La insignia del Club Guaraní es un escudo negro y amarillo con franjas verticales anchas y un perfil indígena dentro de un medallón circular. El nombre proviene del pueblo guaraní, parte esencial de la cultura e historia paraguayas, lo que explica sus apodos «El Aborigen» y «El Legendario». Es uno de los clubes fundadores de la liga paraguaya.",
+    detalles: ["Apodos: El Aborigen, El Legendario", "Fundado: 12 de octubre de 1903", "Colores: negro y amarillo"],
+  },
+  "Nacional": {
+    imagen: "/img/nacional-paraguay-logo-footylogos.png",
+    texto: "La insignia del Club Nacional es un escudo con bordes negros dividido por una banda diagonal blanca, con rojo arriba y azul abajo. Las iniciales «CN» cruzan la banda blanca. Fundado por estudiantes del Colegio Nacional de la Capital, sus colores rojo, blanco y azul representan los colores nacionales de Paraguay, de ahí el apodo «El Tricolor». También es conocido como «La Academia».",
+    detalles: ["Apodos: El Tricolor, La Academia", "Fundado: 5 de junio de 1904", "Colores: rojo, blanco y azul"],
+  },
+  "Sportivo Luqueño": {
+    imagen: "/img/sportivo-luqueno-logo-footylogos.png",
+    texto: "El escudo del Sportivo Luqueño es azul y amarillo con tres estrellas sobre el escudo y un monograma circular. El club se fundó en 1921 en Luque mediante la fusión de tres equipos locales: Marte Atlético, General Aquino y Vencedor. Las tres estrellas representan a esos tres clubes fundadores. Es conocido como «El Kure Luque» y «Auriazul».",
+    detalles: ["Apodos: El Kure Luque, Auriazul", "Fundado: 1921", "Colores: azul y amarillo"],
+  },
+  "Sportivo Trinidense": {
+    imagen: "/img/sportivo-trinidense-logo-footylogos.png",
+    texto: "El emblema del Sportivo Trinidense es un diseño circular en azul y amarillo con un monograma entrelazado blanco y estrellas doradas. Fundado el 11 de agosto de 1935 en el barrio Santísima Trinidad de Asunción. El nombre «Trinidense» hace referencia directa a ese distrito local, vinculando la identidad del club con sus raíces vecinales.",
+    detalles: ["Fundado: 11 de agosto de 1935", "Colores: azul y amarillo"],
+  },
+  "General Caballero JLM": {
+    imagen: "/img/general-caballero-jlm-logo-footylogos.png",
+    texto: "La insignia del General Caballero JLM es un escudo rojo con franjas verticales blancas y una placa central con el nombre. Fundado el 21 de junio de 1962 en Juan León Mallorquín, Alto Paraná. Honra a Bernardino Caballero, figura militar y expresidente paraguayo. La etiqueta «JLM» se usa para distinguirlo de otros clubes paraguayos llamados General Caballero.",
+    detalles: ["Fundado: 21 de junio de 1962", "Ubicación: Juan León Mallorquín, Alto Paraná", "Colores: rojo y blanco"],
+  },
+  "Club Sportivo 2 de Mayo": {
+    imagen: "/img/club-sportivo-2-de-mayo-logo-footylogos.png",
+    texto: "La insignia del Club Sportivo 2 de Mayo es azul y blanca con franjas verticales y un «2» blanco estilizado. El nombre proviene del Regimiento de Infantería 2 de Mayo. Fundado el 6 de diciembre de 1935 por veteranos que regresaban de la Guerra del Chaco, como homenaje al regimiento en el que sirvieron. Tiene sede en Pedro Juan Caballero y es apodado «El Gallo Norteño».",
+    detalles: ["Apodo: El Gallo Norteño", "Fundado: 6 de diciembre de 1935", "Ubicación: Pedro Juan Caballero, Amambay"],
+  },
+  "Club Atlético Tembetary": {
+    imagen: "/img/club-atletico-tembetary-logo-footylogos.png",
+    texto: "La insignia del Club Atlético Tembetary es un escudo con franjas verticales rojas y verdes y un monograma circular blanco. Fundado el 3 de agosto de 1912 en Asunción como Bermejo Football Club, adoptó su nombre actual en 1920, tomado de la zona de Tembetary de la capital paraguaya.",
+    detalles: ["Fundado: 3 de agosto de 1912 (como Bermejo FC)", "Ubicación: Barrio Tembetary, Asunción", "Colores: rojo y verde"],
+  },
+};
 ```
 
-#### Step 2: Build check
+- [ ] **Step 2: Commit**
 
 ```bash
-cd C:\Users\astur\Desktop\liga.paraguaya.futbol\frontend && npm run build 2>&1
+git add frontend/src/data/escudos.ts
+git commit -m "feat: crear archivo de datos de escudos con significado e imágenes"
 ```
-Expected: BUILD PASS
 
-#### Step 3: Commit
+---
 
-```bash
-cd C:\Users\astur\Desktop\liga.paraguaya.futbol
-git add frontend/src/app/h2h/page.tsx
-git commit -m "feat(h2h): add /h2h page with selectors, summary, and match table"
-```

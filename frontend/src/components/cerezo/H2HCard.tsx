@@ -11,7 +11,7 @@ export default function H2HCard({ data }: Props) {
 
   return (
     <div className="max-w-[80%] rounded-2xl p-4 bg-bg-secundario border border-borde-sutil text-sm space-y-3">
-      <p className="text-py-rojo font-semibold text-xs uppercase tracking-wider">Historial</p>
+      <p className="text-apf-rojo font-semibold text-xs uppercase tracking-wider">Historial</p>
       <div className="flex items-center justify-between gap-2">
         <div className="text-center flex-1">
           <p className="text-xs font-bold text-white truncate">{data.club1.nombre}</p>

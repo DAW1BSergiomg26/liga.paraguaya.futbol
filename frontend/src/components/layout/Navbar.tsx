@@ -30,12 +30,12 @@ function NavLink({ href, children, active, onClick }: { href: string; children: 
       href={href}
       onClick={onClick}
       className={`relative transition-colors duration-200 ${
-        active ? "text-py-rojo" : "text-texto-secundario hover:text-white"
+        active ? "text-apf-rojo" : "text-texto-secundario hover:text-white"
       }`}
     >
       {children}
       {active && (
-        <span className="absolute -bottom-1 left-0 right-0 h-px bg-py-rojo" />
+        <span className="absolute -bottom-1 left-0 right-0 h-px bg-apf-rojo" />
       )}
     </Link>
   );
@@ -91,7 +91,7 @@ export default function Navbar() {
         <Link
           href="/login"
           onClick={closeMenu}
-          className="px-3 py-1.5 rounded-lg bg-py-rojo text-white font-semibold text-xs hover:bg-py-rojo-oscuro transition"
+          className="px-3 py-1.5 rounded-lg bg-apf-rojo text-white font-semibold text-xs hover:bg-apf-rojo-oscuro transition"
         >
           Ingresar
         </Link>
@@ -100,11 +100,11 @@ export default function Navbar() {
   );
 
   return (
-    <nav className="navbar-blur sticky top-0 z-50" style={{ borderBottom: "2px solid", borderImage: "linear-gradient(90deg, #D52B1E, #FFFFFF, #0038A8) 1" }}>
+    <nav className="navbar-blur sticky top-0 z-50" style={{ borderBottom: "2px solid", borderImage: "linear-gradient(90deg, #CC001C, #FFFFFF, #00619E) 1" }}>
       <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
         <Link href="/" className="text-xl font-bold tracking-tight relative">
           ⚽ Liga PY
-          <span className="absolute -bottom-2 left-0 right-0 h-0.5 rounded" style={{ background: "linear-gradient(90deg, #D52B1E, #FFFFFF, #0038A8)" }} />
+          <span className="absolute -bottom-2 left-0 right-0 h-0.5 rounded" style={{ background: "linear-gradient(90deg, #CC001C, #FFFFFF, #00619E)" }} />
         </Link>
 
         {/* Desktop */}

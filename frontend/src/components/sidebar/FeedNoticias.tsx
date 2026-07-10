@@ -80,9 +80,9 @@ export default function FeedNoticias() {
             href={n.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="block border-l-2 border-py-rojo pl-3 hover:border-py-rojo/70 transition-colors group"
+            className="block border-l-2 border-apf-rojo pl-3 hover:border-apf-rojo/70 transition-colors group"
           >
-            <p className="text-sm text-texto-principal group-hover:text-py-rojo transition-colors leading-snug">
+            <p className="text-sm text-texto-principal group-hover:text-apf-rojo transition-colors leading-snug">
               {n.titulo}
             </p>
             <p className="text-xs text-texto-secundario mt-1">

@@ -50,7 +50,7 @@ export default function HeroStats({
   return (
     <>
       <section className="mb-12 p-8 rounded-2xl border border-borde-marca bg-bg-secundario/80 shadow-xl">
-        <p className="text-py-rojo text-sm font-bold uppercase tracking-widest mb-3">
+        <p className="text-apf-rojo text-sm font-bold uppercase tracking-widest mb-3">
           Proyecto DAW · Next.js + FastAPI
         </p>
         <h1 className="text-4xl sm:text-6xl font-bold leading-tight mb-4 titulo-modulo text-gradient-shine animate-shine">
@@ -100,19 +100,19 @@ export default function HeroStats({
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-12">
         <div className="p-6 rounded-xl bg-bg-secundario/60 border border-borde-sutil text-center">
-          <p className="text-3xl font-bold text-py-rojo">
+          <p className="text-3xl font-bold text-apf-rojo">
             <AnimatedNumber target={clubesCount} />
           </p>
           <p className="text-texto-secundario mt-1">Clubes</p>
         </div>
         <div className="p-6 rounded-xl bg-bg-secundario/60 border border-borde-sutil text-center">
-          <p className="text-3xl font-bold text-py-rojo">
+          <p className="text-3xl font-bold text-apf-rojo">
             <AnimatedNumber target={partidosTotal} />
           </p>
           <p className="text-texto-secundario mt-1">Partidos</p>
         </div>
         <div className="p-6 rounded-xl bg-bg-secundario/60 border border-borde-sutil text-center">
-          <p className="text-3xl font-bold text-py-rojo">
+          <p className="text-3xl font-bold text-apf-rojo">
             <AnimatedNumber target={equiposCount} />
           </p>
           <p className="text-texto-secundario mt-1">Equipos en tabla</p>

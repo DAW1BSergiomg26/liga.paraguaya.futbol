@@ -1,7 +1,7 @@
 export default function TypingIndicator() {
   return (
     <div className="flex justify-start">
-      <div className="w-8 h-8 rounded-full bg-py-rojo/20 flex items-center justify-center text-py-rojo text-xs font-bold shrink-0 mr-2 mt-1">
+      <div className="w-8 h-8 rounded-full bg-apf-rojo/20 flex items-center justify-center text-apf-rojo text-xs font-bold shrink-0 mr-2 mt-1">
         C
       </div>
       <div className="max-w-[80%] rounded-2xl px-4 py-3 bg-bg-secundario border border-borde-sutil rounded-bl-md">

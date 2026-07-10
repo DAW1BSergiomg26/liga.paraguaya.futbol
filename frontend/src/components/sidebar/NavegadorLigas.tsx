@@ -12,7 +12,7 @@ function LinkLiga({
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="text-xs text-texto-secundario hover:text-py-rojo transition-colors duration-150"
+      className="text-xs text-texto-secundario hover:text-apf-rojo transition-colors duration-150"
     >
       {children}
     </a>

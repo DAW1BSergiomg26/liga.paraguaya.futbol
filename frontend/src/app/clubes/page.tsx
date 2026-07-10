@@ -1,94 +1,88 @@
 "use client";
 
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getClubes } from "@/lib/api";
 import type { Club } from "@/types";
-import Link from "next/link";
 import { CardSkeleton } from "@/components/ui/Skeleton";
 import ErrorMessage from "@/components/ui/ErrorMessage";
-import Sidebar from "@/components/sidebar/Sidebar";
+import PageHeader from "@/components/ui/PageHeader";
+import ClubCard from "@/components/ui/ClubCard";
 
 export default function ClubesPage() {
+  const [ciudad, setCiudad] = useState("");
+  const [busqueda, setBusqueda] = useState("");
+
   const { data: clubes, isLoading, error } = useQuery<Club[]>({
-    queryKey: ["clubes"],
-    queryFn: () => getClubes(),
+    queryKey: ["clubes", ciudad],
+    queryFn: () => getClubes(ciudad || undefined),
     staleTime: 60_000,
   });
+
+  const ciudades = useMemo(() => {
+    if (!clubes) return [];
+    const set = new Set(clubes.map((c) => c.ciudad));
+    return Array.from(set).sort();
+  }, [clubes]);
+
+  const filtrados = useMemo(() => {
+    if (!clubes) return [];
+    if (!busqueda) return clubes;
+    const q = busqueda.toLowerCase();
+    return clubes.filter(
+      (c) =>
+        c.nombre.toLowerCase().includes(q) ||
+        c.apodo.toLowerCase().includes(q) ||
+        c.ciudad.toLowerCase().includes(q)
+    );
+  }, [clubes, busqueda]);
 
   if (isLoading) return <CardSkeleton count={6} />;
 
   if (error) return <ErrorMessage message="Error al cargar los clubes" />;
 
-  if (!clubes || clubes.length === 0) {
-    return (
-      <div className="max-w-6xl mx-auto px-4 py-12">
-        <div className="lg:grid lg:grid-cols-[1fr_320px] lg:gap-8">
-          <div>
-            <h1 className="text-3xl font-bold mb-8">Club de la Liga Paraguaya</h1>
-            <div className="text-center py-16 text-texto-secundario">
-              <p>No hay clubes registrados actualmente.</p>
-            </div>
-          </div>
-          <div className="mt-8 lg:mt-0">
-            <Sidebar />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="max-w-6xl mx-auto px-4 py-12">
-      <div className="lg:grid lg:grid-cols-[1fr_320px] lg:gap-8">
-        <div>
-          <h1 className="text-3xl font-bold mb-8">Club de la Liga Paraguaya</h1>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {clubes.map((club) => (
-              <Link
-                key={club.id}
-                href={`/clubes/${club.id}`}
-                className="p-6 rounded-xl border border-borde-sutil bg-bg-secundario/60 hover:bg-bg-secundario transition block"
-              >
-                <div className="flex items-center gap-4 mb-3">
-                  {club.escudo && (
-                    <img src={club.escudo} alt={club.nombre} loading="lazy" className="w-12 h-12 object-contain" />
-                  )}
-                  <h2 className="text-xl font-bold">{club.nombre}</h2>
-                </div>
-                <div className="space-y-2 text-sm text-texto-secundario">
-                  <p><span className="text-texto-apagado">Ciudad:</span> {club.ciudad}</p>
-                  <p><span className="text-texto-apagado">Apodo:</span> {club.apodo}</p>
-                  <p><span className="text-texto-apagado">Estadio:</span> {club.estadio}</p>
-                  <p><span className="text-texto-apagado">Capacidad:</span> {club.capacidad.toLocaleString()} espectadores</p>
-                  <p><span className="text-texto-apagado">Fundación:</span> {club.fundacion}</p>
-                  <div className="flex items-center gap-2 pt-2">
-                    <span className="text-texto-apagado">Colores:</span>
-                    {(club.colores || []).map((color, i) => (
-                      <span
-                        key={i}
-                        className="w-5 h-5 rounded-full border border-white/20 inline-block"
-                        style={{ backgroundColor: color }}
-                        title={color}
-                      />
-                    ))}
-                  </div>
-                  <div className="flex items-center gap-3 pt-2 border-t border-white/5">
-                    <span className="text-sm text-texto-apagado">🏆 {club.titulos_liga} nacionales</span>
-                    {club.titulos_internacionales?.length > 0 && (
-                      <span className="text-sm text-yellow-400 font-medium">
-                        🌍 {club.titulos_internacionales.reduce((s, t) => s + t.cantidad, 0)} internacionales
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-        <div className="mt-8 lg:mt-0">
-          <Sidebar />
-        </div>
+      <PageHeader
+        titulo="Clubes"
+        subtitulo={
+          clubes
+            ? `${clubes.length} clubes afiliados a la APF`
+            : "Cargando..."
+        }
+      />
+
+      <div className="flex flex-col sm:flex-row gap-3 mb-8">
+        <input
+          type="text"
+          value={busqueda}
+          onChange={(e) => setBusqueda(e.target.value)}
+          placeholder="Buscar club..."
+          className="flex-1 px-4 py-2 rounded-lg border border-borde-sutil bg-bg-secundario/60 text-white text-sm focus:outline-none focus:border-apf-rojo transition"
+        />
+        <select
+          value={ciudad}
+          onChange={(e) => setCiudad(e.target.value)}
+          className="px-4 py-2 rounded-lg border border-borde-sutil bg-bg-secundario/60 text-white text-sm focus:outline-none focus:border-apf-rojo transition"
+        >
+          <option value="">Todas las ciudades</option>
+          {ciudades.map((c) => (
+            <option key={c} value={c}>{c}</option>
+          ))}
+        </select>
       </div>
+
+      {!filtrados || filtrados.length === 0 ? (
+        <div className="text-center py-16 text-texto-secundario">
+          <p>No se encontraron clubes con ese filtro.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 justify-items-center">
+          {filtrados.map((club) => (
+            <ClubCard key={club.id} club={club} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

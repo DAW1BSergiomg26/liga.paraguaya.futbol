@@ -36,7 +36,7 @@ export default function PrediccionesPage() {
           <h1 className="text-3xl font-bold mb-4">Mis Predicciones</h1>
           <div className="p-8 rounded-xl border border-borde-sutil bg-bg-secundario/60">
             <p className="text-texto-secundario mb-4">Sesión expirada. Iniciá sesión de nuevo</p>
-            <Link href="/login" className="inline-block px-6 py-3 rounded-xl bg-py-rojo text-black font-semibold">
+            <Link href="/login" className="inline-block px-6 py-3 rounded-xl bg-apf-rojo text-black font-semibold">
               Iniciar sesión
             </Link>
           </div>
@@ -52,7 +52,7 @@ export default function PrediccionesPage() {
         <h1 className="text-3xl font-bold mb-4">Mis Predicciones</h1>
         <div className="p-8 rounded-xl border border-borde-sutil bg-bg-secundario/60">
           <p className="text-texto-secundario mb-4">Iniciá sesión para ver tus predicciones</p>
-          <Link href="/login" className="inline-block px-6 py-3 rounded-xl bg-py-rojo text-black font-semibold">
+          <Link href="/login" className="inline-block px-6 py-3 rounded-xl bg-apf-rojo text-black font-semibold">
             Iniciar sesión
           </Link>
         </div>
@@ -70,7 +70,7 @@ export default function PrediccionesPage() {
       {(!predicciones || predicciones.length === 0) ? (
         <div className="p-8 rounded-xl border border-borde-sutil bg-bg-secundario/60 text-center mb-8">
           <p className="text-texto-secundario">Todavía no hiciste predicciones.</p>
-          <Link href="/partidos" className="text-py-rojo hover:underline mt-2 inline-block">
+          <Link href="/partidos" className="text-apf-rojo hover:underline mt-2 inline-block">
             Ir a partidos →
           </Link>
         </div>
@@ -128,7 +128,7 @@ export default function PrediccionesPage() {
                       <span className="text-texto-apagado text-xs">@{entry.username}</span>
                     </div>
                   </td>
-                  <td className="p-4 text-center font-bold text-py-rojo">{entry.puntos}</td>
+                  <td className="p-4 text-center font-bold text-apf-rojo">{entry.puntos}</td>
                   <td className="p-4 text-center text-green-400">{entry.aciertos}</td>
                   <td className="p-4 text-center text-texto-secundario">{entry.predicciones}</td>
                 </tr>

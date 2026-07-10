@@ -88,13 +88,13 @@ export default function CerezoPage() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Preguntale a Cerezo..."
-          className="flex-1 rounded-xl px-4 py-3 bg-bg-secundario border border-borde-sutil text-[#f8fafc] placeholder-gray-500 focus:outline-none focus:border-py-rojo/50 transition text-sm"
+          className="flex-1 rounded-xl px-4 py-3 bg-bg-secundario border border-borde-sutil text-[#f8fafc] placeholder-gray-500 focus:outline-none focus:border-apf-rojo/50 transition text-sm"
           disabled={mutation.isPending}
         />
         <button
           type="submit"
           disabled={mutation.isPending || !input.trim()}
-          className="px-5 py-3 rounded-xl bg-py-rojo text-black font-semibold text-sm hover:brightness-110 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-5 py-3 rounded-xl bg-apf-rojo text-black font-semibold text-sm hover:brightness-110 transition disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Enviar
         </button>

@@ -103,12 +103,12 @@ export default function ChatWidget({ partidoId }: ChatWidgetProps) {
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
           placeholder="Escribe un mensaje..."
           maxLength={500}
-          className="flex-1 bg-bg-terciario text-sm text-texto-principal rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-py-rojo placeholder-texto-apagado"
+          className="flex-1 bg-bg-terciario text-sm text-texto-principal rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-apf-rojo placeholder-texto-apagado"
         />
         <button
           onClick={sendMessage}
           disabled={!input.trim() || !connected}
-          className="px-4 py-2 bg-py-rojo text-white text-sm rounded-lg hover:bg-py-rojo-oscuro disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="px-4 py-2 bg-apf-rojo text-white text-sm rounded-lg hover:bg-apf-rojo-oscuro disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           Enviar
         </button>

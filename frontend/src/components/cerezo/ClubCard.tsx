@@ -20,7 +20,7 @@ export default function ClubCard({ data }: Props) {
           />
         )}
         <div>
-          <p className="text-py-rojo font-bold">{club.nombre}</p>
+          <p className="text-apf-rojo font-bold">{club.nombre}</p>
           <p className="text-xs text-gray-400">{club.ciudad}</p>
         </div>
       </div>
@@ -32,7 +32,7 @@ export default function ClubCard({ data }: Props) {
       </div>
       <button
         onClick={() => setShowTitulos(!showTitulos)}
-        className="text-xs text-py-rojo hover:underline"
+        className="text-xs text-apf-rojo hover:underline"
       >
         {showTitulos ? "Ocultar títulos" : `Ver ${titulos.length} título(s)`}
       </button>
