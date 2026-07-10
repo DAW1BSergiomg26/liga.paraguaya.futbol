@@ -8,16 +8,17 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense, useCallback } from "react";
 import { TableSkeleton } from "@/components/ui/Skeleton";
 import ErrorMessage from "@/components/ui/ErrorMessage";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { getSavedToken, setAuthToken } from "@/lib/api";
 import { useQueryClient } from "@tanstack/react-query";
 import PredictionModal from "@/components/PredictionModal";
+import { useLiveScores } from "@/hooks/useLiveScores";
 
 function EstadoBadge({ estado }: { estado: string }) {
   const styles: Record<string, string> = {
     finalizado: "bg-green-900/30 text-green-300",
     programado: "bg-blue-900/30 text-blue-300",
-    en_vivo: "bg-red-900/30 text-red-300",
+    en_vivo: "bg-red-900/30 text-red-300 animate-pulse",
   };
   const labels: Record<string, string> = {
     finalizado: "Finalizado",
@@ -45,6 +46,14 @@ function PartidosContent() {
   });
   const partidos = partidosPage?.data;
 
+  const sorted = useMemo(() => {
+    if (!partidos) return [];
+    const order: Record<string, number> = { en_vivo: 0, programado: 1, finalizado: 2 };
+    return [...partidos].sort(
+      (a, b) => (order[a.estado] ?? 9) - (order[b.estado] ?? 9)
+    );
+  }, [partidos]);
+
   const { data: clubes } = useQuery<Club[]>({
     queryKey: ["clubes"],
     queryFn: () => getClubes(),
@@ -65,6 +74,8 @@ function PartidosContent() {
     const token = getSavedToken();
     if (token) setAuthToken(token);
   }, []);
+
+  const liveScores = useLiveScores();
 
   const setFilter = useCallback(
     (key: string, value: string) => {
@@ -132,7 +143,7 @@ function PartidosContent() {
               </tr>
             </thead>
             <tbody>
-              {partidos.map((p) => {
+              {sorted.map((p) => {
                 const localNombre = clubMap.get(p.local_id) || p.local_id;
                 const visitanteNombre = clubMap.get(p.visitante_id) || p.visitante_id;
                 const tieneResultado =
@@ -158,10 +169,17 @@ function PartidosContent() {
                         href={`/partidos/${p.id}`}
                         className="text-white font-bold hover:text-py-rojo transition"
                       >
-                        {tieneResultado
-                          ? `${p.goles_local} - ${p.goles_visitante}`
-                          : "vs"}
+                        {p.estado === "en_vivo" && liveScores[p.id]
+                          ? `${liveScores[p.id].goles_local ?? p.goles_local ?? "?"} - ${liveScores[p.id].goles_visitante ?? p.goles_visitante ?? "?"}`
+                          : tieneResultado
+                            ? `${p.goles_local} - ${p.goles_visitante}`
+                            : "vs"}
                       </Link>
+                      {p.estado === "en_vivo" && liveScores[p.id] && liveScores[p.id].minuto > 0 && (
+                        <div className="text-xs text-red-400 mt-0.5">
+                          {liveScores[p.id].minuto}'
+                        </div>
+                      )}
                     </td>
                     <td className="py-3 px-2">
                       <Link
