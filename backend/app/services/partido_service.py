@@ -164,16 +164,18 @@ class PartidoService:
         if mayor_b_goles > 0:
             mayor_goleada_b = MayorGoleada(goles=mayor_b_goles, fecha=mayor_b_fecha, goles_recibidos=mayor_b_recibidos)
 
-        resumen = {
-            "pj": victorias_a + empates + victorias_b,
-            "victorias_a": victorias_a,
-            "empates": empates,
-            "victorias_b": victorias_b,
-            "goles_a": goles_a,
-            "goles_b": goles_b,
-            "mayor_goleada_a": mayor_goleada_a,
-            "mayor_goleada_b": mayor_goleada_b,
-        }
+        from backend.app.schemas.partido import ResumenOut
+
+        resumen = ResumenOut(
+            pj=victorias_a + empates + victorias_b,
+            victorias_a=victorias_a,
+            empates=empates,
+            victorias_b=victorias_b,
+            goles_a=goles_a,
+            goles_b=goles_b,
+            mayor_goleada_a=mayor_goleada_a,
+            mayor_goleada_b=mayor_goleada_b,
+        )
 
         return H2HOut(
             club_a=ClubResumen(id=club_a, nombre=club_a_obj.nombre if club_a_obj else club_a, escudo=club_a_obj.escudo if club_a_obj else ""),

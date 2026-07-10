@@ -24,6 +24,18 @@ async def h2h_partidos(
     club_b: str = Query(...),
     db: AsyncSession = Depends(get_db),
 ):
+    if club_a == club_b:
+        raise HTTPException(status_code=400, detail="club_a and club_b must be different")
+
+    from backend.app.models.club import Club
+
+    club_a_obj = await db.get(Club, club_a)
+    club_b_obj = await db.get(Club, club_b)
+    if not club_a_obj:
+        raise HTTPException(status_code=404, detail=f"Club '{club_a}' not found")
+    if not club_b_obj:
+        raise HTTPException(status_code=404, detail=f"Club '{club_b}' not found")
+
     return await PartidoService.get_h2h(db, club_a, club_b)
 
 

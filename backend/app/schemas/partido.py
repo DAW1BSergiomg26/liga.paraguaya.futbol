@@ -62,8 +62,19 @@ class H2HPartidoItem(BaseModel):
     visitante_id: str
 
 
+class ResumenOut(BaseModel):
+    pj: int = 0
+    victorias_a: int = 0
+    empates: int = 0
+    victorias_b: int = 0
+    goles_a: int = 0
+    goles_b: int = 0
+    mayor_goleada_a: Optional[MayorGoleada] = None
+    mayor_goleada_b: Optional[MayorGoleada] = None
+
+
 class H2HOut(BaseModel):
     club_a: ClubResumen
     club_b: ClubResumen
-    resumen: dict
+    resumen: ResumenOut
     partidos: list[H2HPartidoItem]

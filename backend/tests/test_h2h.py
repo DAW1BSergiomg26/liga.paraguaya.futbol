@@ -3,7 +3,7 @@ from httpx import AsyncClient
 from unittest.mock import AsyncMock, MagicMock
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.schemas.partido import H2HOut, ClubResumen, MayorGoleada, H2HPartidoItem
+from backend.app.schemas.partido import H2HOut, ClubResumen, MayorGoleada, H2HPartidoItem, ResumenOut
 from backend.app.services.partido_service import PartidoService
 
 
@@ -30,13 +30,13 @@ class TestH2HSchemas:
     def test_h2h_out_structure(self):
         ca = ClubResumen(id="c1", nombre="Olimpia", escudo="")
         cb = ClubResumen(id="c2", nombre="Cerro", escudo="")
-        resumen = {"pj": 10, "victorias_a": 4, "empates": 2, "victorias_b": 4,
-                    "goles_a": 12, "goles_b": 11,
-                    "mayor_goleada_a": MayorGoleada(goles=3, fecha="2024-01-01", goles_recibidos=0),
-                    "mayor_goleada_b": None}
+        resumen = ResumenOut(pj=10, victorias_a=4, empates=2, victorias_b=4,
+                    goles_a=12, goles_b=11,
+                    mayor_goleada_a=MayorGoleada(goles=3, fecha="2024-01-01", goles_recibidos=0),
+                    mayor_goleada_b=None)
         h2h = H2HOut(club_a=ca, club_b=cb, resumen=resumen, partidos=[])
         assert h2h.club_a.nombre == "Olimpia"
-        assert h2h.resumen["pj"] == 10
+        assert h2h.resumen.pj == 10
 
 
 class TestH2HService:
@@ -52,14 +52,14 @@ class TestH2HService:
         assert result.club_a.id == "c1"
         assert result.club_b.id == "c2"
         assert result.partidos == []
-        assert result.resumen["pj"] == 0
-        assert result.resumen["victorias_a"] == 0
-        assert result.resumen["empates"] == 0
-        assert result.resumen["victorias_b"] == 0
-        assert result.resumen["goles_a"] == 0
-        assert result.resumen["goles_b"] == 0
-        assert result.resumen["mayor_goleada_a"] is None
-        assert result.resumen["mayor_goleada_b"] is None
+        assert result.resumen.pj == 0
+        assert result.resumen.victorias_a == 0
+        assert result.resumen.empates == 0
+        assert result.resumen.victorias_b == 0
+        assert result.resumen.goles_a == 0
+        assert result.resumen.goles_b == 0
+        assert result.resumen.mayor_goleada_a is None
+        assert result.resumen.mayor_goleada_b is None
 
 
 class TestH2HEndpoint:
@@ -68,7 +68,7 @@ class TestH2HEndpoint:
         resp = await client.get("/api/v1/partidos/h2h")
         assert resp.status_code == 422
 
-    @pytest.mark.asyncio
-    async def test_h2h_endpoint_ok(self, client: AsyncClient):
-        resp = await client.get("/api/v1/partidos/h2h?club_a=olimpia&club_b=cerro-porteno")
-        assert resp.status_code in (200, 422, 500)
+@pytest.mark.asyncio
+async def test_h2h_endpoint_ok(client: AsyncClient):
+    resp = await client.get("/api/v1/partidos/h2h?club_a=olimpia&club_b=cerro-porteno")
+    assert resp.status_code in (200, 404, 422, 500)
