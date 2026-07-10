@@ -146,3 +146,8 @@ a, button, tr {
     animation: none;
   }
 }
+
+.carta-club-dorso > * {
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
