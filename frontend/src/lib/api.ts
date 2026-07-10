@@ -114,7 +114,7 @@ export async function getNoticias(): Promise<NoticiasResponse> {
 
 export async function getH2H(clubA: string, clubB: string): Promise<H2HResponse> {
   const res = await fetchJSON<H2HResponse>(
-    `${API_URL}/api/v1/partidos/h2h?club_a=${encodeURIComponent(clubA)}&club_b=${encodeURIComponent(clubB)}`
+    `/api/v1/partidos/h2h?club_a=${encodeURIComponent(clubA)}&club_b=${encodeURIComponent(clubB)}`
   );
   return res;
 }

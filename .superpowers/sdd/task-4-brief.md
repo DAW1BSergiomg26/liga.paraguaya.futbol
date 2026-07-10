@@ -1,76 +1,86 @@
-### Task 4: Frontend — NavegadorLigas component
+### Task 4: Frontend types + API function
 
 **Files:**
-- Create: `frontend/src/components/sidebar/NavegadorLigas.tsx`
+- Modify: `frontend/src/types/index.ts`
+- Modify: `frontend/src/lib/api.ts`
 
 **Interfaces:**
-- Consumes: `ligas` from Task 2
-- Produces: `<NavegadorLigas />` component
+- Consumes: Backend `H2HOut` response shape (ClubResumen, MayorGoleada, H2HPartidoItem, H2HOut)
+- Produces: `H2HResponse` TypeScript interface, `getH2H(clubA, clubB): Promise<H2HResponse>`
 
-- [ ] **Step 1: Create `frontend/src/components/sidebar/NavegadorLigas.tsx`**
+#### Step 1: Add H2HResponse type
 
-```tsx
-import { ligas } from "@/data/ligas";
-
-function LinkLiga({
-  href,
-  children,
-}: {
-  href: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="text-xs text-texto-secundario hover:text-py-rojo transition-colors duration-150"
-    >
-      {children}
-    </a>
-  );
+```typescript
+// Add to frontend/src/types/index.ts (before Noticia)
+export interface ClubResumen {
+  id: string;
+  nombre: string;
+  escudo: string;
 }
 
-export default function NavegadorLigas() {
-  return (
-    <div className="bg-bg-secundario rounded-xl border border-borde-sutil p-4">
-      <h3 className="font-barlow text-lg font-semibold uppercase tracking-wide text-texto-principal mb-3">
-        Otras Ligas
-      </h3>
-      <div className="space-y-3">
-        {ligas.map((liga) => (
-          <div key={liga.id}>
-            <div className="flex items-start gap-2">
-              <span className="text-base shrink-0 mt-0.5">{liga.icono}</span>
-              <div className="min-w-0">
-                <p className="text-sm font-medium text-texto-principal truncate">
-                  {liga.nombre}
-                </p>
-                <div className="flex gap-2 mt-0.5">
-                  <LinkLiga href={liga.urlResultados}>Resultados</LinkLiga>
-                  <span className="text-borde-sutil">·</span>
-                  <LinkLiga href={liga.urlPosiciones}>Posiciones</LinkLiga>
-                  <span className="text-borde-sutil">·</span>
-                  <LinkLiga href={liga.urlCalendario}>Calendario</LinkLiga>
-                </div>
-              </div>
-            </div>
-            {liga.id !== ligas[ligas.length - 1].id && (
-              <hr className="mt-3 border-borde-sutil" />
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+export interface MayorGoleada {
+  goles: number;
+  fecha: string;
+  goles_recibidos: number;
+}
+
+export interface H2HPartidoItem {
+  id: string;
+  torneo: string;
+  jornada: number;
+  fecha: string;
+  estado: string;
+  goles_local: number | null;
+  goles_visitante: number | null;
+  local_id: string;
+  visitante_id: string;
+}
+
+export interface H2HResponse {
+  club_a: ClubResumen;
+  club_b: ClubResumen;
+  resumen: {
+    pj: number;
+    victorias_a: number;
+    empates: number;
+    victorias_b: number;
+    goles_a: number;
+    goles_b: number;
+    mayor_goleada_a: MayorGoleada | null;
+    mayor_goleada_b: MayorGoleada | null;
+  };
+  partidos: H2HPartidoItem[];
 }
 ```
 
-- [ ] **Step 2: Commit**
+#### Step 2: Add getH2H API function
+
+```typescript
+// Add to frontend/src/lib/api.ts (after getPartidos or similar)
+export async function getH2H(clubA: string, clubB: string): Promise<H2HResponse> {
+  const res = await fetchJSON<H2HResponse>(
+    `/api/v1/partidos/h2h?club_a=${encodeURIComponent(clubA)}&club_b=${encodeURIComponent(clubB)}`
+  );
+  return res;
+}
+```
+
+- Add the `H2HResponse` import at the top of `api.ts`:
+```typescript
+import type { H2HResponse } from "@/types";
+```
+
+#### Step 3: Build check
 
 ```bash
-git add frontend/src/components/sidebar/NavegadorLigas.tsx
-git commit -m "feat(frontend): add NavegadorLigas component"
+cd C:\Users\astur\Desktop\liga.paraguaya.futbol\frontend && npm run build 2>&1
 ```
+Expected: BUILD PASS
 
----
+#### Step 4: Commit
+
+```bash
+cd C:\Users\astur\Desktop\liga.paraguaya.futbol
+git add frontend/src/types/index.ts frontend/src/lib/api.ts
+git commit -m "feat(h2h): add H2HResponse type and getH2H API"
+```
