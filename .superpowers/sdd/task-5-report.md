@@ -1,18 +1,22 @@
-# Task 5: FeedNoticias component
+# Task 5 Report: Frontend H2H Page
 
-**Status:** Complete
+## What I Implemented
+- Created `frontend/src/app/h2h/page.tsx` — a `"use client"` page with:
+  - Two `<select>` dropdowns for club selection (Club A / Club B)
+  - Summary card grid showing PJ, wins/empates/losses, goals, goal difference
+  - Biggest win cards for each side
+  - Full match history table with result coloring and status badges
+  - Uses `useQuery` for fetching clubs (`getClubes`) and H2H data (`getH2H`)
+  - Query only fires when both clubs selected (`enabled: !!clubA && !!clubB`)
 
-## Steps performed
+## Build Output
+Build passed successfully. Compilation in 2.3s, TypeScript check in 3.5s. Route `/h2h` registered.
 
-1. Created `frontend/src/components/sidebar/FeedNoticias.tsx` with:
-   - `"use client"` directive
-   - `useQuery` from `@tanstack/react-query` calling `getNoticias()` with 5min staleTime and 1 retry
-   - `formatearFecha` helper for relative time display (es-PY locale)
-   - Skeleton loading state (3 animated pulse bars)
-   - Error state → "No hay noticias disponibles"
-   - Empty state → "No hay noticias disponibles"
-   - News items with red left border (`border-py-rojo`), title, source, and relative time
+## Self-Review Findings
+- Matches the brief code exactly
+- Uses same patterns as `tabla/page.tsx` (useQuery, skeletons, error handling)
+- No unused imports detected
+- All referenced types (`Club`, `H2HResponse`) and components (`TableSkeleton`, `ErrorMessage`) verified to exist
 
-2. Verified with `npx tsc --noEmit` — only pre-existing error (useLiveScore module not found)
-
-3. Committed with: `feat(frontend): add FeedNoticias component with RSS news`
+## Concerns
+- None

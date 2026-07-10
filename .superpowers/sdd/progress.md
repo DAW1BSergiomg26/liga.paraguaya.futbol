@@ -5,3 +5,5 @@
 Task 1: complete (commits 4d0a969..4f20f5b, review clean)
 Task 2: complete (commits 4f20f5b..c1241a2, review clean after fix for pj consistency)
 Task 3: complete (commit TBD, full suite green after endpoint addition)
+Task 3: complete (commits 31f3e33..740eccd, review clean)
+Task 4: complete (commits 740eccd..9ee6d91 + 9ee6d91..6732943, review clean after fix for doubled URL)

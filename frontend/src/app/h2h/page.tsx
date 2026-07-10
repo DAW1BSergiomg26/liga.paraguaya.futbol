@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getClubes, getH2H } from "@/lib/api";
 import type { Club, H2HResponse } from "@/types";
-import Link from "next/link";
 import { TableSkeleton } from "@/components/ui/Skeleton";
 import ErrorMessage from "@/components/ui/ErrorMessage";
 
@@ -151,7 +150,6 @@ export default function H2HPage() {
                   <tr className="bg-bg-terciario border-b border-borde-sutil">
                     <th className="text-left py-3 px-4 font-semibold text-texto-secundario uppercase tracking-wider text-xs">Fecha</th>
                     <th className="text-left py-3 px-4 font-semibold text-texto-secundario uppercase tracking-wider text-xs">Torneo</th>
-                    <th className="text-center py-3 px-3 font-semibold text-texto-secundario uppercase tracking-wider text-xs">J</th>
                     <th className="text-center py-3 px-4 font-semibold text-texto-secundario uppercase tracking-wider text-xs">Resultado</th>
                     <th className="text-center py-3 px-3 font-semibold text-texto-secundario uppercase tracking-wider text-xs">Estado</th>
                   </tr>
@@ -168,7 +166,6 @@ export default function H2HPage() {
                       <tr key={p.id} className={`${bg} border-b border-borde-sutil transition-all duration-150 hover:bg-bg-terciario`}>
                         <td className="py-3 px-4 text-texto-principal">{p.fecha}</td>
                         <td className="py-3 px-4 text-texto-secundario">{p.torneo} <span className="text-texto-apagado">· J{p.jornada}</span></td>
-                        <td className="py-3 px-3 text-center text-texto-principal">{p.jornada}</td>
                         <td className={`py-3 px-4 text-center font-bold text-lg ${ganóA ? "text-victoria" : ganóB ? "text-derrota" : "text-empate"}`}>
                           {gA !== null && gB !== null ? `${gA} - ${gB}` : "—"}
                         </td>
