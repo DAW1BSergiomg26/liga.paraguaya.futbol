@@ -1,71 +1,82 @@
-### Task 3: Backend endpoint — GET /api/v1/partidos/h2h
+### Task 3: Integrate live scores into `/partidos` list page
 
 **Files:**
-- Modify: `backend/app/api/partidos.py`
-- Test: `backend/tests/test_h2h.py` (append)
+- Modify: `frontend/src/app/partidos/page.tsx`
 
-**Interfaces:**
-- Consumes: `PartidoService.get_h2h()`, `get_db` dependency, `H2HOut` schema
-- Produces: `GET /api/v1/partidos/h2h?club_a=X&club_b=Y` JSON response
+- [ ] **Step 1: Add import and hook call**
 
-#### Step 1: Write the integration test
+Add at the top of `frontend/src/app/partidos/page.tsx`:
 
-```python
-# Add to backend/tests/test_h2h.py
-import pytest
-from httpx import AsyncClient
-
-
-@pytest.mark.asyncio
-async def test_h2h_endpoint_no_params(client: AsyncClient):
-    resp = await client.get("/api/v1/partidos/h2h")
-    assert resp.status_code == 422  # missing required params
-
-
-@pytest.mark.asyncio
-async def test_h2h_endpoint_ok(client: AsyncClient):
-    resp = await client.get("/api/v1/partidos/h2h?club_a=oli&club_b=cerro")
-    # In test env with no DB, expect 500 or fallback
-    assert resp.status_code in (200, 422, 500)
+```typescript
+import { useLiveScores } from "@/hooks/useLiveScores";
 ```
 
-#### Step 2: Run test to verify it fails appropriately
+Inside `PartidosContent()` after the existing hooks:
+
+```typescript
+const liveScores = useLiveScores();
+```
+
+- [ ] **Step 2: Sort rows: en_vivo first, then programado, then finalizado**
+
+Replace the `.map()` with a sorted variant. After `const partidos = partidosPage?.data;` add:
+
+```typescript
+const sorted = useMemo(() => {
+  if (!partidos) return [];
+  const order = { en_vivo: 0, programado: 1, finalizado: 2 };
+  return [...partidos].sort(
+    (a, b) => (order[a.estado] ?? 9) - (order[b.estado] ?? 9)
+  );
+}, [partidos]);
+```
+
+Add `useMemo` import to existing react import:
+
+```typescript
+import { useState, useEffect, useMemo } from "react";
+```
+
+Replace `{partidos.map((p) => {` with `{sorted.map((p) => {`.
+
+- [ ] **Step 3: Show live score and minute for en_vivo rows**
+
+Replace the Resultado cell (lines 156-165 in original):
+
+```typescript
+                    <td className="py-3 px-2 text-center">
+                      <Link
+                        href={`/partidos/${p.id}`}
+                        className="text-white font-bold hover:text-py-rojo transition"
+                      >
+                        {p.estado === "en_vivo" && liveScores[p.id]
+                          ? `${liveScores[p.id].goles_local ?? p.goles_local ?? "?"} - ${liveScores[p.id].goles_visitante ?? p.goles_visitante ?? "?"}`
+                          : tieneResultado
+                            ? `${p.goles_local} - ${p.goles_visitante}`
+                            : "vs"}
+                      </Link>
+                      {p.estado === "en_vivo" && liveScores[p.id] && liveScores[p.id].minuto > 0 && (
+                        <div className="text-xs text-red-400 mt-0.5">
+                          {liveScores[p.id].minuto}'
+                        </div>
+                      )}
+                    </td>
+```
+
+Add animated pulse to EstadoBadge for en_vivo (modify the `en_vivo` style at line 20):
+
+```typescript
+    en_vivo: "bg-red-900/30 text-red-300 animate-pulse",
+```
+
+- [ ] **Step 4: Build to verify**
+
+Run: `cd frontend && npm run build`
+Expected: PASS
+
+- [ ] **Step 5: Commit**
 
 ```bash
-$env:PYTHONPATH="C:\Users\astur\Desktop\liga.paraguaya.futbol"; python -m pytest backend/tests/test_h2h.py -v
-```
-Expected: Current tests still pass. New test may fail depending on conftest fixture.
-
-#### Step 3: Add the endpoint
-
-```python
-# Add to backend/app/api/partidos.py (after MarcadorOut class, before the routes)
-
-@router.get("/h2h", response_model=H2HOut)
-async def h2h_partidos(
-    club_a: str = Query(...),
-    club_b: str = Query(...),
-    db: AsyncSession = Depends(get_db),
-):
-    return await PartidoService.get_h2h(db, club_a, club_b)
-```
-
-Also add the import at the top of the file:
-```python
-from backend.app.schemas.partido import H2HOut
-```
-
-#### Step 4: Run the full test suite
-
-```bash
-$env:PYTHONPATH="C:\Users\astur\Desktop\liga.paraguaya.futbol"; cd backend && python -m pytest tests/ -x -q
-```
-Expected: All existing tests pass.
-
-#### Step 5: Commit
-
-```bash
-cd C:\Users\astur\Desktop\liga.paraguaya.futbol
-git add backend/app/api/partidos.py backend/tests/test_h2h.py
-git commit -m "feat(h2h): add GET /api/v1/partidos/h2h endpoint"
+git add frontend/src/app/partidos/page.tsx
+git commit -m "feat: show live scores and minute on partidos list page"
 ```

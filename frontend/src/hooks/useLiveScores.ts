@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 interface LiveScore {
   goles_local: number | null;
@@ -6,35 +6,12 @@ interface LiveScore {
   minuto: number;
 }
 
-const POLL_INTERVAL = 30_000;
-
 export function useLiveScores(): Record<string, LiveScore> {
-  const [scores, setScores] = useState<Record<string, LiveScore>>({});
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function poll() {
-      try {
-        const base = process.env.NEXT_PUBLIC_API_URL || "";
-        const res = await fetch(`${base}/api/v1/partidos/marcadores`);
-        if (!res.ok) return;
-        const data = await res.json();
-        if (!cancelled) {
-          setScores(data);
-        }
-      } catch {
-        // ignore poll errors
-      }
-    }
-
-    poll();
-    const id = setInterval(poll, POLL_INTERVAL);
-    return () => {
-      cancelled = true;
-      clearInterval(id);
-    };
-  }, []);
-
-  return scores;
+  const base = process.env.NEXT_PUBLIC_API_URL || "";
+  const { data } = useQuery<Record<string, LiveScore>>({
+    queryKey: ["liveScores"],
+    queryFn: () => fetch(`${base}/api/v1/partidos/marcadores`).then(r => r.json()),
+    refetchInterval: 30_000,
+  });
+  return data ?? {};
 }

@@ -18,7 +18,7 @@ class MarcadorOut(BaseModel):
     minuto: int = 0
 
 
-@router.get("/marcadores")
+@router.get("/marcadores", response_model=dict[str, MarcadorOut])
 async def marcadores_en_vivo(db: AsyncSession = Depends(get_db)):
     partidos = await PartidoService.get_en_vivo(db)
     now = datetime.now(timezone.utc)

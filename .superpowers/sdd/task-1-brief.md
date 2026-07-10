@@ -1,107 +1,110 @@
-### Task 1: Backend schemas — H2HOut
+### Task 1: Backend service method + endpoint + tests
 
 **Files:**
-- Modify: `backend/app/schemas/partido.py`
-- Test: `backend/tests/test_h2h.py`
+- Modify: `backend/app/services/partido_service.py` (add `get_en_vivo`)
+- Modify: `backend/app/api/partidos.py` (add `GET /marcadores`)
+- Create: `backend/tests/test_marcadores.py`
 
 **Interfaces:**
-- Consumes: `Partido` model fields, `Club.nombre`, `Club.escudo`
-- Produces: `ClubResumen`, `MayorGoleada`, `H2HPartidoItem`, `H2HOut` Pydantic models
+- Consumes: `Partido` model with `estado`, `goles_local`, `goles_visitante`, `fecha`, `id` fields
+- Produces: `PartidoService.get_en_vivo(db) -> list[Partido]` (scalar list, raw ORM objects), `GET /api/v1/partidos/marcadores -> dict[str, MarcadorOut]`
 
-#### Step 1: Write the failing test
+- [ ] **Step 1: Write the failing tests**
+
+Create `backend/tests/test_marcadores.py`:
 
 ```python
-# backend/tests/test_h2h.py
 import pytest
-from backend.app.schemas.partido import H2HOut, ClubResumen, MayorGoleada, H2HPartidoItem
+from httpx import AsyncClient
+from unittest.mock import AsyncMock, MagicMock
+from sqlalchemy.ext.asyncio import AsyncSession
+from datetime import date, datetime, timezone
+
+from backend.app.services.partido_service import PartidoService
 
 
-class TestH2HSchemas:
-    def test_club_resumen_fields(self):
-        c = ClubResumen(id="c1", nombre="Olimpia", escudo="https://example.com/escudo.svg")
-        assert c.id == "c1"
-        assert c.nombre == "Olimpia"
-        assert c.escudo == "https://example.com/escudo.svg"
+class TestMarcadorEndpoint:
+    @pytest.mark.asyncio
+    async def test_marcadores_empty_when_no_en_vivo(self, client: AsyncClient):
+        resp = await client.get("/api/v1/partidos/marcadores")
+        assert resp.status_code == 200
+        assert resp.json() == {}
 
-    def test_mayor_goleada_fields(self):
-        m = MayorGoleada(goles=5, fecha="2024-03-10", goles_recibidos=1)
-        assert m.goles == 5
-        assert m.goles_recibidos == 1
 
-    def test_h2h_partido_item_fields(self):
-        p = H2HPartidoItem(
-            id="p1", torneo="Apertura", jornada=5, fecha="2024-03-10",
-            estado="finalizado", goles_local=2, goles_visitante=1,
-            local_id="c1", visitante_id="c2"
-        )
-        assert p.goles_local == 2
+class TestGetEnVivo:
+    @pytest.mark.asyncio
+    async def test_get_en_vivo_empty(self):
+        db = AsyncMock(spec=AsyncSession)
+        mock_result = MagicMock()
+        mock_result.scalars.return_value.all.return_value = []
+        db.execute = AsyncMock(return_value=mock_result)
 
-    def test_h2h_out_structure(self):
-        ca = ClubResumen(id="c1", nombre="Olimpia", escudo="")
-        cb = ClubResumen(id="c2", nombre="Cerro", escudo="")
-        resumen = {"pj": 10, "victorias_a": 4, "empates": 2, "victorias_b": 4,
-                    "goles_a": 12, "goles_b": 11,
-                    "mayor_goleada_a": MayorGoleada(goles=3, fecha="2024-01-01", goles_recibidos=0),
-                    "mayor_goleada_b": None}
-        h2h = H2HOut(club_a=ca, club_b=cb, resumen=resumen, partidos=[])
-        assert h2h.club_a.nombre == "Olimpia"
-        assert h2h.resumen["pj"] == 10
+        result = await PartidoService.get_en_vivo(db)
+        assert result == []
+
+    @pytest.mark.asyncio
+    async def test_get_en_vivo_filters_only_en_vivo(self):
+        from backend.app.models.partido import Partido
+
+        db = AsyncMock(spec=AsyncSession)
+        live = MagicMock(spec=Partido, id="p1", estado="en_vivo", goles_local=1, goles_visitante=0,
+                         fecha=date.today())
+        mock_result = MagicMock()
+        mock_result.scalars.return_value.all.return_value = [live]
+        db.execute = AsyncMock(return_value=mock_result)
+
+        result = await PartidoService.get_en_vivo(db)
+        assert len(result) == 1
+        assert result[0].id == "p1"
 ```
 
-#### Step 2: Run test to verify it fails
+- [ ] **Step 2: Run test to verify it fails**
 
-Run from `C:\Users\astur\Desktop\liga.paraguaya.futbol\backend`:
-```bash
-$env:PYTHONPATH="C:\Users\astur\Desktop\liga.paraguaya.futbol"; python -m pytest tests/test_h2h.py -v
-```
-Expected: FAIL — `H2HOut` not defined.
+Run: `cd backend && $env:PYTHONPATH="C:\Users\astur\Desktop\liga.paraguaya.futbol"; python -m pytest tests/test_marcadores.py -v`
+Expected: FAIL with "PartidoService has no attribute 'get_en_vivo'"
 
-#### Step 3: Write schemas
+- [ ] **Step 3: Write minimal implementation**
+
+Add `get_en_vivo` to `PartidoService` in `backend/app/services/partido_service.py` before `get_h2h`:
 
 ```python
-# Add to backend/app/schemas/partido.py (after line 38)
-class ClubResumen(BaseModel):
-    id: str
-    nombre: str
-    escudo: str
-
-
-class MayorGoleada(BaseModel):
-    goles: int
-    fecha: str
-    goles_recibidos: int
-
-
-class H2HPartidoItem(BaseModel):
-    id: str
-    torneo: str
-    jornada: int
-    fecha: str
-    estado: str
-    goles_local: Optional[int] = None
-    goles_visitante: Optional[int] = None
-    local_id: str
-    visitante_id: str
-
-
-class H2HOut(BaseModel):
-    club_a: ClubResumen
-    club_b: ClubResumen
-    resumen: dict
-    partidos: list[H2HPartidoItem]
+@staticmethod
+async def get_en_vivo(db: AsyncSession) -> list[Partido]:
+    stmt = select(Partido).where(Partido.estado == "en_vivo")
+    result = await db.execute(stmt)
+    return list(result.scalars().all())
 ```
 
-#### Step 4: Run test to verify it passes
+Add to `backend/app/api/partidos.py` before `h2h_partidos`:
 
-```bash
-$env:PYTHONPATH="C:\Users\astur\Desktop\liga.paraguaya.futbol"; python -m pytest tests/test_h2h.py::TestH2HSchemas -v
+```python
+@router.get("/marcadores")
+async def marcadores_en_vivo(db: AsyncSession = Depends(get_db)):
+    partidos = await PartidoService.get_en_vivo(db)
+    now = datetime.now(timezone.utc)
+    result = {}
+    for p in partidos:
+        minuto = 0
+        if isinstance(p.fecha, date):
+            match_start = datetime.combine(p.fecha, datetime.min.time(), tzinfo=timezone.utc)
+            delta = now - match_start
+            minuto = min(max(int(delta.total_seconds() // 60), 0), 120)
+        result[p.id] = MarcadorOut(
+            goles_local=p.goles_local,
+            goles_visitante=p.goles_visitante,
+            minuto=minuto,
+        )
+    return result
 ```
+
+- [ ] **Step 4: Run test to verify it passes**
+
+Run: `cd backend && $env:PYTHONPATH="C:\Users\astur\Desktop\liga.paraguaya.futbol"; python -m pytest tests/test_marcadores.py -v`
 Expected: PASS
 
-#### Step 5: Commit
+- [ ] **Step 5: Commit**
 
 ```bash
-cd C:\Users\astur\Desktop\liga.paraguaya.futbol
-git add backend/app/schemas/partido.py backend/tests/test_h2h.py
-git commit -m "feat(h2h): add H2HOut schemas"
+git add backend/app/services/partido_service.py backend/app/api/partidos.py backend/tests/test_marcadores.py
+git commit -m "feat: add GET /api/v1/partidos/marcadores batch endpoint"
 ```

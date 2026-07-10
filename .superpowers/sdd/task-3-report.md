@@ -1,30 +1,23 @@
-# Task 3 Report — `GET /api/v1/partidos/h2h` endpoint
+# Task 3 Report: Integrate live scores into `/partidos` list page
 
 ## What I implemented
+- Added `useMemo` to React imports and `useLiveScores` hook import
+- Added `const liveScores = useLiveScores();` hook call in `PartidosContent`
+- Added `sorted` useMemo to sort rows: en_vivo (0), programado (1), finalizado (2)
+- Updated Resultado cell to show live scores for `en_vivo` matches (with fallback to `p.goles_*` or `?`)
+- Added minute counter below the score for live matches
+- Added `animate-pulse` to the `en_vivo` EstadoBadge style
+- Replaced `.map()` with `.sorted.map()` in the JSX
 
-- Added `GET /api/v1/partidos/h2h?club_a=X&club_b=Y` FastAPI endpoint in `backend/app/api/partidos.py`
-- Added `Query` to the fastapi import, `H2HOut` to the schemas import
-- Added integration tests in `backend/tests/test_h2h.py` (class `TestH2HEndpoint`)
-
-## TDD Evidence
-
-- **RED (before endpoint):** 2 new tests failed with 404 (route missing); 5 existing tests passed
-- **GREEN (after endpoint):** All 7 tests passed (5 pre-existing + 2 new)
-- **Full suite:** 100% of tests passed (only unrelated PermissionError in temp dir cleanup)
+## Build result
+**PASS** — Compiled successfully, TypeScript passed, all pages generated.
 
 ## Files changed
-
-- `backend/app/api/partidos.py` — added `Query`, `H2HOut` imports and the `/h2h` route
-- `backend/tests/test_h2h.py` — added `TestH2HEndpoint` with two tests
-- `.superpowers/sdd/progress.md` — updated progress tracker
+- `frontend/src/app/partidos/page.tsx` — 24 insertions, 6 deletions
 
 ## Self-review findings
+- Fixed TypeScript error: `order` object needed `Record<string, number>` type annotation to satisfy strict indexing
+- No logic concerns — the hook is a no-op when no live scores exist (returns `{}`), so `liveScores[p.id]` will be `undefined` for non-live matches, which is handled by the conditional checks
 
-- The endpoint uses `Query(...)` for required params per FastAPI conventions
-- `response_model=H2HOut` ensures proper schema validation on output
-- Tests correctly check 422 for missing params and 200/422/500 for valid params
-- No hardcoded URLs or secrets introduced
-
-## Concerns
-
-- None. Clean implementation matching existing code style.
+## Issues or concerns
+None.

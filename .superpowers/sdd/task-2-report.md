@@ -1,41 +1,39 @@
-# Task 2 Report — Backend service `get_h2h()`
+# Task 2: Frontend `useLiveScores` hook — Report
 
-## What was implemented
+## What I Implemented
 
-Added `PartidoService.get_h2h(db, club_a, club_b) -> H2HOut` to `backend/app/services/partido_service.py`. Method:
-1. Fetches `Club` objects for both IDs via `db.get()`
-2. Queries `Partido` table for matches between the two clubs (any direction), ordered by date desc
-3. Builds `H2HPartidoItem` list from results
-4. Computes summary stats (wins, draws, goals, biggest wins) from finalized matches
-5. Returns an `H2HOut` with club summaries, resumen dict, and partidos list
+Created `frontend/src/hooks/useLiveScores.ts` — a React hook that polls the batch live scores endpoint `GET /api/v1/partidos/marcadores` every 30 seconds and returns `Record<string, LiveScore>`.
 
-## TDD Evidence
+The hook mirrors the existing per-match `useLiveScore` hook pattern but:
+- Takes no arguments (fetches all live matches)
+- Returns a keyed record instead of a single score object
+- Uses `|| ""` fallback for `NEXT_PUBLIC_API_URL` (matches brief exactly)
 
-**RED** — Before implementation:
+## What I Tested
+
+- **TypeScript compilation:** Passed (no type errors)
+- **Next.js build:** Passed — `npm run build` completed successfully with 15 static pages generated
+- **Linter:** No warnings or errors reported
+
+## Build Output
+
 ```
-FAILED test_get_h2h_empty - AttributeError: type object 'PartidoService' has no attribute 'get_h2h'
+✓ Compiled successfully in 2.9s
+✓ Generating static pages using 11 workers (15/15) in 783ms
 ```
 
-**GREEN** — After implementation:
-```
-5 passed in 0.05s
-```
+## Files Changed
 
-## Files changed
-
-| File | Change |
+| File | Action |
 |------|--------|
-| `backend/app/services/partido_service.py` | Added imports (`Club`, schemas) and `get_h2h()` static method |
-| `backend/tests/test_h2h.py` | Added `TestH2HService` class with `test_get_h2h_empty` test |
+| `frontend/src/hooks/useLiveScores.ts` | Created |
 
-## Self-review findings
+## Self-Review Findings
 
-- Matches existing code patterns: `@staticmethod`, `AsyncSession`, `select()` usage, `result.scalars().all()` pattern
-- Schema imports fine at top-level (same as existing `PartidoOut`/`PartidoDetailOut`)
-- Test uses `AsyncMock` + `MagicMock` correctly, following unittest.mock patterns
-- Edge cases handled: None goles, non-finalized matches, missing Club records (falls back to raw id / empty escudo)
-- **No concerns** — implementation straightforward, test covers the empty path
+- **Consistency with existing hook:** Follows the same patterns — `cancelled` flag cleanup, interval-based polling, silent error handling, 30s poll interval.
+- **Minor divergence from existing hook:** The existing `useLiveScore` (singular) has `minuto: number | null` while the brief specifies `minuto: number` (non-nullable) for the batch hook. This matches the task brief exactly — the batch endpoint may guarantee `minuto` is always present, or the brief intentionally simplified the type. Either way, the implementation matches the spec as written.
+- **URL construction:** Uses `process.env.NEXT_PUBLIC_API_URL || ""` (empty string fallback) rather than the existing hook's `process.env.NEXT_PUBLIC_API_URL` (no fallback). This is a minor style difference — if `NEXT_PUBLIC_API_URL` is undefined, the existing hook would produce `undefined/api/v1/...` while this one correctly produces `/api/v1/...`. The new approach is more robust.
 
-## Concerns
+## Issues or Concerns
 
-None.
+None. The implementation is a clean, direct port of the brief with no deviations.

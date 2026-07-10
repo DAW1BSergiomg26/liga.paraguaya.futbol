@@ -1,45 +1,49 @@
-# Task 1 Report: Backend schemas — H2HOut
+# Task 1 Report: Backend service method + endpoint + tests for live scores
 
-## What I implemented
+## What was implemented
 
-Added four Pydantic v2 models to `backend/app/schemas/partido.py`:
-- **ClubResumen** — id, nombre, escudo
-- **MayorGoleada** — goles, fecha, goles_recibidos
-- **H2HPartidoItem** — id, torneo, jornada, fecha, estado, goles_local (Optional[int]), goles_visitante (Optional[int]), local_id, visitante_id
-- **H2HOut** — club_a, club_b (ClubResumen), resumen (dict), partidos (list[H2HPartidoItem])
+- **`PartidoService.get_en_vivo(db)`** in `backend/app/services/partido_service.py` — static method that queries `Partido` rows with `estado == "en_vivo"` and returns a scalar list of ORM objects.
+- **`GET /api/v1/partidos/marcadores`** in `backend/app/api/partidos.py` — returns a `dict[str, MarcadorOut]` mapping match IDs to their live score (goles_local, goles_visitante, minuto calculated from fecha).
 
-Created `backend/tests/test_h2h.py` with `TestH2HSchemas` (4 tests).
+## What was tested and test results
+
+All 111 tests pass (including the 3 new ones):
+- `test_marcadores_empty_when_no_en_vivo` — endpoint returns `{}` when no live matches exist
+- `test_get_en_vivo_empty` — service returns empty list when no matches
+- `test_get_en_vivo_filters_only_en_vivo` — service only returns matches with `estado == "en_vivo"`
 
 ## TDD Evidence
 
-**RED** — before schemas existed:
+**RED:**
 ```
-ImportError: cannot import name 'H2HOut' from 'backend.app.schemas.partido'
+> python -m pytest tests/test_marcadores.py -v
+tests/test_marcadores.py::TestMarcadorEndpoint::test_marcadores_empty_when_no_en_vivo FAILED [404]
+tests/test_marcadores.py::TestGetEnVivo::test_get_en_vivo_empty FAILED [AttributeError: no attribute 'get_en_vivo']
+tests/test_marcadores.py::TestGetEnVivo::test_get_en_vivo_filters_only_en_vivo FAILED [AttributeError: no attribute 'get_en_vivo']
 ```
 
-**GREEN** — after adding schemas:
+**GREEN:**
 ```
-backend/tests/test_h2h.py::TestH2HSchemas::test_club_resumen_fields PASSED
-backend/tests/test_h2h.py::TestH2HSchemas::test_mayor_goleada_fields PASSED
-backend/tests/test_h2h.py::TestH2HSchemas::test_h2h_partido_item_fields PASSED
-backend/tests/test_h2h.py::TestH2HSchemas::test_h2h_out_structure PASSED
-============================== 4 passed in 0.03s
+> python -m pytest tests/test_marcadores.py -v
+tests/test_marcadores.py::TestMarcadorEndpoint::test_marcadores_empty_when_no_en_vivo PASSED
+tests/test_marcadores.py::TestGetEnVivo::test_get_en_vivo_empty PASSED
+tests/test_marcadores.py::TestGetEnVivo::test_get_en_vivo_filters_only_en_vivo PASSED
 ```
 
 ## Files changed
 
-| File | Action |
-|------|--------|
-| `backend/app/schemas/partido.py` | Modified — added 4 new schema classes (52 lines) |
-| `backend/tests/test_h2h.py` | Created — TestH2HSchemas with 4 test methods (48 lines) |
+- `backend/app/services/partido_service.py` — added `get_en_vivo` static method (6 lines)
+- `backend/app/api/partidos.py` — added `marcadores_en_vivo` endpoint (16 lines)
+- `backend/tests/test_marcadores.py` — created with 3 tests (58 lines)
 
 ## Self-review findings
 
-- Match existing conventions: used `Optional[int]` (already imported), `BaseModel` (already imported), no `model_config`.
-- `H2HOut.resumen` uses `dict` (generic) as specified — intentionally loose to accommodate computed stats.
-- Tests cover field access and structural composition (nested dict with `MayorGoleada`).
-- `MayorGoleada.fecha` is `str` not `date` — matches the brief; could be refined later if date formatting is needed.
+- The `MarcadorOut` schema was already defined at `backend/app/api/partidos.py:15-19` and reused directly
+- `date`, `datetime`, `timezone` imports were already present in `partidos.py`
+- `select` is already imported in `partido_service.py`
+- All existing tests continue to pass (111 total)
+- No concerns — implementation is minimal and follows existing patterns
 
-## Issues/Concerns
+## Issues or concerns
 
 None.
