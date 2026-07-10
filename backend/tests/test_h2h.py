@@ -1,5 +1,9 @@
 import pytest
+from unittest.mock import AsyncMock, MagicMock
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from backend.app.schemas.partido import H2HOut, ClubResumen, MayorGoleada, H2HPartidoItem
+from backend.app.services.partido_service import PartidoService
 
 
 class TestH2HSchemas:
@@ -32,3 +36,19 @@ class TestH2HSchemas:
         h2h = H2HOut(club_a=ca, club_b=cb, resumen=resumen, partidos=[])
         assert h2h.club_a.nombre == "Olimpia"
         assert h2h.resumen["pj"] == 10
+
+
+class TestH2HService:
+    @pytest.mark.asyncio
+    async def test_get_h2h_empty(self):
+        db = AsyncMock(spec=AsyncSession)
+        mock_result = MagicMock()
+        mock_result.scalars.return_value.all.return_value = []
+        db.execute = AsyncMock(return_value=mock_result)
+        db.get = AsyncMock(return_value=None)
+
+        result = await PartidoService.get_h2h(db, "c1", "c2")
+        assert result.club_a.id == "c1"
+        assert result.club_b.id == "c2"
+        assert result.partidos == []
+        assert result.resumen["pj"] == 0
