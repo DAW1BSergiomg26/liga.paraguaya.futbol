@@ -82,6 +82,12 @@ class PartidoService:
         return [PartidoOut.model_validate(p) for p in partidos], total
 
     @staticmethod
+    async def get_en_vivo(db: AsyncSession) -> list[Partido]:
+        stmt = select(Partido).where(Partido.estado == "en_vivo")
+        result = await db.execute(stmt)
+        return list(result.scalars().all())
+
+    @staticmethod
     async def get_h2h(
         db: AsyncSession,
         club_a: str,

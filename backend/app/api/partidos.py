@@ -18,6 +18,25 @@ class MarcadorOut(BaseModel):
     minuto: int = 0
 
 
+@router.get("/marcadores")
+async def marcadores_en_vivo(db: AsyncSession = Depends(get_db)):
+    partidos = await PartidoService.get_en_vivo(db)
+    now = datetime.now(timezone.utc)
+    result = {}
+    for p in partidos:
+        minuto = 0
+        if isinstance(p.fecha, date):
+            match_start = datetime.combine(p.fecha, datetime.min.time(), tzinfo=timezone.utc)
+            delta = now - match_start
+            minuto = min(max(int(delta.total_seconds() // 60), 0), 120)
+        result[p.id] = MarcadorOut(
+            goles_local=p.goles_local,
+            goles_visitante=p.goles_visitante,
+            minuto=minuto,
+        )
+    return result
+
+
 @router.get("/h2h", response_model=H2HOut)
 async def h2h_partidos(
     club_a: str = Query(...),
