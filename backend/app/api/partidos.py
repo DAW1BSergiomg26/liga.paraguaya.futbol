@@ -1,12 +1,12 @@
 from datetime import date, datetime, timezone
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.app.core.dependencies import get_db
-from backend.app.schemas.partido import PartidoDetailOut, PartidoOut, PartidoPage
+from backend.app.schemas.partido import H2HOut, PartidoDetailOut, PartidoOut, PartidoPage
 from backend.app.services.partido_service import PartidoService
 
 router = APIRouter(prefix="/api/v1/partidos", tags=["partidos"])
@@ -16,6 +16,15 @@ class MarcadorOut(BaseModel):
     goles_local: Optional[int] = None
     goles_visitante: Optional[int] = None
     minuto: int = 0
+
+
+@router.get("/h2h", response_model=H2HOut)
+async def h2h_partidos(
+    club_a: str = Query(...),
+    club_b: str = Query(...),
+    db: AsyncSession = Depends(get_db),
+):
+    return await PartidoService.get_h2h(db, club_a, club_b)
 
 
 @router.get("", response_model=PartidoPage)

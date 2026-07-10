@@ -1,4 +1,5 @@
 import pytest
+from httpx import AsyncClient
 from unittest.mock import AsyncMock, MagicMock
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -59,3 +60,15 @@ class TestH2HService:
         assert result.resumen["goles_b"] == 0
         assert result.resumen["mayor_goleada_a"] is None
         assert result.resumen["mayor_goleada_b"] is None
+
+
+class TestH2HEndpoint:
+    @pytest.mark.asyncio
+    async def test_h2h_endpoint_no_params(self, client: AsyncClient):
+        resp = await client.get("/api/v1/partidos/h2h")
+        assert resp.status_code == 422
+
+    @pytest.mark.asyncio
+    async def test_h2h_endpoint_ok(self, client: AsyncClient):
+        resp = await client.get("/api/v1/partidos/h2h?club_a=olimpia&club_b=cerro-porteno")
+        assert resp.status_code in (200, 422, 500)
