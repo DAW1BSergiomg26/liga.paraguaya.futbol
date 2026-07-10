@@ -67,6 +67,7 @@ export default function Navbar() {
     { href: "/partidos", label: "Partidos" },
     { href: "/tabla", label: "Tabla" },
     { href: "/predicciones", label: "Predicciones" },
+    { href: "/h2h", label: "H2H" },
     { href: "/cerezo", label: "Cerezo" },
   ];
 
