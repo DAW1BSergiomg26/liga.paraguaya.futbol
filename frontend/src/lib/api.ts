@@ -8,7 +8,7 @@ async function fetchJSON<T>(path: string): Promise<T> {
   return res.json();
 }
 
-import type { Club, ClubDetail, Partido, PartidoDetail, PartidoPage, TablaRow, User, PredictionCreate, PredictionDetail, LeaderboardEntry, Noticia, NoticiasResponse } from "@/types";
+import type { Club, ClubDetail, Partido, PartidoDetail, PartidoPage, TablaRow, User, PredictionCreate, PredictionDetail, LeaderboardEntry, Noticia, NoticiasResponse, H2HResponse } from "@/types";
 
 export async function getClubes(ciudad?: string): Promise<Club[]> {
   const params = ciudad ? `?ciudad=${encodeURIComponent(ciudad)}` : "";
@@ -110,6 +110,13 @@ export async function getLeaderboard(): Promise<LeaderboardEntry[]> {
 
 export async function getNoticias(): Promise<NoticiasResponse> {
   return fetchJSON<NoticiasResponse>("/api/v1/noticias");
+}
+
+export async function getH2H(clubA: string, clubB: string): Promise<H2HResponse> {
+  const res = await fetchJSON<H2HResponse>(
+    `${API_URL}/api/v1/partidos/h2h?club_a=${encodeURIComponent(clubA)}&club_b=${encodeURIComponent(clubB)}`
+  );
+  return res;
 }
 
 export async function updatePartido(

@@ -173,6 +173,46 @@ export interface PredictionData {
   total_partidos?: number;
 }
 
+export interface ClubResumen {
+  id: string;
+  nombre: string;
+  escudo: string;
+}
+
+export interface MayorGoleada {
+  goles: number;
+  fecha: string;
+  goles_recibidos: number;
+}
+
+export interface H2HPartidoItem {
+  id: string;
+  torneo: string;
+  jornada: number;
+  fecha: string;
+  estado: string;
+  goles_local: number | null;
+  goles_visitante: number | null;
+  local_id: string;
+  visitante_id: string;
+}
+
+export interface H2HResponse {
+  club_a: ClubResumen;
+  club_b: ClubResumen;
+  resumen: {
+    pj: number;
+    victorias_a: number;
+    empates: number;
+    victorias_b: number;
+    goles_a: number;
+    goles_b: number;
+    mayor_goleada_a: MayorGoleada | null;
+    mayor_goleada_b: MayorGoleada | null;
+  };
+  partidos: H2HPartidoItem[];
+}
+
 export interface Noticia {
   titulo: string;
   fuente: string;
