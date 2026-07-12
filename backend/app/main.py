@@ -1,3 +1,5 @@
+import asyncio
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
@@ -18,6 +20,19 @@ from backend.app.core.database import async_session, run_alembic_upgrade
 from backend.app.models.club import Club
 from backend.app.scripts.seed import seed_clubes, seed_partidos, seed_tabla, seed_tabla_historico
 
+logger = logging.getLogger(__name__)
+
+
+async def sync_loop():
+    while True:
+        try:
+            from backend.app.services.football_data_service import FootballDataService
+            result = FootballDataService.sync_all()
+            logger.info(f"Sync result: {result}")
+        except Exception as e:
+            logger.error(f"Sync failed: {e}")
+        await asyncio.sleep(600)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -28,7 +43,9 @@ async def lifespan(app: FastAPI):
         await seed_tabla(db)
         await seed_tabla_historico(db)
         await db.commit()
+    sync_task = asyncio.create_task(sync_loop())
     yield
+    sync_task.cancel()
 
 
 app = FastAPI(

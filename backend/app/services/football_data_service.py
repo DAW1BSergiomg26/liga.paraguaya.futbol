@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import Optional
 import httpx
 from backend.app.services.football_config import API_BASE_URL, ENDPOINTS, TEAM_MAP, get_api_key
+from backend.app.services.football_mapper import FootballMapper
 
 logger = logging.getLogger(__name__)
 
@@ -62,3 +63,39 @@ class FootballDataService:
                 "fecha": match.get("utcDate", ""),
             })
         return partidos
+
+    @staticmethod
+    def fetch_tabla() -> list[dict]:
+        data = FootballDataService._make_request(ENDPOINTS["standings"])
+        for competition in data.get("standings", []):
+            if competition.get("type") == "TOTAL":
+                return FootballMapper.map_tabla(competition)
+        return []
+
+    @staticmethod
+    def fetch_goleadores() -> list[dict]:
+        data = FootballDataService._make_request(ENDPOINTS["scorers"])
+        scorers = []
+        for scorer in data.get("scorers", []):
+            scorers.append(FootballMapper.map_goleador(scorer, "Primera Division 2026"))
+        return scorers
+
+    @staticmethod
+    def sync_all() -> dict:
+        results = {"partidos": 0, "tabla": 0, "goleadores": 0, "errors": []}
+        try:
+            partidos = FootballDataService.fetch_partidos()
+            results["partidos"] = len(partidos)
+        except Exception as e:
+            results["errors"].append(f"partidos: {str(e)}")
+        try:
+            tabla = FootballDataService.fetch_tabla()
+            results["tabla"] = len(tabla)
+        except Exception as e:
+            results["errors"].append(f"tabla: {str(e)}")
+        try:
+            goleadores = FootballDataService.fetch_goleadores()
+            results["goleadores"] = len(goleadores)
+        except Exception as e:
+            results["errors"].append(f"goleadores: {str(e)}")
+        return results
