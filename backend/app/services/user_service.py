@@ -6,7 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.app.models.user import User
-from backend.app.schemas.user import UserLogin, UserOut
+from backend.app.schemas.user import UserOAuth, UserOut
 
 
 class UserService:
@@ -18,7 +18,7 @@ class UserService:
         return f"{base}_{secrets.token_hex(3)}"
 
     @staticmethod
-    async def upsert(db: AsyncSession, data: UserLogin) -> UserOut:
+    async def upsert(db: AsyncSession, data: UserOAuth) -> UserOut:
         result = await db.execute(select(User).where(User.email == data.email))
         user = result.scalar_one_or_none()
         if user:
