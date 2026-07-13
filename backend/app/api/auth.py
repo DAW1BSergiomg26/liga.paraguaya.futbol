@@ -5,7 +5,7 @@ from backend.app.schemas.user import UserRegister, UserLogin, TokenResponse, Use
 from backend.app.services.user_service import UserService
 from backend.app.models.user import User
 
-router = APIRouter(prefix="/auth", tags=["auth"])
+router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
 
 
 @router.post("/register", response_model=TokenResponse, status_code=201)
@@ -20,7 +20,7 @@ async def register(body: UserRegister, db: AsyncSession = Depends(get_db)):
         access_token=result["token"],
         user=UserOut(
             id=user.id, email=user.email, name=user.name, image=user.image,
-            username=user.username, puntos=user.puntos,
+            username=user.username, token=user.token or "", puntos=user.puntos,
         ),
     )
 
@@ -37,7 +37,7 @@ async def login(body: UserLogin, db: AsyncSession = Depends(get_db)):
         access_token=result["token"],
         user=UserOut(
             id=user.id, email=user.email, name=user.name, image=user.image,
-            username=user.username, puntos=user.puntos,
+            username=user.username, token=user.token or "", puntos=user.puntos,
         ),
     )
 
@@ -46,5 +46,6 @@ async def login(body: UserLogin, db: AsyncSession = Depends(get_db)):
 async def me(current_user: User = Depends(get_current_user)):
     return UserOut(
         id=current_user.id, email=current_user.email, name=current_user.name,
-        image=current_user.image, username=current_user.username, puntos=current_user.puntos,
+        image=current_user.image, username=current_user.username,
+        token=current_user.token or "", puntos=current_user.puntos,
     )

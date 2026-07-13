@@ -1,3 +1,5 @@
+import uuid
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from backend.app.models.user import User
@@ -14,6 +16,7 @@ class UserService:
             raise ValueError("El email ya está registrado")
 
         user = User(
+            id=str(uuid.uuid4()),
             email=email,
             name=name,
             username=email.split("@")[0],
