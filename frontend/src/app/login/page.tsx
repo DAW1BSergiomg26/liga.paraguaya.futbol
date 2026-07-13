@@ -1,83 +1,115 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { loginWithProvider, setAuthToken } from "@/lib/api";
 import Link from "next/link";
+import { loginUser, registerUser } from "@/lib/api";
 
 export default function LoginPage() {
   const router = useRouter();
+  const [mode, setMode] = useState<"login" | "register">("login");
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
-  const [saving, setSaving] = useState(false);
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!email.trim() || !name.trim()) {
-      setError("Completá todos los campos");
-      return;
-    }
-    setSaving(true);
     setError("");
+    setLoading(true);
     try {
-      const user = await loginWithProvider({ email: email.trim(), name: name.trim() });
-      setAuthToken(user.token);
+      if (mode === "register") {
+        await registerUser(email, name, password);
+      } else {
+        await loginUser(email, password);
+      }
+      window.dispatchEvent(new CustomEvent("auth-changed"));
       router.push("/predicciones");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al iniciar sesión");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Error al autenticar";
+      setError(msg);
     } finally {
-      setSaving(false);
+      setLoading(false);
     }
   }
 
   return (
-    <div className="max-w-md mx-auto px-4 py-20">
-      <h1 className="text-3xl font-bold mb-2">Iniciar sesión</h1>
-      <p className="text-texto-secundario mb-8">Ingresá tu email y nombre para empezar</p>
+    <div className="min-h-screen flex items-center justify-center px-4">
+      <div className="w-full max-w-md bg-bg-secundario/80 border border-borde-sutil rounded-2xl p-8">
+        <h1 className="text-2xl font-bold text-texto-principal text-center mb-6 titulo-modulo">
+          {mode === "login" ? "Iniciar Sesión" : "Crear Cuenta"}
+        </h1>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="email" className="block text-sm text-texto-secundario mb-1">Email</label>
-          <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-lg bg-bg-terciario border border-borde-sutil text-white placeholder-gray-500 focus:outline-none focus:border-apf-rojo"
-            placeholder="tu@email.com"
-            autoComplete="email"
-          />
-        </div>
-        <div>
-          <label htmlFor="name" className="block text-sm text-texto-secundario mb-1">Nombre</label>
-          <input
-            id="name"
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-lg bg-bg-terciario border border-borde-sutil text-white placeholder-gray-500 focus:outline-none focus:border-apf-rojo"
-            placeholder="Tu nombre"
-            autoComplete="name"
-          />
+        {/* Toggle */}
+        <div className="flex mb-6 bg-bg-terciario rounded-lg p-1">
+          <button
+            onClick={() => { setMode("login"); setError(""); }}
+            className={`flex-1 py-2 rounded-md text-sm font-medium transition ${mode === "login" ? "bg-apf-rojo text-white" : "text-texto-secundario hover:text-white"}`}
+          >
+            Iniciar Sesión
+          </button>
+          <button
+            onClick={() => { setMode("register"); setError(""); }}
+            className={`flex-1 py-2 rounded-md text-sm font-medium transition ${mode === "register" ? "bg-apf-rojo text-white" : "text-texto-secundario hover:text-white"}`}
+          >
+            Registrarse
+          </button>
         </div>
 
         {error && (
-          <div className="p-3 rounded-lg bg-red-900/30 text-red-300 text-sm">{error}</div>
+          <div className="mb-4 px-4 py-2 rounded-lg bg-derrota/20 border border-derrota/30 text-derrota text-sm">
+            {error}
+          </div>
         )}
 
-        <button
-          type="submit"
-          disabled={saving}
-          className="w-full py-2.5 rounded-lg bg-apf-rojo text-black font-semibold hover:brightness-110 transition disabled:opacity-50"
-        >
-          {saving ? "Ingresando..." : "Ingresar"}
-        </button>
-      </form>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {mode === "register" && (
+            <div>
+              <label className="block text-texto-secundario text-sm mb-1">Nombre</label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                className="w-full px-4 py-2.5 rounded-lg bg-bg-terciario border border-borde-sutil text-texto-principal focus:outline-none focus:border-apf-rojo transition"
+              />
+            </div>
+          )}
+          <div>
+            <label className="block text-texto-secundario text-sm mb-1">Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full px-4 py-2.5 rounded-lg bg-bg-terciario border border-borde-sutil text-texto-principal focus:outline-none focus:border-apf-rojo transition"
+            />
+          </div>
+          <div>
+            <label className="block text-texto-secundario text-sm mb-1">Contraseña</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={6}
+              className="w-full px-4 py-2.5 rounded-lg bg-bg-terciario border border-borde-sutil text-texto-principal focus:outline-none focus:border-apf-rojo transition"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-3 rounded-lg bg-apf-rojo text-white font-bold hover:bg-apf-rojo-oscuro transition disabled:opacity-50"
+          >
+            {loading ? "Procesando..." : mode === "login" ? "Ingresar" : "Crear Cuenta"}
+          </button>
+        </form>
 
-      <p className="mt-6 text-center text-sm text-texto-apagado">
-        <Link href="/" className="text-apf-rojo hover:underline">← Volver al inicio</Link>
-      </p>
+        <p className="text-texto-apagado text-xs text-center mt-6">
+          <Link href="/" className="text-apf-rojo hover:underline">Volver al inicio</Link>
+        </p>
+      </div>
     </div>
   );
 }
