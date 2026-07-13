@@ -306,3 +306,18 @@ export interface EquipoResumenTactico {
   escudo: string;
   formacion: string;
 }
+
+export interface AuthUser {
+  id: string;
+  email: string;
+  name: string;
+  image: string | null;
+  username: string;
+  puntos: number;
+}
+
+export interface TokenResponse {
+  access_token: string;
+  token_type: string;
+  user: AuthUser;
+}

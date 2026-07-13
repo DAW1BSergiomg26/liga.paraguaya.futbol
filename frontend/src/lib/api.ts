@@ -1,14 +1,14 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://backend-production-0b7d.up.railway.app";
 
-async function fetchJSON<T>(path: string): Promise<T> {
-  const res = await fetch(`${API_URL}${path}`);
+async function fetchJSON<T>(path: string, options?: RequestInit): Promise<T> {
+  const res = await fetch(`${API_URL}${path}`, options);
   if (!res.ok) {
     throw new Error(`API error: ${res.status} ${res.statusText}`);
   }
   return res.json();
 }
 
-import type { Club, ClubDetail, Partido, PartidoDetail, PartidoPage, TablaRow, User, PredictionCreate, PredictionDetail, LeaderboardEntry, Noticia, NoticiasResponse, H2HResponse, EquipoTactico, AnalisisPartido, EquipoResumenTactico } from "@/types";
+import type { Club, ClubDetail, Partido, PartidoDetail, PartidoPage, TablaRow, User, PredictionCreate, PredictionDetail, LeaderboardEntry, Noticia, NoticiasResponse, H2HResponse, EquipoTactico, AnalisisPartido, EquipoResumenTactico, AuthUser, TokenResponse } from "@/types";
 
 export async function getClubes(ciudad?: string): Promise<Club[]> {
   const params = ciudad ? `?ciudad=${encodeURIComponent(ciudad)}` : "";
@@ -90,6 +90,28 @@ export async function loginWithProvider(data: {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
+}
+
+export async function registerUser(email: string, name: string, password: string): Promise<TokenResponse> {
+  const data = await fetchJSON<TokenResponse>("/api/v1/auth/register", {
+    method: "POST",
+    body: JSON.stringify({ email, name, password }),
+  });
+  setAuthToken(data.access_token);
+  return data;
+}
+
+export async function loginUser(email: string, password: string): Promise<TokenResponse> {
+  const data = await fetchJSON<TokenResponse>("/api/v1/auth/login", {
+    method: "POST",
+    body: JSON.stringify({ email, password }),
+  });
+  setAuthToken(data.access_token);
+  return data;
+}
+
+export async function getMe(): Promise<AuthUser> {
+  return authFetchJSON<AuthUser>("/api/v1/auth/me");
 }
 
 export async function crearPrediccion(data: PredictionCreate): Promise<PredictionDetail> {
