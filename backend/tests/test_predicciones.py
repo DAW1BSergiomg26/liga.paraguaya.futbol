@@ -3,32 +3,31 @@ import pytest
 from backend.tests.conftest import seed_test_data, seed_test_user
 
 
+async def _register(client, email, name, password):
+    resp = await client.post("/api/v1/auth/register", json={
+        "email": email, "name": name, "password": password,
+    })
+    return resp
+
+
 @pytest.mark.asyncio
 async def test_login_creates_user(client, db_session):
-    response = await client.post("/api/v1/auth/login", json={
-        "email": "test@example.com",
-        "name": "Test User",
-        "provider": "google",
-        "provider_id": "google_123",
-    })
-    assert response.status_code == 200
+    response = await _register(client, "test@example.com", "Test User", "password123")
+    assert response.status_code == 201
     data = response.json()
-    assert data["email"] == "test@example.com"
-    assert data["token"] != ""
-    assert data["username"] != ""
+    assert data["access_token"] != ""
+    assert data["user"]["email"] == "test@example.com"
 
 
 @pytest.mark.asyncio
 async def test_login_returns_same_user(client, db_session):
-    r1 = await client.post("/api/v1/auth/login", json={
-        "email": "same@example.com", "name": "User", "provider": "google", "provider_id": "g1",
-    })
-    token1 = r1.json()["token"]
+    r1 = await _register(client, "same@example.com", "User", "password123")
+    token1 = r1.json()["access_token"]
     r2 = await client.post("/api/v1/auth/login", json={
-        "email": "same@example.com", "name": "User Updated", "provider": "google", "provider_id": "g1",
+        "email": "same@example.com", "password": "password123",
     })
     assert r2.status_code == 200
-    assert r2.json()["token"] != token1
+    assert r2.json()["access_token"] != token1
 
 
 @pytest.mark.asyncio
@@ -36,10 +35,8 @@ async def test_crear_prediccion(client, db_session):
     await seed_test_data(db_session)
     await seed_test_user(db_session)
 
-    r = await client.post("/api/v1/auth/login", json={
-        "email": "pred@test.com", "name": "Pred User", "provider": "google", "provider_id": "gp1",
-    })
-    token = r.json()["token"]
+    r = await _register(client, "pred@test.com", "Pred User", "password123")
+    token = r.json()["access_token"]
 
     response = await client.post(
         "/api/v1/predicciones",
@@ -57,10 +54,8 @@ async def test_mis_predicciones(client, db_session):
     await seed_test_data(db_session)
     await seed_test_user(db_session)
 
-    r = await client.post("/api/v1/auth/login", json={
-        "email": "list@test.com", "name": "List User", "provider": "google", "provider_id": "gl1",
-    })
-    token = r.json()["token"]
+    r = await _register(client, "list@test.com", "List User", "password123")
+    token = r.json()["access_token"]
 
     await client.post(
         "/api/v1/predicciones",
@@ -82,10 +77,8 @@ async def test_leaderboard(client, db_session):
     await seed_test_data(db_session)
     await seed_test_user(db_session)
 
-    r = await client.post("/api/v1/auth/login", json={
-        "email": "lb@test.com", "name": "LB User", "provider": "google", "provider_id": "glb1",
-    })
-    token = r.json()["token"]
+    r = await _register(client, "lb@test.com", "LB User", "password123")
+    token = r.json()["access_token"]
 
     await client.post(
         "/api/v1/predicciones",
@@ -119,10 +112,8 @@ async def test_calcular_puntos_exacto(client, db_session):
     await seed_test_data(db_session)
     await seed_test_user(db_session)
 
-    r = await client.post("/api/v1/auth/login", json={
-        "email": "exact@test.com", "name": "Exact", "provider": "google", "provider_id": "ge1",
-    })
-    token = r.json()["token"]
+    r = await _register(client, "exact@test.com", "Exact", "password123")
+    token = r.json()["access_token"]
 
     await client.post(
         "/api/v1/predicciones",
