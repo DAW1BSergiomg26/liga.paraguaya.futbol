@@ -100,6 +100,9 @@ async def _ensure_columns_exist():
     partido_columns = [
         ("temporada", "VARCHAR(20) NOT NULL DEFAULT ''"),
     ]
+    user_columns = [
+        ("hashed_password", "VARCHAR(256)"),
+    ]
     async with engine.begin() as conn:
         for col, dtype in club_columns:
             result = await conn.execute(sa_text("PRAGMA table_info(clubes)"))
@@ -113,6 +116,12 @@ async def _ensure_columns_exist():
             if not any(row[1] == col for row in rows):
                 await conn.execute(sa_text(f"ALTER TABLE partidos ADD COLUMN {col} {dtype}"))
                 sys.stderr.write(f"Added missing column partidos.{col}\n")
+        for col, dtype in user_columns:
+            result = await conn.execute(sa_text("PRAGMA table_info(users)"))
+            rows = result.fetchall()
+            if not any(row[1] == col for row in rows):
+                await conn.execute(sa_text(f"ALTER TABLE users ADD COLUMN {col} {dtype}"))
+                sys.stderr.write(f"Added missing column users.{col}\n")
     sys.stderr.flush()
 
 

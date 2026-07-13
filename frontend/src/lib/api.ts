@@ -95,6 +95,7 @@ export async function loginWithProvider(data: {
 export async function registerUser(email: string, name: string, password: string): Promise<TokenResponse> {
   const data = await fetchJSON<TokenResponse>("/api/v1/auth/register", {
     method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, name, password }),
   });
   setAuthToken(data.access_token);
@@ -104,6 +105,7 @@ export async function registerUser(email: string, name: string, password: string
 export async function loginUser(email: string, password: string): Promise<TokenResponse> {
   const data = await fetchJSON<TokenResponse>("/api/v1/auth/login", {
     method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
   });
   setAuthToken(data.access_token);
