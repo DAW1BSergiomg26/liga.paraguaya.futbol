@@ -18,6 +18,7 @@ class User(Base):
     provider: Mapped[str] = mapped_column(String(50), default="google")
     provider_id: Mapped[str] = mapped_column(String(200), default="")
     token: Mapped[str] = mapped_column(String(100), default="")
+    hashed_password: Mapped[str] = mapped_column(String(256), nullable=True)
     puntos: Mapped[int] = mapped_column(Integer, default=0)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
 
