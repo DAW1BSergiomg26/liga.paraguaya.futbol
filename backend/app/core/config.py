@@ -13,6 +13,10 @@ class Settings(BaseSettings):
 
     admin_api_key: str = "Rufi141414%$"
 
+    jwt_secret: str = "change-me-in-production-2026"
+    jwt_algorithm: str = "HS256"
+    jwt_expire_days: int = 7
+
     VAPID_PUBLIC_KEY: str = ""
     VAPID_PRIVATE_KEY: str = ""
     VAPID_CLAIM_EMAIL: str = "admin@ligapy.app"
