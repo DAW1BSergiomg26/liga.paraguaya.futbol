@@ -228,3 +228,81 @@ export interface NoticiasResponse {
 }
 
 export type StructuredData = ClubDetailData | MatchFormData | H2HData | MiniTableData | ComparisonData | NextMatchData | PredictionData | { type: "greeting" | "unknown" };
+
+export interface JugadorTactico {
+  id: string;
+  nombre: string;
+  posicion: string;
+  numero: number;
+  rating: number;
+  x: number;
+  y: number;
+}
+
+export interface EstadisticasEquipo {
+  xg: number;
+  posesion: number;
+  tiros_puerta: number;
+  pases_completados: number;
+  duelos_ganados: number;
+  corners: number;
+}
+
+export interface InsightTactico {
+  icono: string;
+  texto: string;
+  metrica: string | null;
+}
+
+export interface PartidoResumenTactico {
+  fecha: string;
+  rival: string;
+  resultado: string;
+  formacion: string;
+}
+
+export interface EquipoTactico {
+  equipo_id: string;
+  nombre: string;
+  escudo: string;
+  formacion_principal: string;
+  formaciones_disponibles: string[];
+  jugadores: JugadorTactico[];
+  stats: EstadisticasEquipo;
+  tendencias: InsightTactico[];
+  ultimos_partidos: PartidoResumenTactico[];
+}
+
+export interface EquipoPartidoTactico {
+  equipo_id: string;
+  nombre: string;
+  formacion: string;
+  jugadores: JugadorTactico[];
+}
+
+export interface StatsComparativa {
+  local: EstadisticasEquipo;
+  visitante: EstadisticasEquipo;
+}
+
+export interface PrediccionIA {
+  gana_local: number;
+  empate: number;
+  gana_visitante: number;
+  confianza: string;
+}
+
+export interface AnalisisPartido {
+  partido_id: string;
+  local: EquipoPartidoTactico;
+  visitante: EquipoPartidoTactico;
+  stats: StatsComparativa;
+  prediccion_ia: PrediccionIA;
+}
+
+export interface EquipoResumenTactico {
+  id: string;
+  nombre: string;
+  escudo: string;
+  formacion: string;
+}

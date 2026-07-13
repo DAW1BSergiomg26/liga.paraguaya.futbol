@@ -365,5 +365,60 @@
     "escudo": "https://upload.wikimedia.org/wikipedia/commons/2/2a/Club_Sportivo_Trinidense.svg",
     "camiseta": "https://upload.wikimedia.org/wikipedia/commons/2/2a/Club_Sportivo_Trinidense.svg",
     "descripcion": "El Sportivo Trinidense es un club de fútbol de Paraguay que milita actualmente en la Primera División de Paraguay. Está situado en el barrio Virgen de la Asunción del distrito de Santísima Trinidad, en la ciudad de Asunción. Sus partidos como local los juega en el Estadio Martín Torres. Su clásico rival es el club Rubio Ñu, cuyo estadio se encuentra a 1 km de distancia, en el denominado Clásico de Trinidad."
+  },
+  {
+    "id": "general-diaz",
+    "nombre": "Club General Díaz",
+    "ciudad": "Luque",
+    "apodo": "Los Gauchos de Luque",
+    "colores": [
+      "#FF0000",
+      "#FFFFFF"
+    ],
+    "estadio": "Estadio General Adrián Jara",
+    "capacidad": 4500,
+    "fundacion": 1927,
+    "direccion": "Luque, Departamento Central",
+    "escudo": "https://upload.wikimedia.org/wikipedia/en/2/2a/Club_General_D%C3%ADaz.png",
+    "camiseta": "https://upload.wikimedia.org/wikipedia/en/2/2a/Club_General_D%C3%ADaz.png",
+    "descripcion": "El Club General Díaz es un club de fútbol paraguayo de la ciudad de Luque,_departamento Central. Fue fundado el 22 de octubre de 1927. El club lleva su nombre en honor al general José Eduvigis Díaz, héroe de la Guerra de la Triple Alianza. Milita en la Primera División de Paraguay.",
+    "sitio_web": ""
+  },
+  {
+    "id": "deportivo-capiata",
+    "nombre": "Club Deportivo Capiatá",
+    "ciudad": "Capiatá",
+    "apodo": "Depor",
+    "colores": [
+      "#00FF00",
+      "#FFFFFF"
+    ],
+    "estadio": "Estadio Lic. Erico Galeano Segovia",
+    "capacidad": 5000,
+    "fundacion": 2008,
+    "direccion": "Capiatá, Departamento Central",
+    "escudo": "/clubdeportivo_capiata.png",
+    "camiseta": "/clubdeportivo_capiata.png",
+    "descripcion": "El Club Deportivo Capiatá es un club de fútbol paraguayo de la ciudad de Capiatá, Departamento Central. Fue fundado el 22 de septiembre de 2008. Es uno de los clubes más nuevos del fútbol paraguayo pero ha logrado ascender rápidamente a Primera División.",
+    "sitio_web": ""
+  },
+  {
+    "id": "3-de-febrero",
+    "nombre": "Club 3 de Febrero",
+    "ciudad": "Ciudad del Este",
+    "apodo": "El Tricolor",
+    "colores": [
+      "#FF0000",
+      "#0000FF",
+      "#FFFFFF"
+    ],
+    "estadio": "Estadio Antonio Aranda",
+    "capacidad": 20000,
+    "fundacion": 1970,
+    "direccion": "Ciudad del Este, Alto Paraná",
+    "escudo": "https://upload.wikimedia.org/wikipedia/en/a/a1/Club_3_Febrero.png",
+    "camiseta": "https://upload.wikimedia.org/wikipedia/en/a/a1/Club_3_Febrero.png",
+    "descripcion": "El Club 3 de Febrero es un club de fútbol paraguayo de la ciudad de Ciudad del Este, departamento del Alto Paraná. Fue fundado el 3 de febrero de 1970, fecha que le da su nombre. Es el club más importante de la región del Alto Paraná y disputa sus partidos de local en el Estadio Antonio Aranda.",
+    "sitio_web": ""
   }
 ]

@@ -70,8 +70,8 @@ async def listar_partidos(
         page = 1
     if per_page < 1:
         per_page = 25
-    if per_page > 100:
-        per_page = 100
+    if per_page > 500:
+        per_page = 500
     partidos, total = await PartidoService.get_all_paginated(
         db, torneo=torneo, estado=estado, page=page, per_page=per_page
     )

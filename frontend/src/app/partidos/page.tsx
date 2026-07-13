@@ -45,7 +45,7 @@ function PartidosContent() {
     error,
   } = useQuery<PartidoPage>({
     queryKey: ["partidos", torneo, estado],
-    queryFn: () => getPartidos(torneo || undefined, estado || undefined),
+    queryFn: () => getPartidos(torneo || undefined, estado || undefined, undefined, 500),
     refetchInterval: 30000,
   });
   const partidos = partidosPage?.data;

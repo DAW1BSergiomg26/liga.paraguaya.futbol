@@ -17,7 +17,7 @@ function Medalla({ pos }: { pos: number }) {
 }
 
 export default function TablaPage() {
-  const [torneo, setTorneo] = useState("Torneo Apertura 2026");
+  const [torneo, setTorneo] = useState("");
 
   const { data: torneos } = useQuery<string[]>({
     queryKey: ["torneos"],
@@ -25,9 +25,21 @@ export default function TablaPage() {
     staleTime: 300_000,
   });
 
-  const { data: filas, isLoading, error } = useQuery<TablaRow[]>({
+  // Si cambia la lista de torneos del backend, inicializamos con el primero disponible
+  useEffect(() => {
+    if (torneos && torneos.length > 0 && !torneo) {
+      setTorneo(torneos[0]);
+    }
+  }, [torneos, torneo]);
+
+  const {
+    data: filas,
+    isLoading,
+    error,
+  } = useQuery<TablaRow[]>({
     queryKey: ["tabla", torneo],
     queryFn: () => getTabla(torneo),
+    enabled: torneo !== "", // Espera a tener el nombre del torneo válido
     staleTime: 60_000,
   });
 
@@ -50,7 +62,7 @@ export default function TablaPage() {
           obs.unobserve(el);
         }
       },
-      { threshold: 0.08 }
+      { threshold: 0.08 },
     );
     obs.observe(el);
     return () => obs.disconnect();
@@ -74,7 +86,8 @@ export default function TablaPage() {
 
   if (isLoading) return <TableSkeleton rows={12} cols={10} />;
 
-  if (error) return <ErrorMessage message="Error al cargar la tabla de posiciones" />;
+  if (error)
+    return <ErrorMessage message="Error al cargar la tabla de posiciones" />;
 
   const totalEquipos = filas?.length ?? 0;
 
@@ -82,7 +95,7 @@ export default function TablaPage() {
     <div className="max-w-6xl mx-auto px-4 py-12">
       <PageHeader
         titulo="Tabla de Posiciones"
-        subtitulo={`${filas?.length ?? 0} equipos · ${torneo}`}
+        subtitulo={`${filas?.length ?? 0} equipos · ${torneo || "Cargando..."}`}
         accion={
           <select
             value={torneo}
@@ -90,7 +103,9 @@ export default function TablaPage() {
             className="px-4 py-2 rounded-lg bg-bg-terciario border border-borde-sutil text-white text-sm focus:outline-none focus:border-apf-rojo transition"
           >
             {torneos?.map((t) => (
-              <option key={t} value={t}>{t}</option>
+              <option key={t} value={t}>
+                {t}
+              </option>
             ))}
           </select>
         }
@@ -100,30 +115,51 @@ export default function TablaPage() {
         <div ref={wrapperRef}>
           {!filas || filas.length === 0 ? (
             <div className="text-center py-16 text-texto-secundario">
-              <p>No hay datos disponibles para {torneo}.</p>
+              <p>No hay datos disponibles para {torneo || "este torneo"}.</p>
             </div>
           ) : (
             <div className="overflow-x-auto rounded-xl border border-borde-sutil">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-bg-terciario border-b border-borde-sutil">
-                    <th className="text-left py-3 px-3 sm:px-4 font-semibold text-texto-secundario uppercase tracking-wider text-xs">Pos</th>
-                    <th className="text-left py-3 px-3 sm:px-4 font-semibold text-texto-secundario uppercase tracking-wider text-xs">Club</th>
-                    <th className="text-center py-3 px-2 sm:px-3 font-semibold text-texto-secundario uppercase tracking-wider text-xs">PJ</th>
-                    <th className="text-center py-3 px-2 sm:px-3 font-semibold text-texto-secundario uppercase tracking-wider text-xs hidden sm:table-cell">PG</th>
-                    <th className="text-center py-3 px-2 sm:px-3 font-semibold text-texto-secundario uppercase tracking-wider text-xs hidden sm:table-cell">PE</th>
-                    <th className="text-center py-3 px-2 sm:px-3 font-semibold text-texto-secundario uppercase tracking-wider text-xs hidden sm:table-cell">PP</th>
-                    <th className="text-center py-3 px-2 sm:px-3 font-semibold text-texto-secundario uppercase tracking-wider text-xs hidden md:table-cell">GF</th>
-                    <th className="text-center py-3 px-2 sm:px-3 font-semibold text-texto-secundario uppercase tracking-wider text-xs hidden md:table-cell">GC</th>
-                    <th className="text-center py-3 px-2 sm:px-3 font-semibold text-texto-secundario uppercase tracking-wider text-xs">DG</th>
-                    <th className="text-center py-3 px-3 sm:px-4 font-semibold text-texto-secundario uppercase tracking-wider text-xs">Pts</th>
+                    <th className="text-left py-3 px-3 sm:px-4 font-semibold text-texto-secundario uppercase tracking-wider text-xs">
+                      Pos
+                    </th>
+                    <th className="text-left py-3 px-3 sm:px-4 font-semibold text-texto-secundario uppercase tracking-wider text-xs">
+                      Club
+                    </th>
+                    <th className="text-center py-3 px-2 sm:px-3 font-semibold text-texto-secundario uppercase tracking-wider text-xs">
+                      PJ
+                    </th>
+                    <th className="text-center py-3 px-2 sm:px-3 font-semibold text-texto-secundario uppercase tracking-wider text-xs hidden sm:table-cell">
+                      PG
+                    </th>
+                    <th className="text-center py-3 px-2 sm:px-3 font-semibold text-texto-secundario uppercase tracking-wider text-xs hidden sm:table-cell">
+                      PE
+                    </th>
+                    <th className="text-center py-3 px-2 sm:px-3 font-semibold text-texto-secundario uppercase tracking-wider text-xs hidden sm:table-cell">
+                      PP
+                    </th>
+                    <th className="text-center py-3 px-2 sm:px-3 font-semibold text-texto-secundario uppercase tracking-wider text-xs hidden md:table-cell">
+                      GF
+                    </th>
+                    <th className="text-center py-3 px-2 sm:px-3 font-semibold text-texto-secundario uppercase tracking-wider text-xs hidden md:table-cell">
+                      GC
+                    </th>
+                    <th className="text-center py-3 px-2 sm:px-3 font-semibold text-texto-secundario uppercase tracking-wider text-xs">
+                      DG
+                    </th>
+                    <th className="text-center py-3 px-3 sm:px-4 font-semibold text-texto-secundario uppercase tracking-wider text-xs">
+                      Pts
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {filas.map((row, i) => {
                     const esPodio = row.posicion <= 3;
                     const esDescenso = row.posicion > totalEquipos - 2;
-                    const bg = i % 2 === 0 ? "bg-bg-secundario/40" : "bg-transparent";
+                    const bg =
+                      i % 2 === 0 ? "bg-bg-secundario/40" : "bg-transparent";
 
                     let leftBorder = "";
                     let rowBg = bg;
@@ -137,13 +173,19 @@ export default function TablaPage() {
                     return (
                       <tr
                         key={`${row.club_id}-${row.posicion}`}
-                        ref={(el) => { tiltRefs.current[i] = el; }}
+                        ref={(el) => {
+                          tiltRefs.current[i] = el;
+                        }}
                         className={`${rowBg} ${leftBorder} border-b border-borde-sutil transition-all duration-150 hover:bg-bg-terciario hover:translate-x-0.5 ${visible ? "animate-row-enter" : "opacity-0"} ${row.posicion === 1 ? "animate-pulse-lider" : ""}`}
-                        style={{ animationDelay: visible ? `${i * 40}ms` : "0ms" }}
+                        style={{
+                          animationDelay: visible ? `${i * 40}ms` : "0ms",
+                        }}
                         onMouseMove={(e) => handleTilt(e, i)}
                         onMouseLeave={() => handleUntilt(i)}
                       >
-                        <td className={`py-3 px-3 sm:px-4 font-bold ${esPodio ? "text-apf-amarillo" : "text-texto-principal"}`}>
+                        <td
+                          className={`py-3 px-3 sm:px-4 font-bold ${esPodio ? "text-apf-amarillo" : "text-texto-principal"}`}
+                        >
                           <Medalla pos={row.posicion} />
                           {row.posicion}
                         </td>
@@ -160,16 +202,32 @@ export default function TablaPage() {
                             {row.club}
                           </div>
                         </td>
-                        <td className="py-3 px-2 sm:px-3 text-center text-texto-principal">{row.pj}</td>
-                        <td className="py-3 px-2 sm:px-3 text-center text-victoria hidden sm:table-cell">{row.pg}</td>
-                        <td className="py-3 px-2 sm:px-3 text-center text-empate hidden sm:table-cell">{row.pe}</td>
-                        <td className="py-3 px-2 sm:px-3 text-center text-derrota hidden sm:table-cell">{row.pp}</td>
-                        <td className="py-3 px-2 sm:px-3 text-center text-texto-principal hidden md:table-cell">{row.gf}</td>
-                        <td className="py-3 px-2 sm:px-3 text-center text-texto-principal hidden md:table-cell">{row.gc}</td>
-                        <td className={`py-3 px-2 sm:px-3 text-center font-semibold ${row.dg > 0 ? "text-victoria" : row.dg < 0 ? "text-derrota" : "text-texto-principal"}`}>
+                        <td className="py-3 px-2 sm:px-3 text-center text-texto-principal">
+                          {row.pj}
+                        </td>
+                        <td className="py-3 px-2 sm:px-3 text-center text-victoria hidden sm:table-cell">
+                          {row.pg}
+                        </td>
+                        <td className="py-3 px-2 sm:px-3 text-center text-empate hidden sm:table-cell">
+                          {row.pe}
+                        </td>
+                        <td className="py-3 px-2 sm:px-3 text-center text-derrota hidden sm:table-cell">
+                          {row.pp}
+                        </td>
+                        <td className="py-3 px-2 sm:px-3 text-center text-texto-principal hidden md:table-cell">
+                          {row.gf}
+                        </td>
+                        <td className="py-3 px-2 sm:px-3 text-center text-texto-principal hidden md:table-cell">
+                          {row.gc}
+                        </td>
+                        <td
+                          className={`py-3 px-2 sm:px-3 text-center font-semibold ${row.dg > 0 ? "text-victoria" : row.dg < 0 ? "text-derrota" : "text-texto-principal"}`}
+                        >
                           {row.dg > 0 ? `+${row.dg}` : row.dg}
                         </td>
-                        <td className="py-3 px-3 sm:px-4 text-center font-bold text-texto-principal text-sm">{row.puntos}</td>
+                        <td className="py-3 px-3 sm:px-4 text-center font-bold text-texto-principal text-sm">
+                          {row.puntos}
+                        </td>
                       </tr>
                     );
                   })}

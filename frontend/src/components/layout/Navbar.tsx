@@ -66,9 +66,12 @@ export default function Navbar() {
     { href: "/clubes", label: "Clubes" },
     { href: "/partidos", label: "Partidos" },
     { href: "/tabla", label: "Tabla" },
+    { href: "/goleadores", label: "Goleadores" },
     { href: "/predicciones", label: "Predicciones" },
     { href: "/h2h", label: "H2H" },
+    { href: "/tactico", label: "Tactico" },
     { href: "/cerezo", label: "Cerezo" },
+    { href: "/red3d", label: "Red 3D" },
   ];
 
   const navLinks = (

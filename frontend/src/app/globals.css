@@ -103,6 +103,44 @@ a, button, tr {
   }
 }
 
+@keyframes map-glow-trace {
+  0%   { filter: drop-shadow(0 0 10px rgba(213, 43, 30, 0.7))  drop-shadow(0 0 25px rgba(213, 43, 30, 0.35)); }
+  33%  { filter: drop-shadow(0 0 14px rgba(255, 255, 255, 0.8)) drop-shadow(0 0 28px rgba(255, 255, 255, 0.4)); }
+  66%  { filter: drop-shadow(0 0 14px rgba(0, 56, 168, 0.8))  drop-shadow(0 0 28px rgba(0, 56, 168, 0.4)); }
+  100% { filter: drop-shadow(0 0 10px rgba(213, 43, 30, 0.7))  drop-shadow(0 0 25px rgba(213, 43, 30, 0.35)); }
+}
+
+@keyframes ball-orbit {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes trophy-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-3px); }
+}
+
+@keyframes ambient-glow {
+  0%, 100% { opacity: 0.4; transform: translate(-50%, -50%) scale(1); }
+  50%      { opacity: 1;   transform: translate(-50%, -50%) scale(1.4); }
+}
+
+@keyframes ring-breathe {
+  0%, 100% { opacity: 0.3; }
+  50%      { opacity: 0.7; }
+}
+
+@keyframes sparkle-burst {
+  0%, 100% { opacity: 0; transform: scale(0.5); }
+  50%      { opacity: 0.7; transform: scale(1.2); }
+}
+
+@keyframes orbit-wobble {
+  0%, 100% { transform: rotate(0deg) translateX(0); }
+  25%      { transform: rotate(2deg) translateX(3px); }
+  75%      { transform: rotate(-2deg) translateX(-3px); }
+}
+
 /* Utility classes */
 .text-gradient-shine {
   background: linear-gradient(90deg, #F5F6FA, #D52B1E, #F5F6FA, #D52B1E, #F5F6FA);

@@ -33,10 +33,10 @@ export default function PageHeader({
         {accion && <div>{accion}</div>}
       </div>
 
-      {/* Imagen de la albirroja integrada perfectamente a la derecha */}
-      <div className="relative hidden md:block w-24 h-24 flex-shrink-0 opacity-85 select-none pointer-events-none">
+      {/* Imagen de la albirroja integrada elegantemente a la derecha */}
+      <div className="relative hidden md:block w-32 h-32 flex-shrink-0 opacity-50 select-none pointer-events-none">
         <Image
-          src="/albirrojaparaguay.png"
+          src="/albirroparaguay.png"
           alt="Albirroja Paraguay"
           fill
           className="object-contain"

@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from backend.app.core.dependencies import get_db
 from backend.app.services.goleador_service import GoleadorService
 
-router = APIRouter(prefix="/api", tags=["goleadores"])
+router = APIRouter(prefix="/api/v1", tags=["goleadores"])
 
 
 @router.get("/goleadores")

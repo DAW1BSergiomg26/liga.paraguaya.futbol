@@ -8,7 +8,7 @@ async function fetchJSON<T>(path: string): Promise<T> {
   return res.json();
 }
 
-import type { Club, ClubDetail, Partido, PartidoDetail, PartidoPage, TablaRow, User, PredictionCreate, PredictionDetail, LeaderboardEntry, Noticia, NoticiasResponse, H2HResponse } from "@/types";
+import type { Club, ClubDetail, Partido, PartidoDetail, PartidoPage, TablaRow, User, PredictionCreate, PredictionDetail, LeaderboardEntry, Noticia, NoticiasResponse, H2HResponse, EquipoTactico, AnalisisPartido, EquipoResumenTactico } from "@/types";
 
 export async function getClubes(ciudad?: string): Promise<Club[]> {
   const params = ciudad ? `?ciudad=${encodeURIComponent(ciudad)}` : "";
@@ -164,4 +164,30 @@ export interface MensajeChat {
   imagen: string;
   mensaje: string;
   created_at: string;
+}
+
+export async function getTacticoEquipos(): Promise<EquipoResumenTactico[]> {
+  return fetchJSON<EquipoResumenTactico[]>("/api/v1/tactico/equipos");
+}
+
+export async function getTacticoEquipo(equipoId: string): Promise<EquipoTactico> {
+  return fetchJSON<EquipoTactico>(`/api/v1/tactico/equipo/${equipoId}`);
+}
+
+export async function getTacticoPartido(partidoId: string): Promise<AnalisisPartido> {
+  return fetchJSON<AnalisisPartido>(`/api/v1/tactico/partido/${partidoId}`);
+}
+
+export async function getGoleadores(torneo?: string): Promise<{ goleadores: Goleador[]; total: number }> {
+  const params = torneo ? `?torneo=${encodeURIComponent(torneo)}` : "";
+  return fetchJSON(`/api/v1/goleadores${params}`);
+}
+
+interface Goleador {
+  id: string;
+  nombre: string;
+  club_id: string;
+  club_nombre: string;
+  goles: number;
+  asistencias: number;
 }

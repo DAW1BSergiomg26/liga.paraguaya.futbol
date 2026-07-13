@@ -6,6 +6,7 @@ import { misPredicciones, getLeaderboard, getSavedToken, setAuthToken } from "@/
 import type { PredictionDetail, LeaderboardEntry } from "@/types";
 import Link from "next/link";
 import ErrorMessage from "@/components/ui/ErrorMessage";
+import PageHeader from "@/components/ui/PageHeader";
 
 export default function PrediccionesPage() {
   const [loggedIn] = useState(() => {
@@ -65,7 +66,10 @@ export default function PrediccionesPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-12">
-      <h1 className="text-3xl font-bold mb-8">Mis Predicciones</h1>
+      <PageHeader
+        titulo="Mis Predicciones"
+        subtitulo="Hacé tus predicciones y competí en el leaderboard"
+      />
 
       {(!predicciones || predicciones.length === 0) ? (
         <div className="p-8 rounded-xl border border-borde-sutil bg-bg-secundario/60 text-center mb-8">
