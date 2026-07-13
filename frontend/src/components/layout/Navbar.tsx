@@ -86,6 +86,11 @@ export default function Navbar() {
           Admin
         </NavLink>
       )}
+      {token && (
+        <NavLink href="/perfil" active={isActive("/perfil")} onClick={closeMenu}>
+          Perfil
+        </NavLink>
+      )}
       {token ? (
         <button onClick={handleLogout} className="text-texto-apagado hover:text-texto-secundario transition text-xs">
           Salir
