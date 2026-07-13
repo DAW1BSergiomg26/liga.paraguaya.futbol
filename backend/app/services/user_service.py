@@ -15,12 +15,17 @@ class UserService:
         if existing.scalar_one_or_none():
             raise ValueError("El email ya está registrado")
 
+        # Check if this is the first user (becomes admin)
+        count_result = await self.db.execute(select(User))
+        is_first = len(count_result.scalars().all()) == 0
+
         user = User(
             id=str(uuid.uuid4()),
             email=email,
             name=name,
             username=email.split("@")[0],
             hashed_password=hash_password(password),
+            is_admin=is_first,
         )
         self.db.add(user)
         await self.db.commit()
