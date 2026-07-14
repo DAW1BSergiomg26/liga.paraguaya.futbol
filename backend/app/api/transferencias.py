@@ -13,6 +13,7 @@ from backend.app.schemas.transferencia import (
     TransferenciasPaginatedResponse,
 )
 from backend.app.services.transferencia_service import TransferenciaService
+from backend.app.services.transferencia_rss_sync import TransferenciaRssSync
 
 router = APIRouter(prefix="/api/v1/transferencias", tags=["transferencias"])
 
@@ -109,3 +110,12 @@ async def delete_transferencia(
     deleted = await svc.delete(transferencia_id)
     if not deleted:
         raise HTTPException(status_code=404, detail="Transferencia no encontrada")
+
+
+@router.post("/sync-rss", response_model=SyncResponse)
+async def sync_rss(
+    db: AsyncSession = Depends(get_db),
+    admin=Depends(get_current_admin),
+):
+    sync_service = TransferenciaRssSync(db)
+    return await sync_service.sync_all()
