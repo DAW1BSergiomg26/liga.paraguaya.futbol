@@ -68,17 +68,9 @@ a, button, tr {
   pointer-events: none;
   background-color: #05070F;
   background-image:
-    repeating-linear-gradient(
-      115deg,
-      rgba(213, 43, 30, 0.08) 0px,
-      rgba(213, 43, 30, 0.08) 40px,
-      rgba(245, 246, 250, 0.04) 40px,
-      rgba(245, 246, 250, 0.04) 80px,
-      rgba(0, 56, 168, 0.06) 80px,
-      rgba(0, 56, 168, 0.06) 120px
-    ),
     radial-gradient(ellipse at center, transparent 50%, rgba(5, 7, 15, 0.85) 100%);
   will-change: transform;
+  overflow: hidden;
 }
 
 /* Keyframes */
