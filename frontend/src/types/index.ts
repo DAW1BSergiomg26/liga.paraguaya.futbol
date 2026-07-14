@@ -329,3 +329,52 @@ export interface TokenResponse {
   token_type: string;
   user: AuthUser;
 }
+
+// === Transferencias ===
+export type TipoTransferencia = "compra" | "prestamo" | "libre" | "cesion" | "refuerzo";
+export type EstadoTransferencia = "confirmada" | "rumor" | "oficial" | "desmentida";
+
+export interface Transferencia {
+  id: string;
+  jugador_nombre: string;
+  jugador_posicion: string | null;
+  club_origen_id: string | null;
+  club_destino_id: string;
+  fecha: string;
+  tipo: TipoTransferencia;
+  estado: EstadoTransferencia;
+  monto: number | null;
+  duracion_meses: number | null;
+  fuente_url: string | null;
+  fuente_nombre: string | null;
+  verification_level: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  club_origen_nombre?: string;
+  club_origen_escudo?: string;
+  club_destino_nombre?: string;
+  club_destino_escudo?: string;
+}
+
+export interface TransferenciasPaginatedResponse {
+  transferencias: Transferencia[];
+  total: number;
+  page: number;
+  total_pages: number;
+}
+
+export interface GastoPorClub {
+  club_id: string;
+  club_nombre: string;
+  total_gastado: number;
+  total_recibido: number;
+}
+
+export interface EstadisticasTransferencias {
+  total_transferencias: number;
+  gasto_total_por_club: GastoPorClub[];
+  top_compras: Transferencia[];
+  distribucion_posiciones: Record<string, number>;
+  distribucion_tipos: Record<string, number>;
+}

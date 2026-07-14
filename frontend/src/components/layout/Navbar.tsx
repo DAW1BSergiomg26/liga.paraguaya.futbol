@@ -73,6 +73,7 @@ export default function Navbar() {
     { href: "/cerezo", label: "Cerezo" },
     { href: "/red3d", label: "Red 3D" },
     { href: "/noticias", label: "Noticias" },
+    { href: "/transferencias", label: "Transferencias" },
   ];
 
   const navLinks = (
