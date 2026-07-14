@@ -74,6 +74,7 @@ export default function Navbar() {
     { href: "/red3d", label: "Red 3D" },
     { href: "/noticias", label: "Noticias" },
     { href: "/transferencias", label: "Transferencias" },
+    { href: "/historial", label: "Historial" },
   ];
 
   const navLinks = (
