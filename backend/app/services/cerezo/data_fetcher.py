@@ -45,7 +45,15 @@ class CerezoDataFetcher:
 
         if intent == "table_position":
             tabla = await TablaService.get_table(db)
-            return {"tabla": [t.model_dump() for t in tabla]}
+            tabla_data = [t.model_dump() for t in tabla]
+            club_posicion = None
+            if entities.get("clubes"):
+                club_id = entities["clubes"][0]
+                for i, row in enumerate(tabla_data):
+                    if row.get("club_id") == club_id or row.get("id") == club_id:
+                        club_posicion = {"posicion": i + 1, **row}
+                        break
+            return {"tabla": tabla_data, "club_posicion": club_posicion}
 
         if intent == "prediction" and entities.get("clubes"):
             clubes_ids = entities["clubes"]

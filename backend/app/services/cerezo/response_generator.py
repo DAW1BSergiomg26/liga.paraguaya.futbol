@@ -13,6 +13,8 @@ _TEMPLATES: dict[str, list[str]] = {
         "{club[nombre]} juega en {club[estadio]}, fundado en {club[fundacion]}. {titulos_resumen}",
     ],
     "table_position": [
+        "{club_nombre} está en el puesto {posicion}° con {puntos} puntos en {partidos} partidos.",
+        "En la tabla, {club_nombre} va {posicion}° con {puntos} puntos.",
         "Acá va la tabla. Consultame por algún club en particular para más detalles.",
         "Mirá la tabla general. Decime un club para saber su posición exacta.",
     ],
@@ -38,6 +40,10 @@ _TEMPLATES: dict[str, list[str]] = {
     ],
     "top_scorer": [
         "Todavía no tengo datos de goleadores actualizados al instante. Preguntame sobre clubes o partidos.",
+    ],
+    "general_question": [
+        "Buena pregunta. Lamentablemente no tengo acceso a esa información en este momento. Preguntame sobre clubes, partidos, la tabla, o pedime predicciones.",
+        "Eso no lo tengo registrado. Soy experto en la liga paraguaya: preguntame por clubes, posiciones, resultados, o predicciones.",
     ],
     "unknown": [
         "No entendí bien. Probá preguntar: datos de un club, quién ganó un partido, cómo viene la tabla, o quién va a ganar.",
@@ -149,6 +155,17 @@ def _render_template(intent: str, data: dict, prediction: dict | None) -> str:
                 parts.append(f"{p['fecha']} vs {p['rival_nombre']} ({p['torneo']})")
             ctx["lista_partidos"] = "; ".join(parts)
             template = templates[2]
+
+    if intent == "table_position":
+        if data.get("club_posicion"):
+            cp = data["club_posicion"]
+            ctx["club_nombre"] = cp.get("nombre", cp.get("club_nombre", "El club"))
+            ctx["posicion"] = cp["posicion"]
+            ctx["puntos"] = cp.get("puntos", cp.get("pts", 0))
+            ctx["partidos"] = cp.get("partidos_jugados", cp.get("pj", 0))
+            template = random.choice(templates[:2])
+        else:
+            template = random.choice(templates[2:])
 
     if intent == "match_result" and data.get("forma"):
         f = data["forma"]
