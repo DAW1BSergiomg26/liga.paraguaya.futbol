@@ -29,7 +29,7 @@ export default function CinematicHero() {
     if (prefersReduced) return;
 
     // Split title text
-    const split = new SplitType(title, { types: "chars, words" });
+    const split = new SplitType(title, { types: "chars,words" });
 
     // Initial state
     gsap.set(split.chars, { opacity: 0, y: 20 });

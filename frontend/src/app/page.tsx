@@ -2,6 +2,7 @@ import { getClubes, getPartidos, getTabla, getTorneos } from "@/lib/api";
 import type { PartidoPage } from "@/types";
 import Link from "next/link";
 import HeroStats from "@/components/HeroStats";
+import CinematicHero from "@/components/hero/CinematicHero";
 
 async function safeFetch<T>(fn: () => Promise<T>, fallback: T): Promise<[T, string | null]> {
   try {
@@ -43,7 +44,9 @@ export default async function HomePage() {
   const hasErrors = errClubes || errPartidos || errTabla;
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-12">
+    <>
+      <CinematicHero />
+      <div className="max-w-6xl mx-auto px-4 py-12">
       <HeroStats
         clubesCount={clubes.length}
         partidosTotal={partidosData.total}
@@ -114,6 +117,7 @@ export default async function HomePage() {
           <p className="text-texto-secundario text-sm">Calendario y resultados de la temporada</p>
         </Link>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
