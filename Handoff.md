@@ -14,7 +14,7 @@ Plataforma web para el seguimiento de la Primera División paraguaya de fútbol.
 | Scraping | selectolax, httpx, RSSSF + Wikipedia |
 | Auth | JWT (bcrypt + PyJWT), 7-day tokens |
 | APIs externas | Football-Data.org (competicion PA1) |
-| Infra | Docker, Railway (backend), Vercel (frontend) |
+| Infra | Docker (`render.yaml` para Render), Vercel (frontend en producción), backend migrando a host gratuito (Koyeb + Neon Postgres) tras vencer el trial de Railway |
 
 ## Rama activa
 
@@ -223,7 +223,7 @@ El **Handoff Maestro** define la dirección completa del proyecto con una identi
 3. ✅ Noticias (RSS + UI)
 4. ✅ Transferencias (CRUD + RSS + UI + estadísticas)
 5. ✅ Estadísticas históricas
-6. 📋 Deployment a producción
+6. 🔶 Deployment a producción — frontend en Vercel ✅; backend pendiente migrar de Railway (trial vencido) a Koyeb+Neon (gratis, sin tarjeta). Ver sección "Estado de despliegue".
 
 ## Pendientes / Issues conocidos
 
@@ -237,14 +237,42 @@ El **Handoff Maestro** define la dirección completa del proyecto con una identi
 - Sin tests de frontend para la página `/cerezo`.
 - GSAP Experience: Tasks 7-13 pendientes (Page Transitions, ScrollReveal en páginas, Glow Effect).
 
-### En producción (Railway + Vercel)
-- Backend: https://backend-production-0b7d.up.railway.app
-- Frontend: https://frontend-ten-swart-85.vercel.app
-- Railway usa PostgreSQL vía plugin (DATABASE_URL auto-set)
-- Vercel deploy apunta a Railway backend via `NEXT_PUBLIC_API_URL`
+### Bug conocido en producción (pendiente de fix)
+- **`push_subscriptions` timezone crash:** en logs de producción el endpoint de push suscribe/repite crashea con
+  `can't subtract offset-naive and offset-aware datetimes`. Causa: se comparan `datetime` naive (sin tz) con
+  aware (con `timezone.utc`). No bloquea el arranque ni los endpoints nuevos (transferencias/historial), pero
+  hay que corregirlo (usar `datetime.now(timezone.utc)` en la columna de expiración) antes o después del deploy.
+- El backend viejo que corría en el equipo del dev (proceso uvicorn huérfano en puerto 8000) servía código/DB
+  obsoleta y daba 500 en `/transferencias`. Ya fue matado y reemplazado; no replicar ese setup.
 
-### Configuración Pendiente
-- `FOOTBALL_DATA_API_KEY` no configurada — sync cron retorna errores, solo datos demo.
+### Estado de despliegue (ACTUALIZADO — leer antes de tocar infra)
+- **Frontend:** ✅ EN PRODUCCIÓN en Vercel → https://frontend-ten-swart-85.vercel.app
+  - Project ID: `prj_uM7KzAcPV7zRwjWDGpHAIGXelCC2` (org `team_xTbaX86uhYJgVplW2yc6jTUj`)
+  - `NEXT_PUBLIC_API_URL` está inlinado en el build apuntando al backend de Railway **ya muerto** → debe actualizarse a la nueva URL del backend cuando se despliegue.
+- **Backend:** ⚠️ RAILWAY CAÍDO. El proyecto `blissful-nurturing` (servicio `backend`) venció su trial gratuito y devuelve `404 Application not found`. `railway up` está bloqueado.
+  - **Decisión del usuario:** NO pagar ningún plan. Migrar el backend a hosting gratuito **sin tarjeta** → **Koyeb (web service Docker) + Neon (Postgres gratis)**.
+  - Alternativa si se puede agregar tarjeta: Render free (`render.yaml` ya está en el repo). Render free exige tarjeta SOLO para verificar (no cobra).
+- **Repositorio:** `DAW1BSergiomg26/liga.paraguaya.futbol` (rama `main`).
+- **Últimos commits en `main`:** `bedf988` (llama-cpp-python opcional), `0a6f634` (render.yaml), `9df911b` (hardening deploy: `_async_url` postgres:// + sync_loop no-op), `a3eedf5` (módulo Estadísticas Históricas).
+
+### Pasos pendientes para completar el deploy (item 6 del roadmap)
+1. Usuario crea cuenta **Koyeb** (koyeb.com, sin tarjeta) y conecta el repo.
+2. Usuario crea proyecto Postgres gratis en **Neon** (neon.tech, sin tarjeta) y copia la *connection string* (`postgresql://...?sslmode=require`).
+3. En Koyeb: App desde el repo, runtime Docker, `Dockerfile` = `./Dockerfile.backend`, puerto `8000`, env vars:
+   - `DATABASE_URL` = string de Neon
+   - `SECRET_KEY` / `JWT_SECRET` = valores random
+   - `ADMIN_API_KEY=Rufi141414%$`
+   - `CORS_ORIGINS=http://localhost:3000,https://frontend-ten-swart-85.vercel.app`
+   - `FOOTBALL_DATA_API_KEY=` (vacío → el sync cron es no-op, solo datos demo)
+4. Deployar y obtener la URL del backend.
+5. Verificar `/health`, `/api/v1/transferencias`, `/api/v1/historial/campeones` → 200.
+6. En Vercel: setear `NEXT_PUBLIC_API_URL` = nueva URL del backend y redeployar el frontend.
+7. Cerrar Handoff + marcar roadmap item 6 como ✅.
+
+### Configuración
+- `FOOTBALL_DATA_API_KEY` no configurada (intencional) → el sync cron es no-op y solo se usan datos demo. No es un error.
+- `llama-cpp-python` es **opcional** (está en `requirements-optional.txt`, no en `requirements.txt`). El bot Cerezo usa templates por defecto; el modelo `.gguf` no está en el repo. Quitarlo del build gratuito evita fallos de instalación.
+- `render.yaml` (raíz) define el Blueprint para Render por si se elige esa vía.
 
 ## Tests
 
@@ -284,20 +312,23 @@ npx vitest run  # Si hay tests configurados
 | `test_rss_sync.py` | 2 | RSS parse + sync |
 | `test_tactical_analysis.py` | 5 | Análisis táctico |
 | `test_transferencias_api.py` | 11 | CRUD transferencias, filtros, auth, mercado, historial, estadísticas |
+| `test_deploy_readiness.py` | 4 | `_async_url` postgres://, `sync_loop` no-op sin API key, health check |
 
 ## Variables de entorno
 
 ```bash
 # Backend
-DATABASE_URL=sqlite+aiosqlite:///./data/liga.db   # Railway setea PostgreSQL
+DATABASE_URL=sqlite+aiosqlite:///./data/liga.db   # Local SQLite. En prod: postgresql://... de Neon (el código acepta postgres:// y lo convierte a postgresql+asyncpg://)
 SECRET_KEY=change-me-in-production-2026
+JWT_SECRET=change-me-in-production-2026
 VAPID_PUBLIC_KEY=
 VAPID_PRIVATE_KEY=
 ADMIN_API_KEY=Rufi141414%$
-FOOTBALL_DATA_API_KEY=  # Opcional — sin ella solo datos demo
+CORS_ORIGINS=http://localhost:3000,https://frontend-ten-swart-85.vercel.app
+FOOTBALL_DATA_API_KEY=  # Opcional — sin ella el sync cron es no-op, solo datos demo
 
 # Frontend
-NEXT_PUBLIC_API_URL=http://localhost:8000
+NEXT_PUBLIC_API_URL=http://localhost:8000         # En Vercel: debe apuntar a la URL del backend en producción
 NEXT_PUBLIC_VAPID_PUBLIC_KEY=
 ```
 
@@ -319,6 +350,34 @@ npx next dev
 # O ambos con Docker
 docker compose up --build
 ```
+
+## Workflow de desarrollo (LEER ANTES DE EMPEZAR)
+
+**Idioma:** El usuario se comunica en **castellano**. Responder SIEMPRE en español, sin excepción.
+
+**Cómo se construyó este proyecto (convenciones a respetar):**
+- Se usa **OpenCode** con las skills de **superpowers** (`docs/` y `.agents/skills/`). Flujo típico:
+  1. Antes de crear/modificar funcionalidad → skill `brainstorming` (explorar intención y diseño).
+  2. Para bugs → skill `systematic-debugging` (encontrar causa raíz antes de parchear).
+  3. TDD: escribir/extender tests primero (`backend/tests/`), luego implementar.
+  4. Planes y specs vivos en `docs/superpowers/plans/` y `docs/superpowers/specs/`.
+- **Rama:** todo el trabajo va directo a `main` (no se crean branches de feature salvo que el usuario lo pida). No crear PRs salvo indicación explícita.
+- **Commits:** mensajes cortos y descriptivos en castellano. No commitear secrets (ya hay `ADMIN_API_KEY` en el repo por decisión del usuario; no agregar más).
+- **No pagar nada:** el usuario no quiere planes de pago. Hosting gratuito sin tarjeta (Koyeb + Neon, o Render free si se puede verificar con tarjeta). La IA **no puede** crear las cuentas de hosting; eso lo hace el usuario.
+
+**Testing antes de declarar "listo":**
+- Backend: `cd backend; $env:PYTHONPATH=".."; python -m pytest tests/ -v` (140+ tests, deben pasar).
+- Frontend: `cd frontend; npm run build` (TypeScript + build limpio).
+- Deploy-readiness: `backend/tests/test_deploy_readiness.py` (4 tests: `_async_url` acepta `postgres://`, `sync_loop` no-op sin API key, etc.).
+
+**Archivos clave de infra/deploy:**
+- `render.yaml` (raíz) — Blueprint para Render.
+- `backend/Dockerfile.backend` — usa `$PORT` (`${PORT:-8001}`), arranque con `run_alembic_upgrade()` (NO `drop_all`).
+- `backend/requirements.txt` — dependencias de build; `requirements-optional.txt` tiene `llama-cpp-python` (opcional).
+- `backend/app/api/health.py` — endpoint `/health` para health checks de Koyeb/Render.
+- `backend/app/core/database.py` — `_async_url` convierte `postgres://` → `postgresql+asyncpg://`.
+- `backend/app/main.py` — `sync_loop` es no-op si `FOOTBALL_DATA_API_KEY` está vacío.
+- `frontend/.vercel/project.json` — config del proyecto Vercel ya linkeado.
 
 ## Documentación de diseño
 
