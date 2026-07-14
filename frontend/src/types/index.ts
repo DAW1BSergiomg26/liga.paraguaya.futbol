@@ -214,17 +214,25 @@ export interface H2HResponse {
 }
 
 export interface Noticia {
+  id: string;
   titulo: string;
+  resumen: string | null;
+  contenido: string | null;
+  imagen_url: string | null;
+  video_url: string | null;
   fuente: string;
-  url: string;
-  pub_date: string | null;
-  resumen: string;
+  origen: "editorial" | "rss";
+  url_original: string | null;
+  pub_date: string;
+  created_at: string;
+  is_published: boolean;
 }
 
-export interface NoticiasResponse {
+export interface NoticiasPaginatedResponse {
   noticias: Noticia[];
-  fuentes: string[];
-  actualizado: string;
+  total: number;
+  page: number;
+  total_pages: number;
 }
 
 export type StructuredData = ClubDetailData | MatchFormData | H2HData | MiniTableData | ComparisonData | NextMatchData | PredictionData | { type: "greeting" | "unknown" };

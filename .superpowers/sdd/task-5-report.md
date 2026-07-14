@@ -1,22 +1,21 @@
-# Task 5 Report: Frontend H2H Page
+# Task 5 Report: CinematicHero Component
 
-## What I Implemented
-- Created `frontend/src/app/h2h/page.tsx` — a `"use client"` page with:
-  - Two `<select>` dropdowns for club selection (Club A / Club B)
-  - Summary card grid showing PJ, wins/empates/losses, goals, goal difference
-  - Biggest win cards for each side
-  - Full match history table with result coloring and status badges
-  - Uses `useQuery` for fetching clubs (`getClubes`) and H2H data (`getH2H`)
-  - Query only fires when both clubs selected (`enabled: !!clubA && !!clubB`)
+## Status: DONE
 
-## Build Output
-Build passed successfully. Compilation in 2.3s, TypeScript check in 3.5s. Route `/h2h` registered.
+## What Was Done
+Created `frontend/src/components/hero/CinematicHero.tsx` — a full-screen cinematic hero component with:
+- SplitType text reveal (splits title into individual characters)
+- GSAP timeline animation: character reveal → stat counters fade in
+- CountUp animated stat counters (348 partidos, 892 goles, 19 equipos)
+- ScrollTrigger-based scale-down and fade on scroll
+- `prefers-reduced-motion` respect (returns early, no animations)
+- Responsive layout with Tailwind (`h-screen`, `font-barlow`, dark mode classes)
 
-## Self-Review Findings
-- Matches the brief code exactly
-- Uses same patterns as `tabla/page.tsx` (useQuery, skeletons, error handling)
-- No unused imports detected
-- All referenced types (`Club`, `H2HResponse`) and components (`TableSkeleton`, `ErrorMessage`) verified to exist
+## Commit
+- `8cce166` — feat: add CinematicHero with SplitType text reveal and counters
+
+## Build Verification
+- `npm run build` completed successfully (TypeScript compiled, no errors)
 
 ## Concerns
-- None
+None. Component follows the plan exactly.

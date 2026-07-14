@@ -1,11 +1,32 @@
-# Task 6: Cron Endpoint for Recordatorios
+# Task 6: Integrate CinematicHero into Home Page
 
-## Status: ✅ Complete
+**Status:** DONE
 
-## Changes
-- **`backend/app/api/cron.py`**: Overwritten stub with full `POST /api/v1/cron/recordatorios` endpoint that fetches pending reminders via `PushService.obtener_recordatorios` and sends push notifications via `PushService.enviar_a_partido`
-- **`.github/workflows/keep-alive.yml`**: Added `Recordatorios predicciones` step that hits the new cron endpoint every 14 minutes
+## Summary
 
-## Verification
-- All 18 tests passed (`python -m pytest backend/tests/ -v`)
-- Committed: `b99852d` — `feat: add cron endpoint for prediction reminders`
+Successfully integrated `CinematicHero` as the first full-screen element on the home page. The component renders above all existing content, providing a cinematic entrance experience with animated title reveal and stat counters.
+
+## Changes Made
+
+### `frontend/src/app/page.tsx`
+- Added import for `CinematicHero`
+- Wrapped return JSX in a fragment (`<>...</>`)
+- Placed `<CinematicHero />` as the first element before the existing content container
+- All existing content (HeroStats, standings table, navigation links) remains below the hero
+
+### `frontend/src/components/hero/CinematicHero.tsx`
+- Fixed type error: SplitType `types` option changed from `"chars, words"` to `"chars,words"` (no space, required by SplitType types)
+
+## Build Verification
+
+- `npm run build` completed successfully
+- 20 routes generated, 0 errors
+- TypeScript type checking passed
+
+## Commit
+
+- `9d7fe13` — feat: integrate CinematicHero into home page
+
+## Concerns
+
+None.

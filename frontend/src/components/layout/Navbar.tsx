@@ -72,6 +72,7 @@ export default function Navbar() {
     { href: "/tactico", label: "Tactico" },
     { href: "/cerezo", label: "Cerezo" },
     { href: "/red3d", label: "Red 3D" },
+    { href: "/noticias", label: "Noticias" },
   ];
 
   const navLinks = (

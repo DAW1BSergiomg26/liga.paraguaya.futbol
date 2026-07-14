@@ -8,7 +8,7 @@ async function fetchJSON<T>(path: string, options?: RequestInit): Promise<T> {
   return res.json();
 }
 
-import type { Club, ClubDetail, Partido, PartidoDetail, PartidoPage, TablaRow, User, PredictionCreate, PredictionDetail, LeaderboardEntry, Noticia, NoticiasResponse, H2HResponse, EquipoTactico, AnalisisPartido, EquipoResumenTactico, AuthUser, TokenResponse } from "@/types";
+import type { Club, ClubDetail, Partido, PartidoDetail, PartidoPage, TablaRow, User, PredictionCreate, PredictionDetail, LeaderboardEntry, Noticia, NoticiasPaginatedResponse, H2HResponse, EquipoTactico, AnalisisPartido, EquipoResumenTactico, AuthUser, TokenResponse } from "@/types";
 
 export async function getClubes(ciudad?: string): Promise<Club[]> {
   const params = ciudad ? `?ciudad=${encodeURIComponent(ciudad)}` : "";
@@ -132,8 +132,23 @@ export async function getLeaderboard(): Promise<LeaderboardEntry[]> {
   return fetchJSON<LeaderboardEntry[]>("/api/v1/leaderboard");
 }
 
-export async function getNoticias(): Promise<NoticiasResponse> {
-  return fetchJSON<NoticiasResponse>("/api/v1/noticias");
+export async function getNoticias(params?: {
+  page?: number;
+  limit?: number;
+  fuente?: string;
+  search?: string;
+}): Promise<NoticiasPaginatedResponse> {
+  const searchParams = new URLSearchParams();
+  if (params?.page) searchParams.set("page", params.page.toString());
+  if (params?.limit) searchParams.set("limit", params.limit.toString());
+  if (params?.fuente) searchParams.set("fuente", params.fuente);
+  if (params?.search) searchParams.set("search", params.search);
+  const qs = searchParams.toString();
+  return fetchJSON<NoticiasPaginatedResponse>(`/api/v1/noticias${qs ? `?${qs}` : ""}`);
+}
+
+export async function getNoticia(id: string): Promise<Noticia> {
+  return fetchJSON<Noticia>(`/api/v1/noticias/${id}`);
 }
 
 export async function getH2H(clubA: string, clubB: string): Promise<H2HResponse> {

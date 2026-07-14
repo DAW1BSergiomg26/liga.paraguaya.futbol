@@ -1,34 +1,49 @@
-# Task 1 Report: Bugfix — Texto en espejo en flip cards
+# Task 1 Report: GSAP Config + ScrollReveal Foundation
 
-## What was implemented
+**Status:** DONE
 
-Added a CSS rule forcing GPU composition on children of `.carta-club-dorso` to fix mirrored text on WebKit/Safari:
+## What I Implemented
 
-```css
-.carta-club-dorso > * {
-  -webkit-transform: translateZ(0);
-  transform: translateZ(0);
-}
+1. **`frontend/src/lib/gsap.ts`** — Central GSAP configuration with `initGSAP()` that registers ScrollTrigger plugin (idempotent, one-time initialization). Exports `gsap`, `ScrollTrigger`, and `initGSAP`.
+
+2. **`frontend/src/components/ui/ScrollReveal.tsx`** — Reusable scroll reveal component with 5 variants (`from-left`, `from-right`, `from-bottom`, `scale-up`, `clip-reveal`). Accepts `children`, `variant`, `delay`, `stagger`, `duration`, `className`. Respects `prefers-reduced-motion` by skipping animations entirely. Cleans up tweens on unmount.
+
+3. **`frontend/src/components/ui/ScrollReveal.test.tsx`** — 3 tests covering rendering children, className application, and multi-child stagger rendering.
+
+4. **`frontend/vitest.config.ts`** — Vitest configuration with `@/` path alias resolution and jsdom environment (did not exist previously, needed for tests to work).
+
+## Test Results
+
+```
+✓ src/components/ui/ScrollReveal.test.tsx (3 tests) 179ms
+  ✓ renders children
+  ✓ applies className
+  ✓ renders multiple children with stagger
+
+Test Files  1 passed (1)
+Tests       3 passed (3)
 ```
 
-This was placed right after the `.carta-club-dorso` block (line 181 in the final file). The rule forces each direct child into its own compositing layer, preventing Safari's renderer from incorrectly mirroring text when `backface-visibility: hidden` and `rotateY(180deg)` interact.
+## Build Result
 
-## What was tested
+Build passes with no errors. 22+ routes generated.
 
-- Visual inspection of `ClubCard.tsx` confirmed **no inline transforms** (no `scaleX`, `scale(-1,1)`, or rogue `style` attributes)
-- Full `npm run build` — **compiled successfully** with no errors or warnings (TypeScript, static generation all passing)
+## Files Changed
 
-## Files changed
+| File | Action |
+|------|--------|
+| `frontend/src/lib/gsap.ts` | Created |
+| `frontend/src/components/ui/ScrollReveal.tsx` | Created |
+| `frontend/src/components/ui/ScrollReveal.test.tsx` | Created |
+| `frontend/vitest.config.ts` | Created (new - needed for tests to run) |
 
-- `frontend/src/app/globals.css` — Added 4 lines (CSS rule block for `.carta-club-dorso > *`)
+## Deviations from Plan
 
-## Self-review findings
+- **Added `vitest.config.ts`**: The plan assumed vitest would resolve `@/` aliases automatically, but no vitest config existed in the project. Created one with path alias and jsdom environment.
+- **Added `jsdom` and `@testing-library/jest-dom`**: These were missing dev dependencies needed for tests to run. Installed via `npm install -D`.
+- **Fixed test assertions**: The plan's `toHaveClass` matcher required `@testing-library/jest-dom/vitest` import. The `div > div` selector for stagger test was adjusted to account for the wrapper div.
+- **Added `matchMedia` mock**: Required for GSAP's ScrollTrigger in jsdom environment.
 
-- The existing flip card CSS uses the standard `rotateY(180deg)` technique, which is correct. The bug is a WebKit compositing quirk, not a logic error.
-- ClubCard.tsx uses `className="carta-club-cara carta-club-dorso"` on the backface div — no inline style overrides.
-- Build succeeds with zero warnings.
-- The `translateZ(0)` approach is minimal, safe, and well-documented for forcing GPU compositing in WebKit.
+## Commit
 
-## Issues or concerns
-
-None. The fix is minimal and low-risk.
+- `b762bdb` — `feat: add GSAP config and ScrollReveal component`

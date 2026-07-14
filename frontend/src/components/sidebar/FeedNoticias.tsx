@@ -21,7 +21,7 @@ function formatearFecha(iso: string | null): string {
 export default function FeedNoticias() {
   const { data, isLoading, error } = useQuery({
     queryKey: ["noticias"],
-    queryFn: getNoticias,
+    queryFn: () => getNoticias(),
     staleTime: 5 * 60 * 1000,
     retry: 1,
   });
@@ -77,7 +77,7 @@ export default function FeedNoticias() {
         {noticias.map((n, i) => (
           <a
             key={i}
-            href={n.url}
+            href={n.url_original ?? "#"}
             target="_blank"
             rel="noopener noreferrer"
             className="block border-l-2 border-apf-rojo pl-3 hover:border-apf-rojo/70 transition-colors group"

@@ -46,7 +46,7 @@ class NoticiaService:
         query = select(Noticia).where(Noticia.is_published == True)
 
         if fuente:
-            query = query.where(Noticia.origen == fuente)
+            query = query.where(Noticia.fuente == fuente)
         if search:
             query = query.where(Noticia.titulo.ilike(f"%{search}%"))
 

@@ -1,71 +1,83 @@
-import time
-from datetime import datetime, timezone
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy.ext.asyncio import AsyncSession
 
-import feedparser
-import httpx
-from fastapi import APIRouter
+from backend.app.core.dependencies import get_db, get_current_admin
+from backend.app.schemas.noticia import NoticiaCreate, NoticiaUpdate, NoticiaOut, NoticiasPaginatedResponse
+from backend.app.services.noticia_service import NoticiaService
+from backend.app.services.rss_sync import RssSyncService
 
 router = APIRouter(prefix="/api/v1/noticias", tags=["noticias"])
 
-FUENTES = [
-    {"nombre": "ABC Color", "url": "https://www.abc.com.py/arc/outboundfeeds/rss/deportes/futbol/"},
-    {"nombre": "APF", "url": "https://apf.org.py/rss/"},
-]
 
-MAX_NOTICIAS = 6
-TIMEOUT = 10
-CACHE_TTL = 300  # 5 minutes
-
-_cache: dict = {"data": None, "timestamp": 0.0}
-
-
-async def _fetch_fuente(nombre: str, url: str) -> list[dict]:
-    try:
-        async with httpx.AsyncClient(timeout=TIMEOUT) as client:
-            resp = await client.get(url)
-            resp.raise_for_status()
-    except Exception:
-        return []
-
-    feed = feedparser.parse(resp.text)
-    items = []
-    for entry in feed.entries[:MAX_NOTICIAS]:
-        pub_date = None
-        if hasattr(entry, "published_parsed") and entry.published_parsed:
-            pub_date = datetime(*entry.published_parsed[:6], tzinfo=timezone.utc).isoformat()
-        items.append({
-            "titulo": entry.get("title", ""),
-            "fuente": nombre,
-            "url": entry.get("link", ""),
-            "pub_date": pub_date,
-            "resumen": entry.get("summary", "")[:300],
-        })
-    return items
+@router.get("", response_model=NoticiasPaginatedResponse)
+async def list_noticias(
+    page: int = Query(1, ge=1),
+    limit: int = Query(12, ge=1, le=50),
+    fuente: str | None = Query(None),
+    search: str | None = Query(None),
+    db: AsyncSession = Depends(get_db),
+):
+    svc = NoticiaService(db)
+    result = await svc.list_noticias(page=page, limit=limit, fuente=fuente, search=search)
+    return NoticiasPaginatedResponse(
+        noticias=[NoticiaOut.model_validate(n) for n in result["noticias"]],
+        total=result["total"],
+        page=result["page"],
+        total_pages=result["total_pages"],
+    )
 
 
-@router.get("")
-async def get_noticias() -> dict:
-    now = time.monotonic()
-    if _cache["data"] and (now - _cache["timestamp"]) < CACHE_TTL:
-        return _cache["data"]
+@router.get("/{noticia_id}", response_model=NoticiaOut)
+async def get_noticia(noticia_id: str, db: AsyncSession = Depends(get_db)):
+    svc = NoticiaService(db)
+    noticia = await svc.get_by_id(noticia_id)
+    if not noticia:
+        raise HTTPException(status_code=404, detail="Noticia no encontrada")
+    return NoticiaOut.model_validate(noticia)
 
-    todas = []
-    seen_urls = set()
-    for fuente in FUENTES:
-        items = await _fetch_fuente(fuente["nombre"], fuente["url"])
-        for item in items:
-            if item["url"] not in seen_urls:
-                seen_urls.add(item["url"])
-                todas.append(item)
 
-    todas.sort(key=lambda x: x.get("pub_date") or "", reverse=True)
+@router.post("", response_model=NoticiaOut, status_code=201)
+async def create_noticia(
+    body: NoticiaCreate,
+    db: AsyncSession = Depends(get_db),
+    _admin=Depends(get_current_admin),
+):
+    svc = NoticiaService(db)
+    noticia = await svc.create(body)
+    return NoticiaOut.model_validate(noticia)
 
-    result = {
-        "noticias": todas[:MAX_NOTICIAS],
-        "fuentes": [f["nombre"] for f in FUENTES],
-        "actualizado": datetime.now(timezone.utc).isoformat(),
-    }
 
-    _cache["data"] = result
-    _cache["timestamp"] = now
-    return result
+@router.put("/{noticia_id}", response_model=NoticiaOut)
+async def update_noticia(
+    noticia_id: str,
+    body: NoticiaUpdate,
+    db: AsyncSession = Depends(get_db),
+    _admin=Depends(get_current_admin),
+):
+    svc = NoticiaService(db)
+    noticia = await svc.update(noticia_id, body)
+    if not noticia:
+        raise HTTPException(status_code=404, detail="Noticia no encontrada")
+    return NoticiaOut.model_validate(noticia)
+
+
+@router.delete("/{noticia_id}", status_code=204)
+async def delete_noticia(
+    noticia_id: str,
+    db: AsyncSession = Depends(get_db),
+    _admin=Depends(get_current_admin),
+):
+    svc = NoticiaService(db)
+    deleted = await svc.delete(noticia_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Noticia no encontrada")
+
+
+@router.post("/sync-rss")
+async def sync_rss(
+    db: AsyncSession = Depends(get_db),
+    _admin=Depends(get_current_admin),
+):
+    svc = RssSyncService(db)
+    result = await svc.sync_all()
+    return {"message": "Sync completado", "new": result["new"], "skipped": result["skipped"]}
