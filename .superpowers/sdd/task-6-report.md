@@ -1,32 +1,12 @@
-# Task 6: Integrate CinematicHero into Home Page
+# Task 6 Report: RSS Sync Service for Transferencias
 
-**Status:** DONE
+## Status: DONE
 
-## Summary
+## Commits
+- `dd212ab` feat: add Transferencia RSS sync service + endpoint
 
-Successfully integrated `CinematicHero` as the first full-screen element on the home page. The component renders above all existing content, providing a cinematic entrance experience with animated title reveal and stat counters.
-
-## Changes Made
-
-### `frontend/src/app/page.tsx`
-- Added import for `CinematicHero`
-- Wrapped return JSX in a fragment (`<>...</>`)
-- Placed `<CinematicHero />` as the first element before the existing content container
-- All existing content (HeroStats, standings table, navigation links) remains below the hero
-
-### `frontend/src/components/hero/CinematicHero.tsx`
-- Fixed type error: SplitType `types` option changed from `"chars, words"` to `"chars,words"` (no space, required by SplitType types)
-
-## Build Verification
-
-- `npm run build` completed successfully
-- 20 routes generated, 0 errors
-- TypeScript type checking passed
-
-## Commit
-
-- `9d7fe13` — feat: integrate CinematicHero into home page
+## Test summary
+- Import test passed: `from backend.app.services.transferencia_rss_sync import TransferenciaRssSync` executed successfully.
 
 ## Concerns
-
-None.
+- None identified. The RSS sync service fetches from configured feeds, parses for transfer keywords, matches club aliases, and creates transferencia records. The endpoint is admin-only.

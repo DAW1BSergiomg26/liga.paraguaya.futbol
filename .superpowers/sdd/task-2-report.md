@@ -1,25 +1,23 @@
-# Task 2: CountUp Component — Report
+# Task 2: Pydantic Schemas — Completion Report
 
-## What was implemented
-Created `CountUp.tsx` — an animated number counter component that:
-- Animates from 0 to a target `end` value using GSAP
-- Triggers animation when the element enters the viewport (ScrollTrigger, `start: "top 90%"`)
-- Respects `prefers-reduced-motion: reduce` by jumping to final value immediately
-- Uses `tabular-nums` for stable number width during animation
-- Formats numbers with `toLocaleString("es-PY")`
-- Supports optional `prefix` and `suffix` props
-
-## Build Verification
-- **Command:** `cd frontend && npm run build`
-- **Result:** ✅ Compiled successfully in 5.1s — TypeScript OK, 22 routes generated, 0 errors
-
-## Files Changed
-| Action | Path |
-|--------|------|
-| Created | `frontend/src/components/ui/CountUp.tsx` |
+## Status: ✅ COMPLETED
 
 ## Commits
-- `e54987f` — feat: add CountUp animated number component
+- `846275d` — feat: add Transferencia Pydantic schemas
 
-## Issues / Concerns
-None. Component follows the plan exactly and builds cleanly.
+## Test Summary
+- Import test: `from backend.app.schemas.transferencia import *` → OK
+- All 6 schemas verified: TransferenciaCreate, TransferenciaUpdate, TransferenciaOut, TransferenciasPaginatedResponse, GastoPorClub, EstadisticasTransferencias
+
+## Implementation Details
+- Created `backend/app/schemas/transferencia.py` with exact code from plan
+- Pydantic v2 style with `model_config` and `Field` validators
+- Pattern validation for `tipo` and `estado` fields
+- `TransferenciaOut` includes optional club name/escudo fields for enrichment
+- `from_attributes = True` for SQLAlchemy model conversion
+
+## Concerns
+- None — implementation matches plan exactly
+
+## Report Path
+`.superpowers/sdd/task-2-report.md`

@@ -1,49 +1,41 @@
-# Task 1 Report: GSAP Config + ScrollReveal Foundation
+# Task 1: Transferencia Model + Migration — Report
 
 **Status:** DONE
+**Commit:** b399cfd — feat: add Transferencia model and migration
 
-## What I Implemented
+## What was done
 
-1. **`frontend/src/lib/gsap.ts`** — Central GSAP configuration with `initGSAP()` that registers ScrollTrigger plugin (idempotent, one-time initialization). Exports `gsap`, `ScrollTrigger`, and `initGSAP`.
+1. **Created `backend/app/models/transferencia.py`** — SQLAlchemy model with:
+   - `id` (UUID string, primary key)
+   - `jugador_nombre`, `jugador_posicion` (player info)
+   - `club_origen_id`, `club_destino_id` (foreign keys to `clubes` table)
+   - `fecha` (transfer date)
+   - `tipo` (compra/prestamo/libre/cesion/refuerzo)
+   - `estado` (confirmada/rumor/oficial/desmentida)
+   - `monto`, `duracion_meses` (financial details)
+   - `fuente_url`, `fuente_nombre` (source tracking)
+   - `verification_level`, `is_active` (status fields)
+   - `created_at`, `updated_at` (timestamps)
+   - `to_dict()` method
 
-2. **`frontend/src/components/ui/ScrollReveal.tsx`** — Reusable scroll reveal component with 5 variants (`from-left`, `from-right`, `from-bottom`, `scale-up`, `clip-reveal`). Accepts `children`, `variant`, `delay`, `stagger`, `duration`, `className`. Respects `prefers-reduced-motion` by skipping animations entirely. Cleans up tweens on unmount.
+2. **Updated `backend/app/models/__init__.py`** — Registered `Transferencia` in imports and `__all__`
 
-3. **`frontend/src/components/ui/ScrollReveal.test.tsx`** — 3 tests covering rendering children, className application, and multi-child stagger rendering.
+3. **Created `backend/alembic/versions/008_add_transferencias.py`** — Migration that:
+   - Creates `transferencias` table with all 16 columns
+   - Creates 4 indexes (club_origen_id, club_destino_id, fecha, estado)
+   - Chains from revision `007`
 
-4. **`frontend/vitest.config.ts`** — Vitest configuration with `@/` path alias resolution and jsdom environment (did not exist previously, needed for tests to work).
+4. **Ran migration** — Successfully applied: `Running upgrade 007 -> 008, create transferencias table`
 
-## Test Results
+5. **Verified table** — All 16 columns created correctly in `backend/data/liga.db`
 
-```
-✓ src/components/ui/ScrollReveal.test.tsx (3 tests) 179ms
-  ✓ renders children
-  ✓ applies className
-  ✓ renders multiple children with stagger
+## Verification
 
-Test Files  1 passed (1)
-Tests       3 passed (3)
-```
+- Migration ran without errors
+- SQLite table created with correct schema
+- Model imports correctly from `backend.app.models`
+- Commit created successfully
 
-## Build Result
+## Concerns
 
-Build passes with no errors. 22+ routes generated.
-
-## Files Changed
-
-| File | Action |
-|------|--------|
-| `frontend/src/lib/gsap.ts` | Created |
-| `frontend/src/components/ui/ScrollReveal.tsx` | Created |
-| `frontend/src/components/ui/ScrollReveal.test.tsx` | Created |
-| `frontend/vitest.config.ts` | Created (new - needed for tests to run) |
-
-## Deviations from Plan
-
-- **Added `vitest.config.ts`**: The plan assumed vitest would resolve `@/` aliases automatically, but no vitest config existed in the project. Created one with path alias and jsdom environment.
-- **Added `jsdom` and `@testing-library/jest-dom`**: These were missing dev dependencies needed for tests to run. Installed via `npm install -D`.
-- **Fixed test assertions**: The plan's `toHaveClass` matcher required `@testing-library/jest-dom/vitest` import. The `div > div` selector for stagger test was adjusted to account for the wrapper div.
-- **Added `matchMedia` mock**: Required for GSAP's ScrollTrigger in jsdom environment.
-
-## Commit
-
-- `b762bdb` — `feat: add GSAP config and ScrollReveal component`
+None — task completed as specified in the plan.

@@ -1,12 +1,13 @@
+"use client";
+
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
 import { apiFetch } from "@/lib/api";
-import type { Transferencia } from "@/types";
+import type { Transferencia, EstadoTransferencia } from "@/types";
 import TipoBadge from "@/components/transferencia/TipoBadge";
 import VerificationBadge from "@/components/transferencia/VerificationBadge";
-import { EstadoTransferencia } from "@/types"; // Import EstadoTransferencia type
 
 const PLACEHOLDER = "/placeholder-escudo.png";
 

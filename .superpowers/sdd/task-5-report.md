@@ -1,21 +1,36 @@
-# Task 5 Report: CinematicHero Component
+# Task 5: Backend Tests — Report
 
-## Status: DONE
+**Status: DONE**
 
-## What Was Done
-Created `frontend/src/components/hero/CinematicHero.tsx` — a full-screen cinematic hero component with:
-- SplitType text reveal (splits title into individual characters)
-- GSAP timeline animation: character reveal → stat counters fade in
-- CountUp animated stat counters (348 partidos, 892 goles, 19 equipos)
-- ScrollTrigger-based scale-down and fade on scroll
-- `prefers-reduced-motion` respect (returns early, no animations)
-- Responsive layout with Tailwind (`h-screen`, `font-barlow`, dark mode classes)
+## Commits
 
-## Commit
-- `8cce166` — feat: add CinematicHero with SplitType text reveal and counters
+- `7a986d2` — feat: add Transferencia API tests (11 tests)
 
-## Build Verification
-- `npm run build` completed successfully (TypeScript compiled, no errors)
+## Test Results: 11/11 passing
+
+```
+test_list_transferencias_empty PASSED
+test_create_transferencia_as_admin PASSED
+test_create_transferencia_requires_admin PASSED
+test_create_transferencia_same_club_fails PASSED
+test_get_transferencia_by_id PASSED
+test_filter_by_tipo PASSED
+test_filter_by_jugador PASSED
+test_mercado_endpoint PASSED
+test_estadisticas_endpoint PASSED
+test_historial_endpoint PASSED
+test_delete_transferencia PASSED
+```
+
+## Coverage
+
+Tests exercise the full Transferencia API surface:
+- **CRUD**: list (empty + populated), create, read by ID, delete
+- **Auth**: admin-only creation (403 for non-admin)
+- **Validation**: same club origin/destino rejection (400)
+- **Filters**: by `tipo` and `jugador` query params
+- **Special endpoints**: `/mercado`, `/estadisticas`, `/historial/{club_id}`
 
 ## Concerns
-None. Component follows the plan exactly.
+
+- None. All tests pass cleanly against the existing API implementation.

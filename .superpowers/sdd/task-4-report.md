@@ -1,27 +1,26 @@
-# Task 4 Report: ParallaxStripes Enhancement
+## Task 4: API Endpoints — Completion Report
 
-**Date:** 2026-07-14
-**Status:** DONE
+**Status:** ✅ COMPLETE
 
-## What Was Done
+**Commits:** `d7b17a1` — feat: add Transferencias API endpoints (CRUD, filters, stats, mercado, historial)
 
-Enhanced `StripesBackground.tsx` with GSAP ScrollTrigger parallax effect. The original component had a single `stripes-bg` div with CSS gradients for all stripe colors. Since parallax requires differential movement per color, the component was refactored to use separate child elements for red and white stripes, each with its own scroll-driven animation.
+**Test summary:** Import verification passed (`from backend.app.api.transferencias import router` → OK)
 
-### Changes
+**Concerns:** None
 
-**`frontend/src/components/layout/StripesBackground.tsx`:**
-- Added GSAP imports (`initGSAP`, `gsap`, `ScrollTrigger`) from `@/lib/gsap`
-- Split the single gradient background into two child `<div>` layers: `.stripe-red` (yPercent: -30, faster) and `.stripe-white` (yPercent: -15, slower)
-- Added `useEffect` that creates ScrollTrigger scrub tweens for each layer
-- Respects `prefers-reduced-motion` — skips parallax if reduced motion is preferred
-- Tweens are cleaned up on unmount
-- Kept existing mouse-follow parallax on the container
+**Files created/modified:**
+- Created: `backend/app/api/transferencias.py` (113 lines)
+- Modified: `backend/app/main.py` (added import + `app.include_router(transferencias_router)`)
 
-**`frontend/src/app/globals.css`:**
-- Removed the repeating-linear-gradient from `.stripes-bg` (now in child elements)
-- Added `overflow: hidden` to `.stripes-bg` to clip the oversized child layers
-- Kept the radial-gradient vignette overlay on `.stripes-bg`
+**9 endpoints implemented:**
+1. `GET /api/v1/transferencias` — list with filters (club_id, tipo, estado, fecha_desde/hasta, jugador) + pagination
+2. `GET /api/v1/transferencias/mercado` — recent transfers (configurable dias)
+3. `GET /api/v1/transferencias/estadisticas` — stats dashboard data
+4. `GET /api/v1/transferencias/historial/{club_id}` — transfer history per club
+5. `GET /api/v1/transferencias/{transferencia_id}` — get single transfer
+6. `POST /api/v1/transferencias` — create (admin only, same-club validation)
+7. `PUT /api/v1/transferencias/{transferencia_id}` — update (admin only)
+8. `DELETE /api/v1/transferencias/{transferencia_id}` — delete (admin only, 204)
+9. `SyncResponse` BaseModel added for future `sync-rss` endpoint (Task 6)
 
-### Build Verification
-
-- `npm run build` passed with 0 errors, 22+ routes generated
+**Report path:** `.superpowers/sdd/task-4-report.md`
