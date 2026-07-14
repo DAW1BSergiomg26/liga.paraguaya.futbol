@@ -7,6 +7,7 @@ import { apiFetch } from "@/lib/api";
 import type { TransferenciasPaginatedResponse } from "@/types";
 import TransferCard from "@/components/transferencia/TransferCard";
 import FiltrosTransferencias from "@/components/transferencia/FiltrosTransferencias";
+import ScrollReveal from "@/components/ui/ScrollReveal";
 
 const TABS = [
   { key: "confirmada", label: "Confirmadas" },
@@ -62,11 +63,13 @@ export default function TransferenciasPage() {
       ) : data?.transferencias.length === 0 ? (
         <p className="text-texto-secundario text-center py-12">No se encontraron transferencias</p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {data?.transferencias.map((t) => (
-            <TransferCard key={t.id} transferencia={t} />
-          ))}
-        </div>
+        <ScrollReveal variant="from-bottom" stagger={0.05}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {data?.transferencias.map((t) => (
+              <TransferCard key={t.id} transferencia={t} />
+            ))}
+          </div>
+        </ScrollReveal>
       )}
 
       {data && data.total_pages > 1 && (

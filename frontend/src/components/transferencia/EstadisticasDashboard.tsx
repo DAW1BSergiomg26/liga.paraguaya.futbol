@@ -2,6 +2,7 @@
 
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import type { EstadisticasTransferencias } from "@/types";
+import CountUp from "@/components/ui/CountUp";
 
 const COLORS = ["#CC001C", "#00619E", "#FFCC00", "#1a4731", "#8B5CF6", "#F97316", "#06B6D4"];
 
@@ -18,7 +19,7 @@ export default function EstadisticasDashboard({ stats }: { stats: EstadisticasTr
     <div className="space-y-8">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-bg-secundario border border-borde-sutil rounded-xl p-6 text-center">
-          <p className="text-3xl font-bold text-apf-rojo">{stats.total_transferencias}</p>
+          <CountUp end={stats.total_transferencias} className="text-3xl font-bold text-apf-rojo" />
           <p className="text-texto-secundario text-sm mt-1">Total transferencias</p>
         </div>
         <div className="bg-bg-secundario border border-borde-sutil rounded-xl p-6 text-center">
