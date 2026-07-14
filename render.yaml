@@ -1,0 +1,34 @@
+# Render Blueprint — Backend liga.paraguaya.futbol
+# Deploy gratuito: Web Service en Render (plan free) + PostgreSQL en Neon (gratis, sin tarjeta).
+# Uso de Neon en vez del Postgres de Render para garantizar $0 (el Postgres nativo de Render es de pago).
+#
+# Pasos para el deploy (ver Handoff / mensaje del agente):
+#   1. Crear cuenta en render.com y conectar el repo GitHub DAW1BSergiomg26/liga.paraguaya.futbol
+#   2. Crear proyecto Postgres GRATIS en neon.tech y copiar la connection string
+#      (formato postgresql://user:pass@host/db?sslmode=require)
+#   3. En Render: New > Blueprint, seleccionar este repo (lee render.yaml)
+#   4. Cuando pida DATABASE_URL, pegar la connection string de Neon
+#   5. El resto de env vars se autogenera/define abajo
+
+services:
+  - type: web
+    name: liga-backend
+    runtime: docker
+    dockerfilePath: ./Dockerfile.backend
+    plan: free
+    branch: main
+    healthCheckPath: /health
+    envVars:
+      # La completás en el dashboard con la connection string de Neon (postgresql://...)
+      - key: DATABASE_URL
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ADMIN_API_KEY
+        value: Rufi141414%$
+      - key: CORS_ORIGINS
+        value: http://localhost:3000,https://frontend-ten-swart-85.vercel.app
+      - key: FOOTBALL_DATA_API_KEY
+        value: ""
