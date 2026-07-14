@@ -7,5 +7,6 @@ from backend.app.models.push_subscription import PushSubscription
 from backend.app.models.tabla import TablaPosicion
 from backend.app.models.user import User
 from backend.app.models.noticia import Noticia
+from backend.app.models.transferencia import Transferencia
 
-__all__ = ["APIKey", "Club", "MensajeChat", "Partido", "Prediction", "PushSubscription", "TablaPosicion", "User", "Noticia"]
+__all__ = ["APIKey", "Club", "MensajeChat", "Partido", "Prediction", "PushSubscription", "TablaPosicion", "User", "Noticia", "Transferencia"]
