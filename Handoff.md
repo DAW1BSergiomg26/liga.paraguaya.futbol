@@ -351,6 +351,12 @@ npx next dev
 docker compose up --build
 ```
 
+### Launchers locales (Windows)
+- `iniciar.bat` — panel CMD que limpia procesos, verifica archivos y abre backend (`:8000`) y frontend (`:3000`) en ventanas separadas.
+- `iniciar.ps1` — igual pero en PowerShell (corrige `pause` y abre cada servicio en su propia ventana).
+- Ambos setean `PYTHONPATH` a la raíz y usan SQLite local por defecto (sin `DATABASE_URL`).
+- Requieren `python` y `npm` en el PATH.
+
 ## Workflow de desarrollo (LEER ANTES DE EMPEZAR)
 
 **Idioma:** El usuario se comunica en **castellano**. Responder SIEMPRE en español, sin excepción.
