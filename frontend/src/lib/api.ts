@@ -1,6 +1,6 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://backend-production-0b7d.up.railway.app";
 
-async function fetchJSON<T>(path: string, options?: RequestInit): Promise<T> {
+export async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${API_URL}${path}`, options);
   if (!res.ok) {
     throw new Error(`API error: ${res.status} ${res.statusText}`);
@@ -12,11 +12,11 @@ import type { Club, ClubDetail, Partido, PartidoDetail, PartidoPage, TablaRow, U
 
 export async function getClubes(ciudad?: string): Promise<Club[]> {
   const params = ciudad ? `?ciudad=${encodeURIComponent(ciudad)}` : "";
-  return fetchJSON<Club[]>(`/api/v1/clubes${params}`);
+  return apiFetch<Club[]>(`/api/v1/clubes${params}`);
 }
 
 export async function getClub(id: string): Promise<ClubDetail> {
-  return fetchJSON<ClubDetail>(`/api/v1/clubes/${id}`);
+  return apiFetch<ClubDetail>(`/api/v1/clubes/${id}`);
 }
 
 export async function getPartidos(
@@ -31,20 +31,20 @@ export async function getPartidos(
   if (page) params.set("page", page.toString());
   if (per_page) params.set("per_page", per_page.toString());
   const qs = params.toString();
-  return fetchJSON<PartidoPage>(`/api/v1/partidos${qs ? `?${qs}` : ""}`);
+  return apiFetch<PartidoPage>(`/api/v1/partidos${qs ? `?${qs}` : ""}`);
 }
 
 export async function getPartido(id: string): Promise<PartidoDetail> {
-  return fetchJSON<PartidoDetail>(`/api/v1/partidos/${id}`);
+  return apiFetch<PartidoDetail>(`/api/v1/partidos/${id}`);
 }
 
 export async function getTabla(torneo?: string): Promise<TablaRow[]> {
   const params = torneo ? `?torneo=${encodeURIComponent(torneo)}` : "";
-  return fetchJSON<TablaRow[]>(`/api/v1/tabla${params}`);
+  return apiFetch<TablaRow[]>(`/api/v1/tabla${params}`);
 }
 
 export async function getTorneos(): Promise<string[]> {
-  return fetchJSON<string[]>("/api/v1/tabla/torneos");
+  return apiFetch<string[]>("/api/v1/tabla/torneos");
 }
 
 let authToken: string | null = null;
@@ -93,7 +93,7 @@ export async function loginWithProvider(data: {
 }
 
 export async function registerUser(email: string, name: string, password: string): Promise<TokenResponse> {
-  const data = await fetchJSON<TokenResponse>("/api/v1/auth/register", {
+  const data = await apiFetch<TokenResponse>("/api/v1/auth/register", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, name, password }),
@@ -103,7 +103,7 @@ export async function registerUser(email: string, name: string, password: string
 }
 
 export async function loginUser(email: string, password: string): Promise<TokenResponse> {
-  const data = await fetchJSON<TokenResponse>("/api/v1/auth/login", {
+  const data = await apiFetch<TokenResponse>("/api/v1/auth/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
@@ -129,7 +129,7 @@ export async function misPredicciones(): Promise<PredictionDetail[]> {
 }
 
 export async function getLeaderboard(): Promise<LeaderboardEntry[]> {
-  return fetchJSON<LeaderboardEntry[]>("/api/v1/leaderboard");
+  return apiFetch<LeaderboardEntry[]>("/api/v1/leaderboard");
 }
 
 export async function getNoticias(params?: {
@@ -144,15 +144,15 @@ export async function getNoticias(params?: {
   if (params?.fuente) searchParams.set("fuente", params.fuente);
   if (params?.search) searchParams.set("search", params.search);
   const qs = searchParams.toString();
-  return fetchJSON<NoticiasPaginatedResponse>(`/api/v1/noticias${qs ? `?${qs}` : ""}`);
+  return apiFetch<NoticiasPaginatedResponse>(`/api/v1/noticias${qs ? `?${qs}` : ""}`);
 }
 
 export async function getNoticia(id: string): Promise<Noticia> {
-  return fetchJSON<Noticia>(`/api/v1/noticias/${id}`);
+  return apiFetch<Noticia>(`/api/v1/noticias/${id}`);
 }
 
 export async function getH2H(clubA: string, clubB: string): Promise<H2HResponse> {
-  const res = await fetchJSON<H2HResponse>(
+  const res = await apiFetch<H2HResponse>(
     `/api/v1/partidos/h2h?club_a=${encodeURIComponent(clubA)}&club_b=${encodeURIComponent(clubB)}`
   );
   return res;
@@ -206,20 +206,20 @@ export interface MensajeChat {
 }
 
 export async function getTacticoEquipos(): Promise<EquipoResumenTactico[]> {
-  return fetchJSON<EquipoResumenTactico[]>("/api/v1/tactico/equipos");
+  return apiFetch<EquipoResumenTactico[]>("/api/v1/tactico/equipos");
 }
 
 export async function getTacticoEquipo(equipoId: string): Promise<EquipoTactico> {
-  return fetchJSON<EquipoTactico>(`/api/v1/tactico/equipo/${equipoId}`);
+  return apiFetch<EquipoTactico>(`/api/v1/tactico/equipo/${equipoId}`);
 }
 
 export async function getTacticoPartido(partidoId: string): Promise<AnalisisPartido> {
-  return fetchJSON<AnalisisPartido>(`/api/v1/tactico/partido/${partidoId}`);
+  return apiFetch<AnalisisPartido>(`/api/v1/tactico/partido/${partidoId}`);
 }
 
 export async function getGoleadores(torneo?: string): Promise<{ goleadores: Goleador[]; total: number }> {
   const params = torneo ? `?torneo=${encodeURIComponent(torneo)}` : "";
-  return fetchJSON(`/api/v1/goleadores${params}`);
+  return apiFetch(`/api/v1/goleadores${params}`);
 }
 
 interface Goleador {
