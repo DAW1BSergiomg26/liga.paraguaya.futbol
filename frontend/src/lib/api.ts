@@ -8,7 +8,7 @@ export async function apiFetch<T>(path: string, options?: RequestInit): Promise<
   return res.json();
 }
 
-import type { Club, ClubDetail, Partido, PartidoDetail, PartidoPage, TablaRow, User, PredictionCreate, PredictionDetail, LeaderboardEntry, Noticia, NoticiasPaginatedResponse, H2HResponse, EquipoTactico, AnalisisPartido, EquipoResumenTactico, AuthUser, TokenResponse } from "@/types";
+import type { Club, ClubDetail, Partido, PartidoDetail, PartidoPage, TablaRow, User, PredictionCreate, PredictionDetail, LeaderboardEntry, Noticia, NoticiasPaginatedResponse, H2HResponse, EquipoTactico, AnalisisPartido, EquipoResumenTactico, AuthUser, TokenResponse, CampeonHistorico, RankingClubHistorico, ClubTemporadaHistorica } from "@/types";
 
 export async function getClubes(ciudad?: string): Promise<Club[]> {
   const params = ciudad ? `?ciudad=${encodeURIComponent(ciudad)}` : "";
@@ -229,4 +229,16 @@ interface Goleador {
   club_nombre: string;
   goles: number;
   asistencias: number;
+}
+
+export async function getCampeones(): Promise<CampeonHistorico[]> {
+  return apiFetch<CampeonHistorico[]>("/api/v1/historial/campeones");
+}
+
+export async function getRankingClubes(): Promise<RankingClubHistorico[]> {
+  return apiFetch<RankingClubHistorico[]>("/api/v1/historial/ranking-clubes");
+}
+
+export async function getClubHistorial(clubId: string): Promise<ClubTemporadaHistorica[]> {
+  return apiFetch<ClubTemporadaHistorica[]>(`/api/v1/historial/club/${clubId}`);
 }

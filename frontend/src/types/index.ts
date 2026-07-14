@@ -378,3 +378,37 @@ export interface EstadisticasTransferencias {
   distribucion_posiciones: Record<string, number>;
   distribucion_tipos: Record<string, number>;
 }
+
+// === Estadísticas Históricas ===
+export interface CampeonHistorico {
+  ano: number;
+  torneo: string;
+  club_id: string;
+  club: string;
+  escudo: string | null;
+  puntos: number;
+}
+
+export interface RankingClubHistorico {
+  club_id: string;
+  club: string;
+  escudo: string | null;
+  pj: number;
+  pg: number;
+  pe: number;
+  pp: number;
+  gf: number;
+  gc: number;
+  dg: number;
+  puntos: number;
+  titulos: number;
+  torneos_jugados: number;
+}
+
+export interface ClubTemporadaHistorica {
+  ano: number;
+  torneo: string;
+  posicion: number;
+  puntos: number;
+  dg: number;
+}
