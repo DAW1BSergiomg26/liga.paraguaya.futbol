@@ -25,14 +25,14 @@ Plataforma web para el seguimiento de la Primera División paraguaya de fútbol.
 ```
 liga.paraguaya.futbol/
 ├── backend/
-│   ├── alembic/              # Migraciones (7 revisiones: 001-007)
+│   ├── alembic/              # Migraciones (8 revisiones: 001-008)
 │   ├── app/
-│   │   ├── api/              # Routers FastAPI (clubes, partidos, tabla, predicciones, chat, push, admin, cerezo, noticias)
+│   │   ├── api/              # Routers FastAPI (clubes, partidos, tabla, predicciones, chat, push, admin, cerezo, noticias, transferencias)
 │   │   ├── core/             # Config, DB, dependencias (get_current_user, get_current_admin), API Key
-│   │   ├── models/           # SQLAlchemy (10 modelos: Club, Partido, TablaPosicion, Prediccion, User, APIKey, ChatMessage, Noticia, etc.)
+│   │   ├── models/           # SQLAlchemy (11 modelos: Club, Partido, TablaPosicion, Prediccion, User, APIKey, ChatMessage, Noticia, Transferencia, etc.)
 │   │   ├── schemas/          # Pydantic v2
 │   │   ├── scripts/          # Seed de datos
-│   │   ├── services/         # Lógica de negocio (noticia_service, rss_sync, football_data_sync, etc.)
+│   │   ├── services/         # Lógica de negocio (noticia_service, rss_sync, football_data_sync, transferencia_service, transferencia_rss_sync, etc.)
 │   │   └── main.py           # Entry point
 │   ├── scripts/              # Scrapers (Wikipedia, RSSSF)
 │   └── tests/                # 140+ tests (pytest)
@@ -160,6 +160,21 @@ liga.paraguaya.futbol/
 - [x] 10/10 tests backend pasando
 - [x] 28 noticias en DB, 100% con imágenes
 
+### Módulo Transferencias (Julio 2026)
+- [x] Modelo `Transferencia` en SQLAlchemy (jugador como string, sin modelo Player separado)
+- [x] Migración 008_add_transferencias
+- [x] Schemas Pydantic con validaciones (create/update/out/paginado/estadísticas)
+- [x] `TransferenciaService` — CRUD + filtros + estadísticas + mercado + historial
+- [x] 9 API endpoints (list, detail, create, update, delete, mercado, historial, estadísticas, sync-rss)
+- [x] RSS sync service para transferencias (5 fuentes)
+- [x] Frontend types TypeScript (Transferencia, paginado, estadísticas)
+- [x] Navbar link a Transferencias
+- [x] TransferCard, VerificationBadge, TipoBadge components
+- [x] Páginas: `/transferencias`, `/transferencias/[id]`, `/transferencias/mercado`, `/transferencias/historial`, `/transferencias/estadisticas`
+- [x] EstadisticasDashboard con Recharts (pie por tipo/posición, bar por club)
+- [x] GSAP: ScrollReveal en grid + CountUp en total
+- [x] 11/11 tests backend pasando
+
 ### GSAP Experience — Animaciones Cinematográficas (Julio 2026)
 - [x] Task 1: `lib/gsap.ts` — Config GSAP central + `ScrollReveal.tsx` (5 variantes)
 - [x] Task 2: `CountUp.tsx` — Números animados con ScrollTrigger
@@ -194,7 +209,7 @@ El **Handoff Maestro** define la dirección completa del proyecto con una identi
 1. ✅ Datos reales (scraping + Football-Data.org)
 2. ✅ JWT Auth
 3. ✅ Noticias (RSS + UI)
-4. 🔜 Transferencias
+4. ✅ Transferencias (CRUD + RSS + UI + estadísticas)
 5. 📋 Estadísticas históricas
 6. 📋 Deployment a producción
 
@@ -256,6 +271,7 @@ npx vitest run  # Si hay tests configurados
 | `test_noticias_api.py` | 8 | CRUD noticias, filtros, admin |
 | `test_rss_sync.py` | 2 | RSS parse + sync |
 | `test_tactical_analysis.py` | 5 | Análisis táctico |
+| `test_transferencias_api.py` | 11 | CRUD transferencias, filtros, auth, mercado, historial, estadísticas |
 
 ## Variables de entorno
 
