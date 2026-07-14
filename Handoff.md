@@ -175,6 +175,18 @@ liga.paraguaya.futbol/
 - [x] GSAP: ScrollReveal en grid + CountUp en total
 - [x] 11/11 tests backend pasando
 
+### Estadísticas Históricas (Julio 2026)
+- [x] `HistorialService` — agrega TablaPosicion: campeones por torneo, ranking all-time, historial por club
+- [x] 3 API endpoints: `/api/v1/historial/campeones`, `/api/v1/historial/ranking-clubes`, `/api/v1/historial/club/{id}`
+- [x] Schemas Pydantic: CampeonOut, RankingClubOut, ClubTemporadaOut
+- [x] Frontend types + API functions
+- [x] Sección `/historial` con 3 tabs: Tablas por año, Ranking agregado, Rendimiento por club
+- [x] Recharts: barchart de títulos, linechart de posición por temporada
+- [x] Navbar link a Historial
+- [x] Tests backend (service + api) pasando
+
+> Nota: los datos históricos son tablas finales por torneo (2020–2026). No incluye resultados fecha por fecha ni goleadores históricos (sin datos en JSON).
+
 ### GSAP Experience — Animaciones Cinematográficas (Julio 2026)
 - [x] Task 1: `lib/gsap.ts` — Config GSAP central + `ScrollReveal.tsx` (5 variantes)
 - [x] Task 2: `CountUp.tsx` — Números animados con ScrollTrigger
@@ -210,7 +222,7 @@ El **Handoff Maestro** define la dirección completa del proyecto con una identi
 2. ✅ JWT Auth
 3. ✅ Noticias (RSS + UI)
 4. ✅ Transferencias (CRUD + RSS + UI + estadísticas)
-5. 📋 Estadísticas históricas
+5. ✅ Estadísticas históricas
 6. 📋 Deployment a producción
 
 ## Pendientes / Issues conocidos
