@@ -14,6 +14,7 @@ from backend.app.api.notificaciones import router as notificaciones_router
 from backend.app.api.cron import router as cron_router
 from backend.app.api.noticias import router as noticias_router
 from backend.app.api.tactico import router as tactico_router
+from backend.app.api.transferencias import router as transferencias_router
 from backend.app.core.api_key import RATE_LIMIT_MAX, rate_limit_info
 from backend.app.core.config import settings
 from backend.app.core.database import async_session, run_alembic_upgrade
@@ -103,6 +104,7 @@ app.include_router(cron_router)
 app.include_router(noticias_router)
 app.include_router(tactico_router)
 app.include_router(goleadores.router)
+app.include_router(transferencias_router)
 
 
 @app.get("/")
