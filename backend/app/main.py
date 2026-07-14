@@ -26,6 +26,9 @@ logger = logging.getLogger(__name__)
 
 
 async def sync_loop():
+    if not settings.api_football_key:
+        logger.info("FOOTBALL_DATA_API_KEY no configurada - sync_loop desactivado")
+        return
     while True:
         try:
             from backend.app.services.football_data_service import FootballDataService
