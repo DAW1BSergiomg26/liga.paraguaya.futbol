@@ -1,12 +1,13 @@
 // frontend/src/app/transferencias/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { apiFetch } from "@/lib/api";
+import { apiFetch, getEstadisticasTransferencias } from "@/lib/api";
 import type { TransferenciasPaginatedResponse } from "@/types";
 import TransferCard from "@/components/transferencia/TransferCard";
 import FiltrosTransferencias from "@/components/transferencia/FiltrosTransferencias";
+import MercadoStats from "@/components/transferencia/MercadoStats";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 
 const TABS = [
@@ -19,6 +20,7 @@ export default function TransferenciasPage() {
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [tab, setTab] = useState("confirmada");
   const [page, setPage] = useState(1);
+  const [sort, setSort] = useState<"fecha" | "monto">("fecha");
 
   const params = new URLSearchParams({ page: String(page), per_page: "20" });
   if (tab !== "all") params.set("estado", tab);
@@ -28,6 +30,21 @@ export default function TransferenciasPage() {
     queryKey: ["transferencias", tab, filters, page],
     queryFn: () => apiFetch(`/api/v1/transferencias?${params}`),
   });
+
+  const { data: stats } = useQuery({
+    queryKey: ["transferencias-estadisticas"],
+    queryFn: () => getEstadisticasTransferencias(),
+  });
+
+  const lista = useMemo(() => {
+    const items = data?.transferencias ?? [];
+    if (sort === "monto") {
+      return [...items].sort((a, b) => (b.monto || 0) - (a.monto || 0));
+    }
+    return [...items].sort(
+      (a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
+    );
+  }, [data, sort]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -52,7 +69,19 @@ export default function TransferenciasPage() {
         ))}
       </div>
 
-      <FiltrosTransferencias onFilter={(f) => { setFilters(f); setPage(1); }} />
+      <div className="flex flex-wrap items-center gap-3 mb-6">
+        <FiltrosTransferencias onFilter={(f) => { setFilters(f); setPage(1); }} />
+        <select
+          value={sort}
+          onChange={(e) => setSort(e.target.value as "fecha" | "monto")}
+          className="px-4 py-2 rounded-lg bg-bg-noche border border-borde-sutil text-texto-principal text-sm focus:outline-none focus:border-apf-rojo/50 ml-auto"
+        >
+          <option value="fecha">Más recientes</option>
+          <option value="monto">Mayor monto</option>
+        </select>
+      </div>
+
+      {stats && <MercadoStats data={stats} />}
 
       {isLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -60,12 +89,12 @@ export default function TransferenciasPage() {
             <div key={i} className="h-48 bg-bg-secundario rounded-xl animate-pulse" />
           ))}
         </div>
-      ) : data?.transferencias.length === 0 ? (
+      ) : lista.length === 0 ? (
         <p className="text-texto-secundario text-center py-12">No se encontraron transferencias</p>
       ) : (
         <ScrollReveal variant="from-bottom" stagger={0.05}>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {data?.transferencias.map((t) => (
+            {lista.map((t) => (
               <TransferCard key={t.id} transferencia={t} />
             ))}
           </div>
