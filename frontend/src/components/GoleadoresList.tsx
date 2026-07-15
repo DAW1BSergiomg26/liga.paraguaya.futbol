@@ -61,15 +61,26 @@ export default function GoleadoresList({ torneo }: { torneo?: string }) {
     );
   }
 
+  const maxGoles = Math.max(...goleadores.map((g) => g.goles), 1);
+  const podium = ["text-amber-300", "text-slate-300", "text-orange-400"];
+
   return (
     <div className="space-y-2">
       {goleadores.map((g, i) => (
         <div
           key={g.id}
-          className="flex items-center justify-between p-3 bg-bg-secundario/40 rounded-lg border border-borde-sutil hover:bg-bg-terciario transition-colors"
+          className="relative flex items-center justify-between p-3 bg-bg-secundario/40 rounded-lg border border-borde-sutil hover:bg-bg-terciario transition-colors overflow-hidden"
         >
-          <div className="flex items-center gap-3">
-            <span className="text-lg font-bold text-texto-terciario w-8 text-center">
+          <div
+            className="absolute inset-y-0 left-0 bg-victoria/10"
+            style={{ width: `${(g.goles / maxGoles) * 100}%` }}
+          />
+          <div className="relative flex items-center gap-3">
+            <span
+              className={`text-lg font-bold w-8 text-center tabular-nums ${
+                i < 3 ? podium[i] : "text-texto-terciario"
+              }`}
+            >
               {i + 1}
             </span>
             <div>
@@ -77,8 +88,8 @@ export default function GoleadoresList({ torneo }: { torneo?: string }) {
               <p className="text-sm text-texto-terciario">{g.club_nombre || g.club_id}</p>
             </div>
           </div>
-          <div className="text-right">
-            <p className="text-2xl font-bold text-victoria">{g.goles}</p>
+          <div className="relative text-right">
+            <p className="text-2xl font-bold text-victoria tabular-nums">{g.goles}</p>
             <p className="text-xs text-texto-terciario">{g.asistencias} asist.</p>
           </div>
         </div>

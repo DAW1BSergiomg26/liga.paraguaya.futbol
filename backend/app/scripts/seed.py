@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.app.core.database import async_session, init_db
 from backend.app.models.club import Club
+from backend.app.models.goleador import Goleador
 from backend.app.models.partido import Partido
 from backend.app.models.tabla import TablaPosicion
 
@@ -122,6 +123,37 @@ async def seed_tabla(db: AsyncSession):
     return count
 
 
+async def seed_goleadores(db: AsyncSession):
+    data = load_json("goleadores_demo.json")
+    count_new = 0
+    count_upd = 0
+    for item in data:
+        existing = await db.execute(select(Goleador).where(Goleador.id == item["id"]))
+        g = existing.scalar_one_or_none()
+        if g:
+            g.nombre = item["nombre"]
+            g.club_id = item["club_id"]
+            g.goles = item["goles"]
+            g.asistencias = item["asistencias"]
+            g.torneo = item["torneo"]
+            g.temporada = item["temporada"]
+            count_upd += 1
+            continue
+        db.add(Goleador(
+            id=item["id"],
+            nombre=item["nombre"],
+            club_id=item["club_id"],
+            goles=item["goles"],
+            asistencias=item["asistencias"],
+            torneo=item["torneo"],
+            temporada=item["temporada"],
+        ))
+        count_new += 1
+    await db.flush()
+    print(f"  Goleadores: {count_new} nuevos, {count_upd} actualizados")
+    return count_new
+
+
 HISTORICO_DIR = DATA_DIR / "partidos_historicos"
 
 
@@ -173,6 +205,7 @@ async def main():
         await seed_clubes(db)
         await seed_partidos(db)
         await seed_tabla(db)
+        await seed_goleadores(db)
         await db.commit()
     print("Seed completado.")
 
