@@ -161,6 +161,34 @@ a, button, tr {
   background-color: rgba(16, 22, 43, 0.85);
 }
 
+/* === HERO: brillo dorado titilando (albirroja) === */
+@keyframes hero-gold-flicker {
+  0%, 100% {
+    text-shadow:
+      0 0 6px #FFCC00,
+      0 0 14px #FFCC00,
+      0 0 22px #D52B1E,
+      0 0 30px #D52B1E;
+  }
+  50% {
+    text-shadow:
+      0 0 8px #FFCC00,
+      0 0 18px #FFFFFF,
+      0 0 26px #D52B1E,
+      0 0 34px #D52B1E;
+  }
+}
+
+.hero-title-glow {
+  color: #FFD24A;
+  animation: hero-gold-flicker 2.4s ease-in-out infinite;
+}
+
+.hero-sub-glow {
+  color: #F5F6FA;
+  text-shadow: 0 0 8px rgba(255, 204, 0, 0.6), 0 0 16px rgba(213, 43, 30, 0.45);
+}
+
 /* prefers-reduced-motion: apaga todo lo animado */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

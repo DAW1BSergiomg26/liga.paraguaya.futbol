@@ -89,20 +89,23 @@ export default function CinematicHero() {
       {/* Overlay suave para legibilidad del texto */}
       <div className="absolute inset-0 bg-gradient-to-b from-bg-noche/70 to-bg-primario/80" />
 
-      {/* Content con marco tricolor Paraguay */}
+      {/* Borde tricolor Paraguay a todo el cuadro */}
+      <div
+        className="pointer-events-none absolute inset-0 z-[5]"
+        style={{ boxShadow: "inset 0 0 0 4px #D52B1E, inset 0 0 0 8px #FFFFFF, inset 0 0 0 12px #0038A8" }}
+        aria-hidden
+      />
+
+      {/* Content */}
       <div className="relative z-10 text-center px-4">
-        <div
-          className="inline-block rounded-2xl px-8 py-10 md:px-14 md:py-12 bg-bg-noche/40 backdrop-blur-sm"
-          style={{ boxShadow: "0 0 0 3px #CC001C, 0 0 0 6px #FFFFFF, 0 0 0 9px #00619E" }}
-        >
         <h1
           ref={titleRef}
-          className="font-barlow text-4xl md:text-6xl lg:text-7xl font-bold uppercase tracking-wider text-texto-principal"
+          className="hero-title-glow font-barlow text-[2.6rem] md:text-[4.3rem] lg:text-[5.2rem] font-bold uppercase tracking-wider"
         >
           Liga Paraguaya de Fútbol
         </h1>
 
-        <p className="mt-4 text-texto-secundario text-lg md:text-xl max-w-2xl mx-auto">
+        <p className="hero-sub-glow mt-4 text-xl md:text-2xl max-w-2xl mx-auto">
           Estadísticas en vivo del fútbol paraguayo
         </p>
 
@@ -113,15 +116,14 @@ export default function CinematicHero() {
         >
           {stats.map((stat) => (
             <div key={stat.label} className="text-center">
-              <div className="font-barlow text-3xl md:text-5xl font-bold text-apf-dorado">
-                <CountUp end={stat.value} duration={2.5} />
-              </div>
-              <div className="text-texto-apagado text-xs md:text-sm tracking-widest mt-1">
+              <div className="hero-title-glow font-barlow text-4xl md:text-[3.4rem] font-bold">
+                 <CountUp end={stat.value} duration={2.5} />
+               </div>
+               <div className="text-texto-apagado text-sm md:text-base tracking-widest mt-1">
                 {stat.label}
               </div>
             </div>
           ))}
-        </div>
         </div>
       </div>
 
