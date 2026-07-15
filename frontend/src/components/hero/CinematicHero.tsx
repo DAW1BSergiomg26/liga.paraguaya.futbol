@@ -89,10 +89,10 @@ export default function CinematicHero() {
       {/* Overlay suave para legibilidad del texto */}
       <div className="absolute inset-0 bg-gradient-to-b from-bg-noche/70 to-bg-primario/80" />
 
-      {/* Borde tricolor Paraguay a todo el cuadro */}
+      {/* Borde tricolor Paraguay (fino y redondeado) a todo el cuadro */}
       <div
-        className="pointer-events-none absolute inset-0 z-[5]"
-        style={{ boxShadow: "inset 0 0 0 4px #D52B1E, inset 0 0 0 8px #FFFFFF, inset 0 0 0 12px #0038A8" }}
+        className="pointer-events-none absolute inset-0 z-[5] rounded-3xl"
+        style={{ boxShadow: "inset 0 0 0 2px #D52B1E, inset 0 0 0 4px #FFFFFF, inset 0 0 0 6px #0038A8" }}
         aria-hidden
       />
 
@@ -127,11 +127,6 @@ export default function CinematicHero() {
         </div>
       </div>
 
-      {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-texto-apagado">
-        <span className="text-xs tracking-widest">SCROLL</span>
-        <div className="w-px h-8 bg-gradient-to-b from-texto-apagado to-transparent" />
-      </div>
     </section>
   );
 }
