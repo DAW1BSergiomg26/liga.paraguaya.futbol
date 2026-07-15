@@ -80,17 +80,21 @@ export default function CinematicHero() {
       ref={heroRef}
       className="relative h-screen flex flex-col items-center justify-center overflow-hidden"
     >
-      {/* Background image (tenue) */}
+      {/* Background image (claro y reconocible) */}
       <div
-        className="absolute inset-0 bg-cover bg-center opacity-30"
+        className="absolute inset-0 bg-cover bg-center opacity-45"
         style={{ backgroundImage: "url('/fondoweb.png')" }}
         aria-hidden
       />
-      {/* Overlay oscuro para legibilidad del texto */}
-      <div className="absolute inset-0 bg-gradient-to-b from-bg-noche/85 to-bg-primario/90" />
+      {/* Overlay suave para legibilidad del texto */}
+      <div className="absolute inset-0 bg-gradient-to-b from-bg-noche/70 to-bg-primario/80" />
 
-      {/* Content */}
+      {/* Content con marco tricolor Paraguay */}
       <div className="relative z-10 text-center px-4">
+        <div
+          className="inline-block rounded-2xl px-8 py-10 md:px-14 md:py-12 bg-bg-noche/40 backdrop-blur-sm"
+          style={{ boxShadow: "0 0 0 3px #CC001C, 0 0 0 6px #FFFFFF, 0 0 0 9px #00619E" }}
+        >
         <h1
           ref={titleRef}
           className="font-barlow text-4xl md:text-6xl lg:text-7xl font-bold uppercase tracking-wider text-texto-principal"
@@ -117,6 +121,7 @@ export default function CinematicHero() {
               </div>
             </div>
           ))}
+        </div>
         </div>
       </div>
 
