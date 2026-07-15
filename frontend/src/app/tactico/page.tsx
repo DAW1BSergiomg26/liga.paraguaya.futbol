@@ -44,6 +44,7 @@ export default function TacticoPage() {
                       src={equipo.escudo}
                       alt={equipo.nombre}
                       fill
+                      sizes="64px"
                       className="object-contain"
                     />
                   ) : (

@@ -69,7 +69,7 @@ export default function NoticiaDetallePage() {
 
       {noticia.imagen_url && (
         <div className="relative h-80 rounded-xl overflow-hidden mb-8">
-          <Image src={noticia.imagen_url} alt={noticia.titulo} fill className="object-cover" />
+          <Image src={noticia.imagen_url} alt={noticia.titulo} fill sizes="100vw" className="object-cover" />
         </div>
       )}
 

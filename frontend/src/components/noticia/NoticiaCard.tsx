@@ -40,9 +40,10 @@ function FuenteBadge({ fuente, origen }: { fuente: string; origen: string }) {
 interface NoticiaCardProps {
   noticia: Noticia;
   variant?: "featured" | "normal" | "compact";
+  priority?: boolean;
 }
 
-export default function NoticiaCard({ noticia, variant = "normal" }: NoticiaCardProps) {
+export default function NoticiaCard({ noticia, variant = "normal", priority = false }: NoticiaCardProps) {
   const isFeatured = variant === "featured";
   const isCompact = variant === "compact";
 
@@ -59,6 +60,8 @@ export default function NoticiaCard({ noticia, variant = "normal" }: NoticiaCard
             src={noticia.imagen_url}
             alt={noticia.titulo}
             fill
+            sizes="(max-width: 768px) 100vw, 33vw"
+            priority={priority}
             className="object-cover group-hover:scale-105 transition-transform duration-300"
           />
           {noticia.video_url && (

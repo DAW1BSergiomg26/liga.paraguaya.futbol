@@ -23,6 +23,7 @@ export default function NoticiaGrid({ noticias }: NoticiaGridProps) {
           key={noticia.id}
           noticia={noticia}
           variant={i === 0 ? "featured" : i < 3 ? "normal" : "compact"}
+          priority={i === 0}
         />
       ))}
     </div>

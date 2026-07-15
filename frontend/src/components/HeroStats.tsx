@@ -246,13 +246,14 @@ export default function HeroStats({
             {/* ---------- Map (centered, on top) ---------- */}
             <div className="relative z-10 w-48 h-48 lg:w-60 lg:h-60 xl:w-72 xl:h-72 [perspective:900px]">
               <div className="relative w-full h-full transition-all duration-700 ease-out hover:scale-105 cursor-pointer group">
-                <Image
-                  src="/albirroparaguay.png"
-                  alt="Mapa del Paraguay - Albirroja"
-                  fill
-                  className="object-contain animate-[map-glow-trace_5s_ease-in-out_infinite] transition-all duration-700 group-hover:scale-105"
-                  priority
-                />
+                  <Image
+                    src="/albirroparaguay.png"
+                    alt="Mapa del Paraguay - Albirroja"
+                    fill
+                    sizes="(max-width: 1024px) 50vw, 33vw"
+                    className="object-contain animate-[map-glow-trace_5s_ease-in-out_infinite] transition-all duration-700 group-hover:scale-105"
+                    priority
+                  />
                 {/* Halo tricolor rotating */}
                 <div className="absolute inset-[-10px] pointer-events-none">
                   <div className="w-full h-full animate-[ball-orbit_8s_linear_infinite] rounded-[40%_60%_55%_45%/55%_45%_55%_45%] border border-dorado-medalla/15 bg-[conic-gradient(from_0deg,rgba(213,43,30,0.3),rgba(212,175,55,0.15),rgba(0,56,168,0.3),rgba(212,175,55,0.15),rgba(213,43,30,0.3))] [mask:linear-gradient(#fff_0_0)_content-box,linear-gradient(#fff_0_0)] [mask-composite:xor] [-webkit-mask:linear-gradient(#fff_0_0)_content-box,linear-gradient(#fff_0_0)] [-webkit-mask-composite:xor] p-[1px]" />

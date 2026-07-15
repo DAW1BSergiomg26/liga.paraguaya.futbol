@@ -39,6 +39,7 @@ export default function PageHeader({
           src="/albirroparaguay.png"
           alt="Albirroja Paraguay"
           fill
+          sizes="128px"
           className="object-contain"
           priority
         />

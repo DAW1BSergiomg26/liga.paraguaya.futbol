@@ -40,7 +40,7 @@ export default function EquipoTacticoPage() {
         accion={
           <div className="relative w-20 h-20">
             {equipo.escudo ? (
-              <Image src={equipo.escudo} alt={equipo.nombre} fill className="object-contain" />
+              <Image src={equipo.escudo} alt={equipo.nombre} fill sizes="64px" className="object-contain" />
             ) : (
               <div className="w-20 h-20 bg-bg-terciario rounded-full flex items-center justify-center text-2xl font-bold text-white">
                 {equipo.nombre.slice(0, 2).toUpperCase()}
