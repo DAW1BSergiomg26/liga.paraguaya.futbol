@@ -4,6 +4,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import PageHeader from "@/components/ui/PageHeader";
 import { apiFetch } from "@/lib/api";
+import * as THREE from "three";
 
 interface GraphNode {
   id: string;
@@ -15,6 +16,7 @@ interface GraphNode {
   titulos?: number;
   intl?: number;
   movimientos?: number;
+  escudo?: string;
   x?: number;
   y?: number;
   z?: number;
@@ -66,6 +68,33 @@ const RIVALIDADES_FALLBACK: GraphData = {
   ],
 };
 
+const texLoader = new THREE.TextureLoader();
+texLoader.setCrossOrigin("anonymous");
+
+function proxied(u?: string): string {
+  if (!u) return "";
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+  return `${origin}/_next/image?url=${encodeURIComponent(u)}&w=128&q=75`;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function makeNodeObject(n: GraphNode): any {
+  const size = 9 + Math.min(n.val, 60) * 0.3;
+  if (n.escudo) {
+    const mat = new THREE.SpriteMaterial({
+      map: texLoader.load(n.escudo),
+      transparent: true,
+      depthWrite: false,
+    });
+    const sprite = new THREE.Sprite(mat);
+    sprite.scale.set(size, size, 1);
+    return sprite;
+  }
+  const geo = new THREE.SphereGeometry(size * 0.35, 16, 16);
+  const mat = new THREE.MeshBasicMaterial({ color: n.color });
+  return new THREE.Mesh(geo, mat);
+}
+
 export default function Red3DPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -77,12 +106,23 @@ export default function Red3DPage() {
 
   const [rivalidadesData, setRivalidadesData] = useState<GraphData>(RIVALIDADES_FALLBACK);
   const [transfers, setTransfers] = useState<any[]>([]);
+  const [escudoMap, setEscudoMap] = useState<Record<string, string>>({});
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
-  // Cargar datos de rivalidades (estático) y transferencias (API)
+  // Cargar datos de rivalidades (estático), transferencias y escudos de clubes (API)
+  useEffect(() => {
+    apiFetch<any[]>("/api/v1/clubes")
+      .then((cls) => {
+        const m: Record<string, string> = {};
+        cls.forEach((c: any) => { if (c.id && c.escudo) m[c.id] = c.escudo; });
+        setEscudoMap(m);
+      })
+      .catch(() => {});
+  }, []);
+
   useEffect(() => {
     fetch("/data/red-clubes.json")
       .then((r) => r.json())
@@ -90,6 +130,7 @@ export default function Red3DPage() {
         const nodes = d.nodes.map((n) => ({
           ...n,
           tipo: "club" as const,
+          escudo: escudoMap[n.id] ? proxied(escudoMap[n.id]) : undefined,
           label: `<div style="color:#020a14;background:#FFCC00;padding:6px 10px;border-radius:6px;font-weight:600;font-size:13px;white-space:nowrap">${n.name}<br/><span style="font-size:11px;color:#333">${n.titulos ?? 0} títulos · ${n.intl ?? 0} internacionales</span></div>`,
         }));
         const links = d.links.map((l) => ({ ...l, w: Math.max(0.5, (l.value || 1) / 50) }));
@@ -100,7 +141,7 @@ export default function Red3DPage() {
     apiFetch<{ transferencias: any[] }>("/api/v1/transferencias?per_page=100")
       .then((d) => setTransfers(d.transferencias || []))
       .catch(() => setTransfers([]));
-  }, []);
+  }, [escudoMap]);
 
   // Construir grafo de fichajes (clubes = nodos, fichajes = aristas)
   const fichajesData = useMemo<GraphData>(() => {
@@ -108,18 +149,18 @@ export default function Red3DPage() {
       ? transfers
       : transfers.filter((t) => String(new Date(t.fecha).getFullYear()) === temporada);
 
-    const clubMap = new Map<string, { id: string; name: string; count: number }>();
+    const clubMap = new Map<string, { id: string; name: string; escudo?: string; count: number }>();
     const linkMap = new Map<string, { source: string; target: string; value: number; labels: string[] }>();
 
     for (const t of vis) {
       const oId = t.club_origen_id;
       const dId = t.club_destino_id;
       if (oId) {
-        if (!clubMap.has(oId)) clubMap.set(oId, { id: oId, name: t.club_origen_nombre || oId, count: 0 });
+        if (!clubMap.has(oId)) clubMap.set(oId, { id: oId, name: t.club_origen_nombre || oId, escudo: t.club_origen_escudo, count: 0 });
         clubMap.get(oId)!.count++;
       }
       if (dId) {
-        if (!clubMap.has(dId)) clubMap.set(dId, { id: dId, name: t.club_destino_nombre || dId, count: 0 });
+        if (!clubMap.has(dId)) clubMap.set(dId, { id: dId, name: t.club_destino_nombre || dId, escudo: t.club_destino_escudo, count: 0 });
         clubMap.get(dId)!.count++;
       }
       if (!oId || !dId) continue;
@@ -137,6 +178,7 @@ export default function Red3DPage() {
       color: CLUB_COLORS[c.id] || "#FFCC00",
       tipo: "club",
       movimientos: c.count,
+      escudo: proxied(escudoMap[c.id] || c.escudo),
       label: `<div style="color:#020a14;background:#FFCC00;padding:6px 10px;border-radius:6px;font-weight:600;font-size:13px;white-space:nowrap">${c.name}<br/><span style="font-size:11px;color:#333">${c.count} movimientos</span></div>`,
     }));
 
@@ -149,7 +191,7 @@ export default function Red3DPage() {
     }));
 
     return { nodes, links };
-  }, [transfers, temporada]);
+  }, [transfers, temporada, escudoMap]);
 
   const graphData = useMemo<GraphData | null>(() => {
     return mode === "rivalidades" ? rivalidadesData : fichajesData;
@@ -170,9 +212,9 @@ export default function Red3DPage() {
         .backgroundColor("#020a14")
         .showNavInfo(false)
         .nodeLabel((n: GraphNode) => n.label)
-        .nodeVal((n: GraphNode) => Math.max(n.val, 1) * 0.6)
         .nodeColor((n: GraphNode) => n.color)
-        .nodeRelSize(4)
+        .nodeThreeObject(makeNodeObject)
+        .nodeThreeObjectExtend(false)
         .nodeOpacity(0.9)
         .nodeResolution(12)
         .linkLabel((l: GraphLink) => l.label)
