@@ -80,8 +80,14 @@ export default function CinematicHero() {
       ref={heroRef}
       className="relative h-screen flex flex-col items-center justify-center overflow-hidden"
     >
-      {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-bg-noche to-bg-primario" />
+      {/* Background image (tenue) */}
+      <div
+        className="absolute inset-0 bg-cover bg-center opacity-30"
+        style={{ backgroundImage: "url('/fondoweb.png')" }}
+        aria-hidden
+      />
+      {/* Overlay oscuro para legibilidad del texto */}
+      <div className="absolute inset-0 bg-gradient-to-b from-bg-noche/85 to-bg-primario/90" />
 
       {/* Content */}
       <div className="relative z-10 text-center px-4">

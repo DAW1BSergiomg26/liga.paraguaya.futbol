@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { getNoticia } from "@/lib/api";
+import { htmlToText, sanitizeHtml } from "@/lib/html";
 
 function formatearFechaCompleta(iso: string): string {
   return new Date(iso).toLocaleDateString("es-PY", {
@@ -12,30 +13,6 @@ function formatearFechaCompleta(iso: string): string {
     month: "long",
     year: "numeric",
   });
-}
-
-// El contenido viene como HTML crudo del RSS. Lo sanitizamos en el navegador
-// (sin dependencias) para poder renderizarlo con formato sin riesgo XSS.
-function sanitizeHtml(html: string): string {
-  if (typeof window === "undefined") return html;
-  const doc = new DOMParser().parseFromString(html, "text/html");
-  doc
-    .querySelectorAll("script, style, iframe, object, embed")
-    .forEach((el) => el.remove());
-  doc.querySelectorAll("*").forEach((el) => {
-    Array.from(el.attributes).forEach((attr) => {
-      const name = attr.name.toLowerCase();
-      const value = attr.value.toLowerCase();
-      if (name.startsWith("on") || value.includes("javascript:")) {
-        el.removeAttribute(attr.name);
-      }
-    });
-    if (el.tagName.toLowerCase() === "a") {
-      const href = el.getAttribute("href") || "";
-      if (!/^https?:\/\//i.test(href)) el.removeAttribute("href");
-    }
-  });
-  return doc.body.innerHTML;
 }
 
 export default function NoticiaDetallePage() {
@@ -114,7 +91,7 @@ export default function NoticiaDetallePage() {
       )}
 
       {noticia.resumen && !noticia.contenido && (
-        <p className="text-texto-principal text-lg leading-relaxed">{noticia.resumen}</p>
+        <p className="text-texto-principal text-lg leading-relaxed">{htmlToText(noticia.resumen)}</p>
       )}
     </div>
   );

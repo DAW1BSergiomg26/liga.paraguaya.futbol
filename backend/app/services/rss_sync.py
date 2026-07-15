@@ -1,4 +1,6 @@
 import uuid
+import re
+import html
 import logging
 from datetime import datetime, timezone, timedelta
 
@@ -10,6 +12,23 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from backend.app.models.noticia import Noticia
 
 logger = logging.getLogger(__name__)
+
+
+def _html_to_plain(html_text: str, limit: int = 300) -> str:
+    """HTML crudo -> texto plano limpio (quita tags, decodifica entidades)."""
+    text = re.sub(r"<[^>]+>", "", html_text or "")
+    text = html.unescape(text)
+    text = re.sub(r"\s+", " ", text).strip()
+    if len(text) > limit:
+        text = text[:limit].rsplit(" ", 1)[0].rstrip() + "…"
+    return text
+
+
+def _clean_html(html_text: str) -> str | None:
+    """Decodifica entidades del HTML (&#8230; -> …, &ntilde; -> ñ) sin perder tags."""
+    if not html_text:
+        return None
+    return html.unescape(html_text)
 
 FUENTES_RSS = [
     {"nombre": "ABC Color Deportes", "url": "https://www.abc.com.py/arc/outboundfeeds/rss/deportes/"},
@@ -44,6 +63,15 @@ class RssSyncService:
             if hasattr(entry, "published_parsed") and entry.published_parsed:
                 pub_date = datetime(*entry.published_parsed[:6], tzinfo=timezone.utc)
 
+            summary_raw = getattr(entry, "summary", "") or ""
+            content_raw = ""
+            entry_content = getattr(entry, "content", None)
+            if isinstance(entry_content, list) and entry_content:
+                first = entry_content[0]
+                content_raw = (
+                    first.get("value", "") if hasattr(first, "get") else getattr(first, "value", "")
+                )
+
             imagen_url = None
             if hasattr(entry, "media_content") and entry.media_content:
                 imagen_url = entry.media_content[0].get("url")
@@ -55,12 +83,7 @@ class RssSyncService:
                         imagen_url = enc.get("href") or enc.get("url")
                         break
             if not imagen_url:
-                import re
-                summary = entry.get("summary", "")
-                content_text = ""
-                if hasattr(entry, "content") and entry.content:
-                    content_text = entry.content[0].get("value", "")
-                all_html = summary + content_text
+                all_html = summary_raw + content_raw
                 img_match = re.search(r'<img[^>]+src=["\']([^"\']+)["\']', all_html)
                 if img_match:
                     imagen_url = img_match.group(1)
@@ -74,7 +97,8 @@ class RssSyncService:
                 "fuente": nombre,
                 "url_original": entry.get("link", ""),
                 "pub_date": pub_date or datetime.now(timezone.utc),
-                "resumen": entry.get("summary", "")[:500],
+                "resumen": _html_to_plain(summary_raw),
+                "contenido": _clean_html(content_raw),
                 "imagen_url": imagen_url,
             })
         return items
@@ -97,6 +121,7 @@ class RssSyncService:
                     id=str(uuid.uuid4()),
                     titulo=item["titulo"],
                     resumen=item["resumen"],
+                    contenido=item.get("contenido"),
                     imagen_url=item["imagen_url"],
                     fuente=item["fuente"],
                     origen="rss",

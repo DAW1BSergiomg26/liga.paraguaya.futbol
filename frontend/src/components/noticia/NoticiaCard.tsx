@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Noticia } from "@/types";
+import { htmlToText } from "@/lib/html";
 
 function formatearFecha(iso: string): string {
   const d = new Date(iso);
@@ -88,7 +89,7 @@ export default function NoticiaCard({ noticia, variant = "normal" }: NoticiaCard
           {noticia.titulo}
         </h3>
         {noticia.resumen && !isCompact && (
-          <p className="text-texto-secundario text-sm mt-2 line-clamp-2">{noticia.resumen}</p>
+          <p className="text-texto-secundario text-sm mt-2 line-clamp-2">{htmlToText(noticia.resumen)}</p>
         )}
       </div>
     </Link>
