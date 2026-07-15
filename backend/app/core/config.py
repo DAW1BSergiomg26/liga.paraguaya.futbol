@@ -1,4 +1,8 @@
+from pathlib import Path
+
 from pydantic_settings import BaseSettings
+
+_DEFAULT_DB_PATH = Path(__file__).resolve().parent.parent.parent / "data" / "liga.db"
 
 
 class Settings(BaseSettings):
@@ -6,7 +10,7 @@ class Settings(BaseSettings):
     app_version: str = "0.6.0"
     debug: bool = True
 
-    database_url: str = "sqlite+aiosqlite:///./data/liga.db"
+    database_url: str = f"sqlite+aiosqlite:///{_DEFAULT_DB_PATH.as_posix()}"
     cors_origins: str = "http://localhost:3000,http://localhost:5173,https://frontend-ten-swart-85.vercel.app"
 
     api_football_key: str = ""
