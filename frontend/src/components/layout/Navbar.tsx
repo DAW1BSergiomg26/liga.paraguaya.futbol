@@ -29,7 +29,7 @@ function NavLink({ href, children, active, onClick }: { href: string; children: 
     <Link
       href={href}
       onClick={onClick}
-      className={`relative transition-colors duration-200 ${
+      className={`relative whitespace-nowrap transition-colors duration-200 ${
         active ? "text-apf-rojo" : "text-texto-secundario hover:text-white"
       }`}
     >
@@ -112,9 +112,10 @@ export default function Navbar() {
 
   return (
     <nav className="navbar-blur sticky top-0 z-50" style={{ borderBottom: "2px solid", borderImage: "linear-gradient(90deg, #CC001C, #FFFFFF, #00619E) 1" }}>
-      <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-        <Link href="/" className="text-xl font-bold tracking-tight relative">
-          ⚽ Liga PY
+      <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
+        <Link href="/" className="flex items-center gap-1.5 text-xl font-bold tracking-tight relative whitespace-nowrap">
+          <span aria-hidden>⚽</span>
+          <span>Liga PY</span>
           <span className="absolute -bottom-2 left-0 right-0 h-0.5 rounded" style={{ background: "linear-gradient(90deg, #CC001C, #FFFFFF, #00619E)" }} />
         </Link>
 
