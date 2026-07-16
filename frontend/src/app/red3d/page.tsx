@@ -315,7 +315,7 @@ export default function Red3DPage() {
                 <div className="flex items-start gap-3">
                   {selectedNode.escudo && (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={selectedNode.escudo} alt={selectedNode.name} className="w-14 h-14 object-contain rounded-lg bg-white/10 p-1 shadow" />
+                    <img src={selectedNode.escudo} alt={selectedNode.name} fetchPriority="high" className="w-14 h-14 object-contain rounded-lg bg-white/10 p-1 shadow" />
                   )}
                   <div className="flex-1">
                     <h3 className="text-texto-principal font-bold text-lg leading-tight">{selectedNode.name}</h3>
@@ -361,7 +361,7 @@ export default function Red3DPage() {
                   >
                     {c.escudo && (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={c.escudo} alt="" className="w-7 h-7 object-contain rounded bg-white/5 p-0.5" />
+                      <img src={c.escudo} alt="" fetchPriority="high" className="w-7 h-7 object-contain rounded bg-white/5 p-0.5" />
                     )}
                     <span className="text-sm text-texto-principal truncate">{c.name}</span>
                   </button>

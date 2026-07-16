@@ -129,6 +129,12 @@ export default function Graph3D({ data, autoRotate, onSelect, onReady }: Graph3D
     autoRotateRef.current = autoRotate;
   }, [autoRotate]);
 
+  // Precargar el módulo three/3d-force-graph apenas monta el componente,
+  // para adelantar la descarga y el parseo del chunk pesado (mejora LCP/TBT).
+  useEffect(() => {
+    void import("3d-force-graph");
+  }, []);
+
   useEffect(() => {
     if (!containerRef.current || graphRef.current) return;
     const el = containerRef.current;
