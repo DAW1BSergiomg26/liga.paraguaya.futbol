@@ -223,6 +223,7 @@ liga.paraguaya.futbol/
 - [x] Verificación Playwright desktop + mobile: canvas OK, 19 clubes en lista, **0 page errors**; solo `ERR_CONNECTION_REFUSED` del backend Koyeb dormido (no del grafo).
 - [x] PR #3 mergeado a `main` (`42d4fcd`): repara carga infinita + escudos reales.
 - [x] Commit `efcef15`: sección entendible + crash-proof + nombres visibles + panel explicativo. Pusheado a `main` → Vercel despliega solo.
+- [x] Click en fichaje (modo Mercado de Fichajes) abre drawer con origen→destino, inversión ($M), tipo y enlace "Ver ficha del jugador" → `/transferencias/[id]`. `Graph3D` expone `onLinkClick`; links de fichaje llevan `transferenciaId`/`tipo`/`monto`. Test frontend cubre el drawer (commit `dec58f3`).
 
 > Nota: el usuario reportó un botón "ISSUE" que daba el crash; no existe string "ISSUE" en el código fuente — probablemente UI de Vercel o confusión. El crash real estaba en `cameraPosition`/`flyTo` leyendo coords no inicializadas.
 
