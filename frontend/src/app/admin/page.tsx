@@ -17,22 +17,22 @@ export default function AdminLoginPage() {
 
   return (
     <div className="max-w-md mx-auto px-4 py-20">
-      <div className="p-8 rounded-2xl border border-white/10 bg-[#0a1628]/80">
+      <div className="p-8 rounded-2xl border border-borde-sutil bg-bg-secundario/80">
         <h1 className="text-2xl font-bold mb-6">Admin</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="text-sm text-gray-400 block mb-1">API Key</label>
+            <label className="text-sm text-texto-secundario block mb-1">API Key</label>
             <input
               type="password"
               value={key}
               onChange={(e) => setKey(e.target.value)}
-              className="w-full px-4 py-2 rounded-lg bg-[#1a2a3a] border border-white/10 text-white focus:outline-none focus:border-[#76e4f7]"
+              className="w-full px-4 py-2 rounded-lg bg-bg-terciario border border-borde-sutil text-white focus:outline-none focus:border-apf-rojo"
               placeholder="Ingresá tu API Key"
             />
           </div>
           <button
             type="submit"
-            className="w-full py-2 rounded-lg bg-[#76e4f7] text-black font-semibold hover:bg-[#5ac8df] transition"
+            className="w-full py-2 rounded-lg bg-apf-rojo text-black font-semibold hover:bg-apf-rojo-oscuro transition"
           >
             Ingresar
           </button>

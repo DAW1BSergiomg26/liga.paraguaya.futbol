@@ -1,9 +1,11 @@
 from collections.abc import AsyncIterator
 
-from fastapi import Depends, HTTPException, Header, status
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.app.core.database import async_session
+from backend.app.core.security import decode_access_token
 from backend.app.models.user import User
 from backend.app.services.user_service import UserService
 
@@ -18,14 +20,40 @@ async def get_db() -> AsyncIterator[AsyncSession]:
             raise
 
 
+bearer_scheme = HTTPBearer(auto_error=False)
+
+
 async def get_current_user(
-    authorization: str = Header(""),
+    credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
     db: AsyncSession = Depends(get_db),
-) -> User:
-    if not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing Bearer token")
-    token = authorization[7:]
-    user = await UserService.get_by_token(db, token)
+):
+    if not credentials:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="No autenticado")
+
+    token = credentials.credentials
+    payload = decode_access_token(token)
+    if not payload:
+        svc = UserService(db)
+        user = await svc.get_by_token(token)
+        if user:
+            return user
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token inválido o expirado")
+
+    user_id = payload.get("sub")
+    if not user_id:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token inválido")
+
+    svc = UserService(db)
+    user = await svc.get_by_id(user_id)
     if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Usuario no encontrado")
+
     return user
+
+
+async def get_current_admin(
+    current_user: User = Depends(get_current_user),
+):
+    if not current_user.is_admin:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Se requieren permisos de administrador")
+    return current_user

@@ -1,27 +1,41 @@
-# Task 1 Report: Backend Models (MensajeChat + PushSubscription)
+# Task 1: Transferencia Model + Migration — Report
 
-## Status: DONE
+**Status:** DONE
+**Commit:** b399cfd — feat: add Transferencia model and migration
 
-## What Was Implemented
-- `backend/app/models/mensaje_chat.py` — `MensajeChat` model with fields: id, partido_id (FK→partidos), user_id (FK→users), mensaje (Text), created_at. Relationships to Partido and User.
-- `backend/app/models/push_subscription.py` — `PushSubscription` model with fields: id, user_id (FK→users), endpoint (Text), p256dh, auth, created_at.
-- Updated `backend/app/models/__init__.py` to export both new models.
+## What was done
 
-## Tests
-- `python -c "from backend.app.models.mensaje_chat import MensajeChat; from backend.app.models.push_subscription import PushSubscription"` — imports OK
-- `python -m pytest backend/tests/ -v` — 18/18 passed (same as baseline, 14 deprecation warnings for `utcnow()` in existing code)
+1. **Created `backend/app/models/transferencia.py`** — SQLAlchemy model with:
+   - `id` (UUID string, primary key)
+   - `jugador_nombre`, `jugador_posicion` (player info)
+   - `club_origen_id`, `club_destino_id` (foreign keys to `clubes` table)
+   - `fecha` (transfer date)
+   - `tipo` (compra/prestamo/libre/cesion/refuerzo)
+   - `estado` (confirmada/rumor/oficial/desmentida)
+   - `monto`, `duracion_meses` (financial details)
+   - `fuente_url`, `fuente_nombre` (source tracking)
+   - `verification_level`, `is_active` (status fields)
+   - `created_at`, `updated_at` (timestamps)
+   - `to_dict()` method
 
-## Files Changed
-- `backend/app/models/mensaje_chat.py` (created)
-- `backend/app/models/push_subscription.py` (created)
-- `backend/app/models/__init__.py` (modified)
+2. **Updated `backend/app/models/__init__.py`** — Registered `Transferencia` in imports and `__all__`
 
-## Self-Review
-- Models follow the exact code from the brief.
-- Model style uses classic `Column` style (matching the brief) vs the `Mapped`/`mapped_column` style used in other existing models — this is intentional as per task spec.
-- Foreign keys reference existing tables (`partidos`, `users`).
-- Relationships use `lazy="selectin"` matching project conventions.
-- UUID import is included but not used in model definitions (used at instance creation layer).
+3. **Created `backend/alembic/versions/008_add_transferencias.py`** — Migration that:
+   - Creates `transferencias` table with all 16 columns
+   - Creates 4 indexes (club_origen_id, club_destino_id, fecha, estado)
+   - Chains from revision `007`
+
+4. **Ran migration** — Successfully applied: `Running upgrade 007 -> 008, create transferencias table`
+
+5. **Verified table** — All 16 columns created correctly in `backend/data/liga.db`
+
+## Verification
+
+- Migration ran without errors
+- SQLite table created with correct schema
+- Model imports correctly from `backend.app.models`
+- Commit created successfully
 
 ## Concerns
-- None.
+
+None — task completed as specified in the plan.

@@ -1,0 +1,53 @@
+# Koyeb App Spec - Backend liga.paraguaya.futbol
+# Deploy GRATIS sin tarjeta: https://app.koyeb.com
+# Este archivo permite crear el servicio con "Create App" > "With YAML".
+#
+# IMPORTANTE (leer antes de crear la cuenta):
+#   - Koyeb free NO requiere tarjeta de credito.
+#   - El backend usa SQLite por defecto si no seteas DATABASE_URL.
+#     Para produccion real usá Neon Postgres gratis (neon.tech, sin tarjeta)
+#     y pegá la connection string en DATABASE_URL (postgresql://...).
+#   - El codigo acepta "postgres://" y lo convierte a postgresql+asyncpg://.
+#
+# Pasos resumidos:
+#   1. Crear cuenta en app.koyeb.com (sin tarjeta).
+#   2. Create App > "With YAML" > pegar este archivo (o seleccionar el repo).
+#   3. Setear las env vars (DATABASE_URL opcional; el resto abajo).
+#   4. El puerto lo toma de $PORT (el Dockerfile ya usa ${PORT:-8001}).
+#   5. Health check: GET /health (devuelve 200).
+#   6. Copiar la "Public URL" (https://....koyeb.app) y usarla en Vercel
+#      como NEXT_PUBLIC_API_URL.
+
+name: liga-backend
+services:
+  - name: api
+    type: web
+    protocol: http
+    ports:
+      - port: 8001
+        type: http
+    docker:
+      dockerfile: ./Dockerfile.backend
+    # NOTA: las variables SENSIBLES (ADMIN_API_KEY, JWT_SECRET, DATABASE_URL)
+    # NO se hardcodean aqui. Se setean en el dashboard de Koyeb (secrets) o se
+    # sobreescriben al crear el App. Lo que va abajo son solo defaults publicos.
+    env:
+      - key: PORT
+        value: "8001"
+      # SECRETO: setear en dashboard de Koyeb como secret (no en este archivo).
+      - key: ADMIN_API_KEY
+        value: ""
+      - key: CORS_ORIGINS
+        value: http://localhost:3000,https://frontend-ten-swart-85.vercel.app
+      - key: FOOTBALL_DATA_API_KEY
+        value: ""
+      # OBLIGATORIA para produccion real: connection string de Neon Postgres.
+      # Setear en el dashboard de Koyeb (secret) en lugar de aqui:
+      # - key: DATABASE_URL
+      #   value: postgresql://user:pass@host/db?sslmode=require
+    health_check:
+      path: /health
+      initial_delay: 30
+    scaling:
+      min_instances: 0
+      max_instances: 1

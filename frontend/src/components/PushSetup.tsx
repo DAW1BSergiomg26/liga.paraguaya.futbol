@@ -23,7 +23,7 @@ export default function PushSetup() {
           userVisibleOnly: true,
           applicationServerKey: keyBytes,
         });
-        const token = localStorage.getItem("auth_token");
+        const token = localStorage.getItem("user_token");
         if (!token) return;
         await fetch(`${apiUrl}/api/v1/notificaciones/suscribir`, {
           method: "POST",

@@ -1,47 +1,54 @@
-import re
-import secrets
-from typing import Optional
+import uuid
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from backend.app.models.user import User
-from backend.app.schemas.user import UserLogin, UserOut
+from backend.app.core.security import hash_password, verify_password, create_access_token
 
 
 class UserService:
+    def __init__(self, db: AsyncSession):
+        self.db = db
 
-    @staticmethod
-    def _generate_username(email: str) -> str:
-        base = email.split("@")[0].lower()
-        base = re.sub(r"[^a-z0-9]", "", base)[:20]
-        return f"{base}_{secrets.token_hex(3)}"
+    async def register(self, email: str, name: str, password: str) -> dict:
+        existing = await self.db.execute(select(User).where(User.email == email))
+        if existing.scalar_one_or_none():
+            raise ValueError("El email ya está registrado")
 
-    @staticmethod
-    async def upsert(db: AsyncSession, data: UserLogin) -> UserOut:
-        result = await db.execute(select(User).where(User.email == data.email))
+        # Check if this is the first user (becomes admin)
+        count_result = await self.db.execute(select(User))
+        is_first = len(count_result.scalars().all()) == 0
+
+        user = User(
+            id=str(uuid.uuid4()),
+            email=email,
+            name=name,
+            username=email.split("@")[0],
+            hashed_password=hash_password(password),
+            is_admin=is_first,
+        )
+        self.db.add(user)
+        await self.db.commit()
+        await self.db.refresh(user)
+
+        token = create_access_token({"sub": user.id, "email": user.email})
+        return {"user": user, "token": token}
+
+    async def login(self, email: str, password: str) -> dict:
+        result = await self.db.execute(select(User).where(User.email == email))
         user = result.scalar_one_or_none()
-        if user:
-            user.name = data.name
-            user.image = data.image
-            user.generate_token()
-        else:
-            user_id = f"{data.provider}_{data.provider_id or data.email.split('@')[0]}"
-            user = User(
-                id=user_id,
-                email=data.email,
-                name=data.name,
-                image=data.image,
-                username=UserService._generate_username(data.email),
-                provider=data.provider,
-                provider_id=data.provider_id,
-            )
-            user.generate_token()
-            db.add(user)
-        await db.flush()
-        return UserOut.model_validate(user)
+        if not user or not user.hashed_password:
+            raise ValueError("Credenciales inválidas")
+        if not verify_password(password, user.hashed_password):
+            raise ValueError("Credenciales inválidas")
 
-    @staticmethod
-    async def get_by_token(db: AsyncSession, token: str) -> Optional[User]:
-        result = await db.execute(select(User).where(User.token == token))
+        token = create_access_token({"sub": user.id, "email": user.email})
+        return {"user": user, "token": token}
+
+    async def get_by_id(self, user_id: str) -> User | None:
+        result = await self.db.execute(select(User).where(User.id == user_id))
+        return result.scalar_one_or_none()
+
+    async def get_by_token(self, token: str) -> User | None:
+        result = await self.db.execute(select(User).where(User.token == token))
         return result.scalar_one_or_none()

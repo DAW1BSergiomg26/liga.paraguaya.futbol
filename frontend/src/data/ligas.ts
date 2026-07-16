@@ -1,0 +1,31 @@
+export interface Liga {
+  id: string;
+  nombre: string;
+  icono: string;
+  urlResultados: string;
+  urlPosiciones: string;
+  urlCalendario: string;
+}
+
+export const ligas: Liga[] = [
+  { id: "mundial", nombre: "Mundial 2026", icono: "🏆", urlResultados: "https://espndeportes.espn.com/futbol/resultados/_/liga/fifa.world", urlPosiciones: "https://espndeportes.espn.com/futbol/posiciones/_/liga/fifa.world", urlCalendario: "https://espndeportes.espn.com/futbol/calendario/_/liga/fifa.world" },
+  { id: "libertadores", nombre: "CONMEBOL Libertadores", icono: "🏆", urlResultados: "https://espndeportes.espn.com/futbol/resultados/_/liga/conmebol.libertadores", urlPosiciones: "https://espndeportes.espn.com/futbol/posiciones/_/liga/conmebol.libertadores", urlCalendario: "https://espndeportes.espn.com/futbol/calendario/_/liga/conmebol.libertadores" },
+  { id: "sudamericana", nombre: "CONMEBOL Sudamericana", icono: "🏆", urlResultados: "https://espndeportes.espn.com/futbol/resultados/_/liga/conmebol.sudamericana", urlPosiciones: "https://espndeportes.espn.com/futbol/posiciones/_/liga/conmebol.sudamericana", urlCalendario: "https://espndeportes.espn.com/futbol/calendario/_/liga/conmebol.sudamericana" },
+  { id: "liga-py", nombre: "Liga Paraguaya", icono: "🇵🇾", urlResultados: "https://espndeportes.espn.com/futbol/resultados/_/liga/par.1", urlPosiciones: "https://espndeportes.espn.com/futbol/posiciones/_/liga/par.1", urlCalendario: "https://espndeportes.espn.com/futbol/calendario/_/liga/par.1" },
+  { id: "liga-arg", nombre: "Liga Profesional Argentina", icono: "🇦🇷", urlResultados: "https://espndeportes.espn.com/futbol/resultados/_/liga/arg.1", urlPosiciones: "https://espndeportes.espn.com/futbol/posiciones/_/liga/arg.1", urlCalendario: "https://espndeportes.espn.com/futbol/calendario/_/liga/arg.1" },
+  { id: "la-liga", nombre: "LALIGA", icono: "🇪🇸", urlResultados: "https://espndeportes.espn.com/futbol/resultados/_/liga/esp.1", urlPosiciones: "https://espndeportes.espn.com/futbol/posiciones/_/liga/esp.1", urlCalendario: "https://espndeportes.espn.com/futbol/calendario/_/liga/esp.1" },
+  { id: "premier", nombre: "Premier League", icono: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", urlResultados: "https://espndeportes.espn.com/futbol/resultados/_/liga/eng.1", urlPosiciones: "https://espndeportes.espn.com/futbol/posiciones/_/liga/eng.1", urlCalendario: "https://espndeportes.espn.com/futbol/calendario/_/liga/eng.1" },
+  { id: "serie-a", nombre: "Serie A", icono: "🇮🇹", urlResultados: "https://espndeportes.espn.com/futbol/resultados/_/liga/ita.1", urlPosiciones: "https://espndeportes.espn.com/futbol/posiciones/_/liga/ita.1", urlCalendario: "https://espndeportes.espn.com/futbol/calendario/_/liga/ita.1" },
+  { id: "bundesliga", nombre: "Bundesliga", icono: "🇩🇪", urlResultados: "https://espndeportes.espn.com/futbol/resultados/_/liga/ger.1", urlPosiciones: "https://espndeportes.espn.com/futbol/posiciones/_/liga/ger.1", urlCalendario: "https://espndeportes.espn.com/futbol/calendario/_/liga/ger.1" },
+  { id: "ligue-1", nombre: "Ligue 1", icono: "🇫🇷", urlResultados: "https://espndeportes.espn.com/futbol/resultados/_/liga/fra.1", urlPosiciones: "https://espndeportes.espn.com/futbol/posiciones/_/liga/fra.1", urlCalendario: "https://espndeportes.espn.com/futbol/calendario/_/liga/fra.1" },
+  { id: "eredivisie", nombre: "Eredivisie", icono: "🇳🇱", urlResultados: "https://espndeportes.espn.com/futbol/resultados/_/liga/ned.1", urlPosiciones: "https://espndeportes.espn.com/futbol/posiciones/_/liga/ned.1", urlCalendario: "https://espndeportes.espn.com/futbol/calendario/_/liga/ned.1" },
+  { id: "liga-portugal", nombre: "Liga Portugal", icono: "🇵🇹", urlResultados: "https://espndeportes.espn.com/futbol/resultados/_/liga/por.1", urlPosiciones: "https://espndeportes.espn.com/futbol/posiciones/_/liga/por.1", urlCalendario: "https://espndeportes.espn.com/futbol/calendario/_/liga/por.1" },
+  { id: "mls", nombre: "Major League Soccer", icono: "🇺🇸", urlResultados: "https://espndeportes.espn.com/futbol/resultados/_/liga/usa.1", urlPosiciones: "https://espndeportes.espn.com/futbol/posiciones/_/liga/usa.1", urlCalendario: "https://espndeportes.espn.com/futbol/calendario/_/liga/usa.1" },
+  { id: "liga-mx", nombre: "Liga MX", icono: "🇲🇽", urlResultados: "https://espndeportes.espn.com/futbol/resultados/_/liga/mex.1", urlPosiciones: "https://espndeportes.espn.com/futbol/posiciones/_/liga/mex.1", urlCalendario: "https://espndeportes.espn.com/futbol/calendario/_/liga/mex.1" },
+  { id: "brasileirao", nombre: "Campeonato Brasileño", icono: "🇧🇷", urlResultados: "https://espndeportes.espn.com/futbol/resultados/_/liga/bra.1", urlPosiciones: "https://espndeportes.espn.com/futbol/posiciones/_/liga/bra.1", urlCalendario: "https://espndeportes.espn.com/futbol/calendario/_/liga/bra.1" },
+  { id: "chile", nombre: "Liga Chilena", icono: "🇨🇱", urlResultados: "https://espndeportes.espn.com/futbol/resultados/_/liga/chi.1", urlPosiciones: "https://espndeportes.espn.com/futbol/posiciones/_/liga/chi.1", urlCalendario: "https://espndeportes.espn.com/futbol/calendario/_/liga/chi.1" },
+  { id: "uruguay", nombre: "Campeonato Uruguayo", icono: "🇺🇾", urlResultados: "https://espndeportes.espn.com/futbol/resultados/_/liga/uru.1", urlPosiciones: "https://espndeportes.espn.com/futbol/posiciones/_/liga/uru.1", urlCalendario: "https://espndeportes.espn.com/futbol/calendario/_/liga/uru.1" },
+  { id: "colombia", nombre: "Colombia Primera A", icono: "🇨🇴", urlResultados: "https://espndeportes.espn.com/futbol/resultados/_/liga/col.1", urlPosiciones: "https://espndeportes.espn.com/futbol/posiciones/_/liga/col.1", urlCalendario: "https://espndeportes.espn.com/futbol/calendario/_/liga/col.1" },
+  { id: "ucl", nombre: "UEFA Champions League", icono: "⭐", urlResultados: "https://espndeportes.espn.com/futbol/resultados/_/liga/uefa.champions", urlPosiciones: "https://espndeportes.espn.com/futbol/posiciones/_/liga/uefa.champions", urlCalendario: "https://espndeportes.espn.com/futbol/calendario/_/liga/uefa.champions" },
+  { id: "uel", nombre: "UEFA Europa League", icono: "⭐", urlResultados: "https://espndeportes.espn.com/futbol/resultados/_/liga/uefa.europa", urlPosiciones: "https://espndeportes.espn.com/futbol/posiciones/_/liga/uefa.europa", urlCalendario: "https://espndeportes.espn.com/futbol/calendario/_/liga/uefa.europa" },
+];

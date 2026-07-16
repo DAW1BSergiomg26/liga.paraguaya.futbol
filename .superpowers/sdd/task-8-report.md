@@ -1,16 +1,13 @@
-# Task 8 Report: Service Worker + PushSetup + Layout Registration
+# Task 8: TransferCard Component — Report
 
-## Status: ✓ Complete
+- **Status:** DONE
+- **Commit:** `cbd07ec` — `feat: add TransferCard, VerificationBadge, TipoBadge components`
+- **Build result:** 0 errors (Next.js 16.2.10, TypeScript compiled successfully)
 
-## Files Created
-- `frontend/public/sw.js` — service worker handling push events and notification clicks
-- `frontend/src/components/PushSetup.tsx` — client component that registers SW and subscribes to push
+## Files created
+- `frontend/src/components/transferencia/VerificationBadge.tsx`
+- `frontend/src/components/transferencia/TipoBadge.tsx`
+- `frontend/src/components/transferencia/TransferCard.tsx`
 
-## Files Modified
-- `frontend/src/app/layout.tsx` — added import and `<PushSetup />` (no `"use client"` added; server component preserved)
-
-## Verification
-- `npm run build` passed (TypeScript compiled successfully, all routes generated)
-
-## Commit
-`f68eaf8` — `feat: add service worker and push subscription setup`
+## Concerns
+- None.

@@ -10,7 +10,9 @@ import Pagination from "@/components/Pagination";
 export default function AdminPartidosPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const [apiKey, setApiKey] = useState<string | null>(null);
+  const [apiKey] = useState<string | null>(() => {
+    try { return localStorage.getItem("admin_api_key"); } catch { return null; }
+  });
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({ goles_local: "", goles_visitante: "", estado: "programado" });
   const [filtroTorneo, setFiltroTorneo] = useState("");
@@ -21,10 +23,8 @@ export default function AdminPartidosPage() {
   const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
   useEffect(() => {
-    const key = localStorage.getItem("admin_api_key");
-    if (!key) router.push("/admin");
-    else setApiKey(key);
-  }, [router]);
+    if (!apiKey) router.push("/admin");
+  }, [apiKey, router]);
 
   const showToast = useCallback((type: "success" | "error", message: string) => {
     setToast({ type, message });
@@ -103,7 +103,7 @@ export default function AdminPartidosPage() {
         <h1 className="text-3xl font-bold">Admin - Partidos</h1>
         <button
           onClick={() => { localStorage.removeItem("admin_api_key"); router.push("/admin"); }}
-          className="text-sm text-gray-400 hover:text-white transition"
+          className="text-sm text-texto-secundario hover:text-white transition"
         >
           Cerrar sesión
         </button>
@@ -123,7 +123,7 @@ export default function AdminPartidosPage() {
         <select
           value={filtroTorneo}
           onChange={(e) => handleFilterChange("torneo", e.target.value)}
-          className="px-3 py-2 rounded-lg bg-[#1a2a3a] border border-white/10 text-white text-sm"
+          className="px-3 py-2 rounded-lg bg-bg-terciario border border-borde-sutil text-white text-sm"
         >
           <option value="">Todos los torneos</option>
           <option value="Apertura 2026">Apertura 2026</option>
@@ -132,7 +132,7 @@ export default function AdminPartidosPage() {
         <select
           value={filtroEstado}
           onChange={(e) => handleFilterChange("estado", e.target.value)}
-          className="px-3 py-2 rounded-lg bg-[#1a2a3a] border border-white/10 text-white text-sm"
+          className="px-3 py-2 rounded-lg bg-bg-terciario border border-borde-sutil text-white text-sm"
         >
           <option value="">Todos los estados</option>
           <option value="programado">Programado</option>
@@ -143,20 +143,24 @@ export default function AdminPartidosPage() {
       {error && <div className="mb-4 p-3 rounded-lg bg-red-900/30 text-red-300 text-sm">{error}</div>}
 
       {isLoading ? (
-        <div className="text-center py-12 text-gray-400">Cargando partidos...</div>
+        <div className="space-y-2">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="h-16 bg-white/5 rounded-xl animate-pulse" />
+          ))}
+        </div>
       ) : (
         <>
           <div className="space-y-2">
             {(pageData?.data || []).map((p) => (
               <div
                 key={p.id}
-                className={`p-4 rounded-xl border border-white/10 transition-colors ${
-                  editingId === p.id ? "bg-[#0a2a1a]/60 border-green-700/30" : "bg-[#0a1628]/60"
+                className={`p-4 rounded-xl border border-borde-sutil transition-colors ${
+                  editingId === p.id ? "bg-[#0a2a1a]/60 border-green-700/30" : "bg-bg-secundario/60"
                 }`}
               >
                 {editingId === p.id ? (
                   <div className="space-y-3">
-                    <div className="text-sm text-gray-400">
+                    <div className="text-sm text-texto-secundario">
                       {p.torneo} · Jornada {p.jornada} · {new Date(p.fecha).toLocaleDateString("es-PY")}
                     </div>
                     <div className="flex items-center gap-4">
@@ -164,15 +168,15 @@ export default function AdminPartidosPage() {
                       <input
                         type="number"
                         min="0"
-                        className="w-16 px-3 py-2 rounded-lg bg-[#1a2a3a] border border-white/10 text-white text-center"
+                        className="w-16 px-3 py-2 rounded-lg bg-bg-terciario border border-borde-sutil text-white text-center"
                         value={form.goles_local}
                         onChange={(e) => setForm({ ...form, goles_local: e.target.value })}
                       />
-                      <span className="text-gray-400">vs</span>
+                      <span className="text-texto-secundario">vs</span>
                       <input
                         type="number"
                         min="0"
-                        className="w-16 px-3 py-2 rounded-lg bg-[#1a2a3a] border border-white/10 text-white text-center"
+                        className="w-16 px-3 py-2 rounded-lg bg-bg-terciario border border-borde-sutil text-white text-center"
                         value={form.goles_visitante}
                         onChange={(e) => setForm({ ...form, goles_visitante: e.target.value })}
                       />
@@ -180,7 +184,7 @@ export default function AdminPartidosPage() {
                       <select
                         value={form.estado}
                         onChange={(e) => setForm({ ...form, estado: e.target.value })}
-                        className="px-3 py-2 rounded-lg bg-[#1a2a3a] border border-white/10 text-white text-sm"
+                        className="px-3 py-2 rounded-lg bg-bg-terciario border border-borde-sutil text-white text-sm"
                       >
                         <option value="programado">Programado</option>
                         <option value="finalizado">Finalizado</option>
@@ -188,13 +192,13 @@ export default function AdminPartidosPage() {
                       <button
                         onClick={() => handleSave(p.id)}
                         disabled={saving}
-                        className="px-4 py-2 rounded-lg bg-[#76e4f7] text-black font-semibold text-sm hover:bg-[#5ac8df] transition disabled:opacity-50"
+                        className="px-4 py-2 rounded-lg bg-apf-rojo text-black font-semibold text-sm hover:bg-apf-rojo-oscuro transition disabled:opacity-50"
                       >
                         {saving ? "Guardando..." : "Guardar"}
                       </button>
                       <button
                         onClick={() => setEditingId(null)}
-                        className="px-4 py-2 rounded-lg border border-white/10 text-gray-400 text-sm hover:text-white transition"
+                        className="px-4 py-2 rounded-lg border border-borde-sutil text-texto-secundario text-sm hover:text-white transition"
                       >
                         Cancelar
                       </button>
@@ -211,7 +215,7 @@ export default function AdminPartidosPage() {
                         <span className="text-white font-medium w-40">{clubMap.get(p.visitante_id) || p.visitante_id}</span>
                       </div>
                       <div className="flex items-center gap-3 text-sm">
-                        <span className="text-gray-500">{p.torneo} · J{p.jornada}</span>
+                        <span className="text-texto-apagado">{p.torneo} · J{p.jornada}</span>
                         <span className={`px-2 py-0.5 rounded-full text-xs ${
                           p.estado === "finalizado"
                             ? "bg-green-900/30 text-green-300"
@@ -219,7 +223,7 @@ export default function AdminPartidosPage() {
                         }`}>
                           {p.estado}
                         </span>
-                        <span className="text-[#76e4f7] text-xs">Editar</span>
+                        <span className="text-apf-rojo text-xs">Editar</span>
                       </div>
                     </div>
                   </button>

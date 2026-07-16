@@ -1,116 +1,47 @@
-# Task 2: Chat Schema + Service
+### Task 2: Bugfix — Footer roto
 
-## Files to Create
-- `backend/app/schemas/chat.py`
-- `backend/app/services/chat_service.py`
+**Files:**
+- Modify: `frontend/src/components/layout/Footer.tsx`
+- Modify: `frontend/src/app/layout.tsx` (si es necesario)
 
-## Exact Code
+**Bug:** El footer se ve descuadrado, texto solapado y línea horizontal cortando el contenido.
 
-### backend/app/schemas/chat.py
-```python
-from datetime import datetime
+**Análisis:** El footer usa `borderTop: "2px solid"` + `borderImage` con gradiente. `borderImage` anula el borde normal, causando renderizado inconsistente. Además, la línea de gradiente puede renderizarse mal en algunos browsers porque `borderImage` y `borderTop` juntos son conflictivos.
 
-from pydantic import BaseModel, Field
+- [ ] **Step 1: Corregir Footer.tsx**
 
+Reemplazar el `style` inline problemático con un `::after` pseudo-elemento usando Tailwind:
 
-class MensajeChatCreate(BaseModel):
-    contenido: str = Field(..., min_length=1, max_length=500)
-
-
-class MensajeChatOut(BaseModel):
-    id: str
-    partido_id: str
-    user_id: str
-    username: str = ""
-    nombre: str = ""
-    imagen: str = ""
-    mensaje: str
-    created_at: datetime
-
-    class Config:
-        from_attributes = True
+```tsx
+export default function Footer() {
+  return (
+    <footer className="navbar-blur mt-auto">
+      <div className="relative max-w-6xl mx-auto px-4 py-6 text-center text-sm text-texto-apagado">
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-apf-rojo via-white to-apf-azul" />
+        <p>liga.paraguaya.futbol — Proyecto de datos y seguimiento del fútbol paraguayo</p>
+        <p className="mt-1">
+          <a href="https://github.com/usuario/liga.paraguaya.futbol" className="hover:text-texto-secundario transition" target="_blank" rel="noopener noreferrer">
+            GitHub
+          </a>
+        </p>
+      </div>
+    </footer>
+  );
+}
 ```
 
-### backend/app/services/chat_service.py
-```python
-import uuid
-from datetime import datetime, timezone
+- [ ] **Step 2: Build para verificar**
 
-from sqlalchemy import select, func
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from backend.app.models.mensaje_chat import MensajeChat
-from backend.app.schemas.chat import MensajeChatCreate, MensajeChatOut
-
-
-class ChatService:
-
-    @staticmethod
-    async def guardar(
-        db: AsyncSession, partido_id: str, user_id: str, data: MensajeChatCreate
-    ) -> MensajeChatOut:
-        msg_id = f"msg_{uuid.uuid4().hex[:12]}"
-        msg = MensajeChat(
-            id=msg_id,
-            partido_id=partido_id,
-            user_id=user_id,
-            mensaje=data.contenido,
-            created_at=datetime.now(timezone.utc),
-        )
-        db.add(msg)
-        await db.flush()
-        await db.refresh(msg, ["user"])
-        return MensajeChatOut(
-            id=msg.id,
-            partido_id=msg.partido_id,
-            user_id=msg.user_id,
-            username=msg.user.username if msg.user else "",
-            nombre=msg.user.name if msg.user else "",
-            imagen=msg.user.image if msg.user else "",
-            mensaje=msg.mensaje,
-            created_at=msg.created_at,
-        )
-
-    @staticmethod
-    async def obtener_historial(
-        db: AsyncSession, partido_id: str, limit: int = 50, offset: int = 0
-    ) -> list[MensajeChatOut]:
-        stmt = (
-            select(MensajeChat)
-            .where(MensajeChat.partido_id == partido_id)
-            .order_by(MensajeChat.created_at.desc())
-            .offset(offset)
-            .limit(limit)
-        )
-        result = await db.execute(stmt)
-        msgs = result.scalars().all()
-        out = []
-        for msg in msgs:
-            out.append(
-                MensajeChatOut(
-                    id=msg.id,
-                    partido_id=msg.partido_id,
-                    user_id=msg.user_id,
-                    username=msg.user.username if msg.user else "",
-                    nombre=msg.user.name if msg.user else "",
-                    imagen=msg.user.image if msg.user else "",
-                    mensaje=msg.mensaje,
-                    created_at=msg.created_at,
-                )
-            )
-        return out[::-1]  # oldest first for frontend
-```
-
-## Global Constraints
-- `id` pattern: `f"msg_{uuid.uuid4().hex[:12]}"`
-- Token auth reuses `get_current_user` dependency from `backend/app/core/dependencies.py`
-- Follow existing service patterns in `backend/app/services/`
-
-## Commit
 ```bash
-git add backend/app/schemas/chat.py backend/app/services/chat_service.py
-git commit -m "feat: add chat schema and service"
+cd frontend && npm run build
 ```
 
-## Report File
-`.superpowers/sdd/task-2-report.md`
+- [ ] **Step 3: Commit**
+
+```bash
+git add frontend/src/components/layout/Footer.tsx
+git commit -m "fix: reemplazar borderImage conflictiva por gradiente con pseudo-elemento en footer"
+```
+
+---
+

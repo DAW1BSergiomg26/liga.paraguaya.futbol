@@ -1,0 +1,18 @@
+[
+  { "id": "gol-01", "nombre": "Derlis González", "club_id": "olimpia", "goles": 14, "asistencias": 5, "torneo": "Apertura 2026", "temporada": "2026" },
+  { "id": "gol-02", "nombre": "Óscar Cardozo", "club_id": "libertad", "goles": 12, "asistencias": 3, "torneo": "Apertura 2026", "temporada": "2026" },
+  { "id": "gol-03", "nombre": "Fernando Fernández", "club_id": "cerro-porteno", "goles": 11, "asistencias": 4, "torneo": "Apertura 2026", "temporada": "2026" },
+  { "id": "gol-04", "nombre": "Gustavo Aguilar", "club_id": "nacional", "goles": 9, "asistencias": 6, "torneo": "Apertura 2026", "temporada": "2026" },
+  { "id": "gol-05", "nombre": "Mathías Espinoza", "club_id": "guarani", "goles": 9, "asistencias": 2, "torneo": "Apertura 2026", "temporada": "2026" },
+  { "id": "gol-06", "nombre": "Roque Santa Cruz", "club_id": "olimpia", "goles": 8, "asistencias": 1, "torneo": "Apertura 2026", "temporada": "2026" },
+  { "id": "gol-07", "nombre": "Lorenzo Melgarejo", "club_id": "libertad", "goles": 7, "asistencias": 5, "torneo": "Apertura 2026", "temporada": "2026" },
+  { "id": "gol-08", "nombre": "Iván Franco", "club_id": "sol-de-america", "goles": 7, "asistencias": 3, "torneo": "Apertura 2026", "temporada": "2026" },
+  { "id": "gol-09", "nombre": "Richard Ortiz", "club_id": "nacional", "goles": 6, "asistencias": 4, "torneo": "Apertura 2026", "temporada": "2026" },
+  { "id": "gol-10", "nombre": "Antonio Galeano", "club_id": "olimpia", "goles": 6, "asistencias": 2, "torneo": "Apertura 2026", "temporada": "2026" },
+  { "id": "gol-11", "nombre": "Alan Rodríguez", "club_id": "cerro-porteno", "goles": 5, "asistencias": 4, "torneo": "Apertura 2026", "temporada": "2026" },
+  { "id": "gol-12", "nombre": "Diego Gómez", "club_id": "libertad", "goles": 5, "asistencias": 3, "torneo": "Apertura 2026", "temporada": "2026" },
+  { "id": "gol-13", "nombre": "Matías Rojas", "club_id": "ameliano", "goles": 4, "asistencias": 5, "torneo": "Apertura 2026", "temporada": "2026" },
+  { "id": "gol-14", "nombre": "Fabián Cano", "club_id": "guarani", "goles": 4, "asistencias": 2, "torneo": "Apertura 2026", "temporada": "2026" },
+  { "id": "gol-15", "nombre": "Héctor Villalba", "club_id": "san-lorenzo", "goles": 4, "asistencias": 1, "torneo": "Apertura 2026", "temporada": "2026" },
+  { "id": "gol-16", "nombre": "Julio César Enciso", "club_id": "luqueno", "goles": 3, "asistencias": 6, "torneo": "Apertura 2026", "temporada": "2026" }
+]

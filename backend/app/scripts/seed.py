@@ -7,8 +7,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.app.core.database import async_session, init_db
 from backend.app.models.club import Club
+from backend.app.models.goleador import Goleador
 from backend.app.models.partido import Partido
 from backend.app.models.tabla import TablaPosicion
+from backend.app.models.transferencia import Transferencia
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
 
@@ -31,7 +33,7 @@ async def seed_clubes(db: AsyncSession):
         club = existing.scalar_one_or_none()
         if club:
             changed = False
-            for field in ("sitio_web", "descripcion", "titulos_liga", "titulos_info"):
+            for field in ("sitio_web", "descripcion", "titulos_liga", "titulos_info", "titulos_internacionales"):
                 val = item.get(field)
                 if val is not None and getattr(club, field, None) != val:
                     setattr(club, field, val)
@@ -55,6 +57,7 @@ async def seed_clubes(db: AsyncSession):
             descripcion=item.get("descripcion", ""),
             titulos_liga=item.get("titulos_liga", 0),
             titulos_info=item.get("titulos_info", []),
+            titulos_internacionales=item.get("titulos_internacionales", []),
         )
         db.add(club)
         count_new += 1
@@ -121,6 +124,71 @@ async def seed_tabla(db: AsyncSession):
     return count
 
 
+async def seed_goleadores(db: AsyncSession):
+    data = load_json("goleadores_demo.json")
+    count_new = 0
+    count_upd = 0
+    for item in data:
+        existing = await db.execute(select(Goleador).where(Goleador.id == item["id"]))
+        g = existing.scalar_one_or_none()
+        if g:
+            g.nombre = item["nombre"]
+            g.club_id = item["club_id"]
+            g.goles = item["goles"]
+            g.asistencias = item["asistencias"]
+            g.torneo = item["torneo"]
+            g.temporada = item["temporada"]
+            count_upd += 1
+            continue
+        db.add(Goleador(
+            id=item["id"],
+            nombre=item["nombre"],
+            club_id=item["club_id"],
+            goles=item["goles"],
+            asistencias=item["asistencias"],
+            torneo=item["torneo"],
+            temporada=item["temporada"],
+        ))
+        count_new += 1
+    await db.flush()
+    print(f"  Goleadores: {count_new} nuevos, {count_upd} actualizados")
+    return count_new
+
+
+async def seed_transferencias(db: AsyncSession):
+    data = load_json("transferencias_demo.json")
+    count_new = 0
+    count_upd = 0
+    for item in data:
+        existing = await db.execute(select(Transferencia).where(Transferencia.id == item["id"]))
+        t = existing.scalar_one_or_none()
+        if t:
+            for k, v in item.items():
+                if k != "id":
+                    setattr(t, k, v)
+            count_upd += 1
+            continue
+        db.add(Transferencia(
+            id=item["id"],
+            jugador_nombre=item["jugador_nombre"],
+            jugador_posicion=item.get("jugador_posicion"),
+            club_origen_id=item.get("club_origen_id"),
+            club_destino_id=item["club_destino_id"],
+            fecha=__import__("datetime").date.fromisoformat(item["fecha"]),
+            tipo=item["tipo"],
+            estado=item["estado"],
+            monto=item.get("monto"),
+            duracion_meses=item.get("duracion_meses"),
+            fuente_nombre=item.get("fuente_nombre"),
+            verification_level=item.get("verification_level", 3),
+            is_active=item.get("is_active", True),
+        ))
+        count_new += 1
+    await db.flush()
+    print(f"  Transferencias: {count_new} nuevos, {count_upd} actualizados")
+    return count_new
+
+
 HISTORICO_DIR = DATA_DIR / "partidos_historicos"
 
 
@@ -165,13 +233,17 @@ async def seed_tabla_historico(db: AsyncSession):
 
 
 async def main():
-    print("Inicializando base de datos...")
-    await init_db()
+    print("Creando tablas (sin borrar datos existentes)...")
+    from backend.app.core.database import engine, Base
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
     print("Ejecutando seed...")
     async with async_session() as db:
         await seed_clubes(db)
         await seed_partidos(db)
         await seed_tabla(db)
+        await seed_goleadores(db)
+        await seed_transferencias(db)
         await db.commit()
     print("Seed completado.")
 

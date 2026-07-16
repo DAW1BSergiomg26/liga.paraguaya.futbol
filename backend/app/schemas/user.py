@@ -1,7 +1,7 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
-class UserLogin(BaseModel):
+class UserOAuth(BaseModel):
     email: str
     name: str
     image: str = ""
@@ -19,3 +19,20 @@ class UserOut(BaseModel):
     token: str
 
     model_config = {"from_attributes": True}
+
+
+class UserRegister(BaseModel):
+    email: str
+    name: str
+    password: str = Field(min_length=6)
+
+
+class UserLogin(BaseModel):
+    email: str
+    password: str
+
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    user: "UserOut"

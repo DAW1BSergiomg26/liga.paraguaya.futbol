@@ -1,70 +1,97 @@
-# Task 1: Backend Models (MensajeChat + PushSubscription)
+### Task 1: Bugfix — Texto en espejo en flip cards
 
-## Files to Create
-- `backend/app/models/mensaje_chat.py`
-- `backend/app/models/push_subscription.py`
+**Files:**
+- Modify: `frontend/src/app/globals.css:136-180`
+- Verify: `frontend/src/components/ui/ClubCard.tsx`
 
-## Exact Code
+**Bug:** El texto "Datos del club" aparece horizontalmente invertido. Causa: `.carta-club-dorso { transform: rotateY(180deg) }` combinado con `backface-visibility` que no funciona correctamente en WebKit.
 
-### backend/app/models/mensaje_chat.py
-```python
-import uuid
-from datetime import datetime, timezone
+**Análisis concreto:** La cara frontal (`.carta-club-cara`) no tiene `transform`. El dorso (`.carta-club-dorso`) tiene `transform: rotateY(180deg)` para compensar el giro del contenedor `.carta-club-inner`. Si `backface-visibility: hidden` falla en algún browser, ambas caras son visibles: la frontal normal + el dorso rotado 180° (texto en espejo). La solución: no depender de `rotateY(180deg)` en el dorso, sino usar una técnica más robusta.
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text
-from sqlalchemy.orm import relationship
+- [ ] **Step 1: Reemplazar la técnica de flip en globals.css**
 
-from backend.app.core.database import Base
+Cambiar de `rotateY(180deg)` a usar `scaleX(-1)` para el backface y `scaleX(-1)` para compensar, que es más compatible cross-browser:
 
+```css
+/* === 3D FLIP CARD — Fichas de clubes === */
 
-class MensajeChat(Base):
-    __tablename__ = "mensajes_chat"
+.carta-club {
+  -webkit-perspective: 1000px;
+  perspective: 1000px;
+  height: 320px;
+  width: 100%;
+  max-width: 380px;
+  outline: none;
+}
 
-    id = Column(String, primary_key=True)
-    partido_id = Column(String, ForeignKey("partidos.id"), nullable=False, index=True)
-    user_id = Column(String, ForeignKey("users.id"), nullable=False)
-    mensaje = Column(Text, nullable=False)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+.carta-club-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+  -webkit-transform-style: preserve-3d;
+  transform-style: preserve-3d;
+}
 
-    partido = relationship("Partido", lazy="selectin")
-    user = relationship("User", lazy="selectin")
+.carta-club:hover .carta-club-inner,
+.carta-club:focus-visible .carta-club-inner {
+  transform: rotateY(180deg);
+}
+
+.carta-club-cara {
+  position: absolute;
+  inset: 0;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  border-radius: 14px;
+  background: var(--color-bg-carta);
+  border: 1px solid var(--color-borde-sutil);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.carta-club-dorso {
+  transform: rotateY(180deg);
+  justify-content: flex-start;
+  text-align: left;
+  overflow-y: auto;
+}
 ```
 
-### backend/app/models/push_subscription.py
-```python
-import uuid
-from datetime import datetime, timezone
+El `rotateY(180deg)` en el dorso y en el hover del inner es la técnica estándar. Para reforzar, se agrega un wrapper de texto con `-webkit-transform: translateZ(0)` para forzar aceleración GPU:
 
-from sqlalchemy import Column, DateTime, ForeignKey, String, Text
+Agregar después de `.carta-club-dorso { ... }`:
 
-from backend.app.core.database import Base
-
-
-class PushSubscription(Base):
-    __tablename__ = "push_subscriptions"
-
-    id = Column(String, primary_key=True)
-    user_id = Column(String, ForeignKey("users.id"), nullable=False)
-    endpoint = Column(Text, nullable=False)
-    p256dh = Column(String, nullable=False)
-    auth = Column(String, nullable=False)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+```css
+.carta-club-dorso > * {
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
 ```
 
-## Global Constraints
-- All new models use `id TEXT PRIMARY KEY` with `f"msg_{uuid.uuid4().hex[:12]}"` pattern (matching existing codebase)
-- Backend tests use SQLite in-memory (`sqlite+aiosqlite://`)
-- Follow existing model patterns in `backend/app/models/`
+Esto fuerza la composición por GPU en Safari/WebKit, eliminando el mirroring.
 
-## Verification
-- `python -m pytest backend/tests/ -v` should still pass (18 existing tests)
-- Models should import without errors
+- [ ] **Step 2: Verificar ClubCard.tsx**
 
-## Commit
+Confirmar que `ClubCard.tsx` no tiene ningún `style` inline en el dorso que esté aplicando transform incorrecto.
+
+Leer el archivo y asegurarse de que no hay `scaleX` ni `scale(-1,1)` en ningún JSX.
+
+- [ ] **Step 3: Build para verificar**
+
 ```bash
-git add backend/app/models/mensaje_chat.py backend/app/models/push_subscription.py
-git commit -m "feat: add MensajeChat and PushSubscription models"
+cd frontend && npm run build
 ```
 
-## Report File
-`.superpowers/sdd/task-1-report.md` — write status (DONE/DONE_WITH_CONCERNS), commits, test summary, any concerns.
+- [ ] **Step 4: Commit**
+
+```bash
+git add frontend/src/app/globals.css
+git commit -m "fix: agregar translateZ(0) en dorso de flip card para evitar texto en espejo en WebKit"
+```
+
+---
+

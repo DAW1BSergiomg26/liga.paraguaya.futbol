@@ -1,17 +1,42 @@
+import asyncio
+import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from sqlalchemy import select
 
-from backend.app.api import admin, auth, clubes, health, leaderboard, partidos, predicciones, tabla
+from backend.app.api import admin, auth, clubes, goleadores, health, leaderboard, partidos, predicciones, tabla
+from backend.app.api.cerezo import router as cerezo_router
 from backend.app.api.chat import router as chat_router
 from backend.app.api.notificaciones import router as notificaciones_router
 from backend.app.api.cron import router as cron_router
+from backend.app.api.noticias import router as noticias_router
+from backend.app.api.tactico import router as tactico_router
+from backend.app.api.transferencias import router as transferencias_router
+from backend.app.api.historial import router as historial_router
+from backend.app.core.api_key import RATE_LIMIT_MAX, rate_limit_info
 from backend.app.core.config import settings
 from backend.app.core.database import async_session, run_alembic_upgrade
 from backend.app.models.club import Club
 from backend.app.scripts.seed import seed_clubes, seed_partidos, seed_tabla, seed_tabla_historico
+
+logger = logging.getLogger(__name__)
+
+
+async def sync_loop():
+    if not settings.api_football_key:
+        logger.info("FOOTBALL_DATA_API_KEY no configurada - sync_loop desactivado")
+        return
+    while True:
+        try:
+            from backend.app.services.football_data_service import FootballDataService
+            result = FootballDataService.sync_all()
+            logger.info(f"Sync result: {result}")
+        except Exception as e:
+            logger.error(f"Sync failed: {e}")
+        await asyncio.sleep(600)
 
 
 @asynccontextmanager
@@ -23,7 +48,9 @@ async def lifespan(app: FastAPI):
         await seed_tabla(db)
         await seed_tabla_historico(db)
         await db.commit()
+    sync_task = asyncio.create_task(sync_loop())
     yield
+    sync_task.cancel()
 
 
 app = FastAPI(
@@ -41,6 +68,31 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+@app.middleware("http")
+async def api_key_middleware(request: Request, call_next):
+    path = request.url.path
+    if not path.startswith("/api/v1/") or path.startswith("/api/v1/admin/"):
+        return await call_next(request)
+
+    x_api_key = request.headers.get("X-API-Key", "")
+    if x_api_key:
+        info = await rate_limit_info(x_api_key)
+        if not info["ok"]:
+            headers = {}
+            if info.get("reset_in"):
+                headers["X-RateLimit-Reset"] = str(info["reset_in"])
+            return JSONResponse(status_code=info["status_code"], content=info["body"], headers=headers)
+
+        response = await call_next(request)
+        response.headers["X-RateLimit-Limit"] = str(RATE_LIMIT_MAX)
+        response.headers["X-RateLimit-Remaining"] = str(info["remaining"])
+        if info.get("reset_in"):
+            response.headers["X-RateLimit-Reset"] = str(info["reset_in"])
+        return response
+
+    return await call_next(request)
+
 app.include_router(health.router)
 app.include_router(clubes.router)
 app.include_router(partidos.router)
@@ -49,9 +101,15 @@ app.include_router(auth.router)
 app.include_router(predicciones.router)
 app.include_router(leaderboard.router)
 app.include_router(admin.router)
+app.include_router(cerezo_router)
 app.include_router(chat_router)
 app.include_router(notificaciones_router)
 app.include_router(cron_router)
+app.include_router(noticias_router)
+app.include_router(tactico_router)
+app.include_router(goleadores.router)
+app.include_router(transferencias_router)
+app.include_router(historial_router)
 
 
 @app.get("/")

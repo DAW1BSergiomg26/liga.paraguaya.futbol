@@ -1,40 +1,26 @@
-# Task 4 Report: Push Service + Subscription Endpoints
+## Task 4: API Endpoints — Completion Report
 
-## What I Implemented
-- Added `pywebpush>=1.0.0` to `backend/requirements.txt`
-- Added VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, and VAPID_CLAIM_EMAIL to Settings class in `backend/app/core/config.py`
-- Created `backend/app/schemas/push_subscription.py` with `PushSubscriptionCreate` schema (endpoint, p256dh, auth)
-- Created `backend/app/services/push_service.py` with `PushService` class:
-  - `suscribir` / `desuscribir` methods for managing push subscriptions
-  - `_enviar` internal method using pywebpush (try/except guard)
-  - `enviar_a_partido` to notify all users who predicted a match
-  - `enviar_a_usuario` to notify a specific user
-  - `obtener_recordatorios` to find matches within next 30 minutes
-- Overwrote `backend/app/api/notificaciones.py` with full implementation:
-  - `POST /suscribir` — save a push subscription
-  - `DELETE /suscribir` — remove a push subscription
-  - `GET /vapid-public-key` — expose VAPID public key to clients
+**Status:** ✅ COMPLETE
 
-## Test Results
-All 18 existing tests pass:
-```
-18 passed in 0.56s
-```
+**Commits:** `d7b17a1` — feat: add Transferencias API endpoints (CRUD, filters, stats, mercado, historial)
 
-## Files Changed
-- `backend/requirements.txt` — appended pywebpush dep
-- `backend/app/core/config.py` — added 3 VAPID fields
-- `backend/app/schemas/push_subscription.py` — new file (schema)
-- `backend/app/services/push_service.py` — new file (service logic)
-- `backend/app/api/notificaciones.py` — overwrite stub with full impl
+**Test summary:** Import verification passed (`from backend.app.api.transferencias import router` → OK)
 
-## Self-Review Findings
-- ✅ Code matches brief exactly — no deviations
-- ✅ pywebpush import is guarded with try/except (graceful degradation when not installed)
-- ✅ Subscription id pattern matches spec: `f"sub_{uuid.uuid4().hex[:12]}"`
-- ✅ Token auth via `get_current_user` dependency on all protected endpoints
-- ✅ Follows existing service patterns (static methods, async session)
-- ✅ All 18 existing tests still pass
+**Concerns:** None
 
-## Concerns
-None.
+**Files created/modified:**
+- Created: `backend/app/api/transferencias.py` (113 lines)
+- Modified: `backend/app/main.py` (added import + `app.include_router(transferencias_router)`)
+
+**9 endpoints implemented:**
+1. `GET /api/v1/transferencias` — list with filters (club_id, tipo, estado, fecha_desde/hasta, jugador) + pagination
+2. `GET /api/v1/transferencias/mercado` — recent transfers (configurable dias)
+3. `GET /api/v1/transferencias/estadisticas` — stats dashboard data
+4. `GET /api/v1/transferencias/historial/{club_id}` — transfer history per club
+5. `GET /api/v1/transferencias/{transferencia_id}` — get single transfer
+6. `POST /api/v1/transferencias` — create (admin only, same-club validation)
+7. `PUT /api/v1/transferencias/{transferencia_id}` — update (admin only)
+8. `DELETE /api/v1/transferencias/{transferencia_id}` — delete (admin only, 204)
+9. `SyncResponse` BaseModel added for future `sync-rss` endpoint (Task 6)
+
+**Report path:** `.superpowers/sdd/task-4-report.md`

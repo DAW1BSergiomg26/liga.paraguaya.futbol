@@ -1,9 +1,17 @@
-# SDD Progress Ledger
+# Progress Ledger - Transferencias
 
-Task 1: complete (commits 64aecd4..6629246, review approved)
-Task 2: complete (commits 6629246..eff3e8c, review approved)
-Task 3: complete (commits eff3e8c..6cf2f5b, review approved)
-Task 4: complete (commits 6cf2f5b..facd6ff, review approved)
-Task 5: complete (commits facd6ff..3c16b09, review approved)
-Task 6: complete (commits 3c16b09..b99852d, review approved)
-Task 7: complete (commits b99852d..e9d3478, review approved)
+| Task | Status | Commits | Review |
+|------|--------|---------|--------|
+| Task 1: Transferencia Model + Migration | ✅ done | b399cfd | clean |
+| Task 2: Pydantic Schemas | ✅ done | 846275d | clean |
+| Task 3: TransferenciaService CRUD | ✅ done | c9c1b56 | clean |
+| Task 4: API Endpoints | ✅ done | d7b17a1 | clean |
+| Task 5: Backend Tests | ✅ done | 7a986d2 | clean |
+| Task 6: RSS Sync Service | ✅ done | dd212ab | clean |
+| Task 7: Frontend Types + Navbar | ✅ done | 341fcef | clean |
+| Task 8: TransferCard Component | ✅ done | cbd07ec | clean |
+| Task 9: Listado Principal Page | ✅ done | 4e443cb | clean |
+| Task 10: Detalle Page | pending | | |
+| Task 11: Mercado + Historial + Estadísticas Pages | pending | | |
+| Task 12: GSAP Animations | pending | | |
+| Task 13: Final Verification + Handoff | pending | | |
