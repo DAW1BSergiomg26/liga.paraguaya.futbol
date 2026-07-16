@@ -202,6 +202,21 @@ liga.paraguaya.futbol/
 - [ ] Task 12: Glow Effect para líder
 - [ ] Task 13: Verificación final
 
+### Red 3D de Clubes — `/red3d` (Julio 2026)
+- [x] Grafo 3D con `3d-force-graph` + Three.js: bloom, starfield, halo rojo APF y escudos reales.
+- [x] `frontend/public/escudos/` — 19 PNG reales mapeados 1:1 en `frontend/src/lib/escudos.ts` (sin nombres inventados; `capiata.png` → `deportivo-capiata`).
+- [x] `Graph3D.tsx` reescrito: `buildNodeObject` dibuja escudo real + anillo de color + halo + **nombre SIEMPRE visible** (`makeLabelSprite`).
+- [x] **Crash `Cannot read properties of undefined (reading 'x')` ELIMINADO**: `flyTo` valida `Number.isFinite(node.x/y/z)` y cae a `zoomToFit`; `autoRotate` blindado; import dinámico de `3d-force-graph` + `useEffect` de precarga.
+- [x] Tipos estrictos `GraphInstance` / `ClubNode` / `ClubLink` sin `any`; comentarios en español.
+- [x] `page.tsx`: panel "¿Qué es esto?" (explica el propósito), subtítulos por modo, leyenda visual, buscador, lista lateral clicable (escudo + nombre) de los 19 clubes, auto-rotación, centrado de cámara, panel de detalle.
+- [x] Dos modos: **Rivalidades** (clásicos, grosor = historia) y **Mercado de Fichajes** (pases por temporada, grosor = inversión).
+- [x] Tests Vitest: `datos.test.ts` (estructura de red) + `escudos.test.ts` (mapeo 1:1) — 7 pasan.
+- [x] Verificación Playwright desktop + mobile: canvas OK, 19 clubes en lista, **0 page errors**; solo `ERR_CONNECTION_REFUSED` del backend Koyeb dormido (no del grafo).
+- [x] PR #3 mergeado a `main` (`42d4fcd`): repara carga infinita + escudos reales.
+- [x] Commit `efcef15`: sección entendible + crash-proof + nombres visibles + panel explicativo. Pusheado a `main` → Vercel despliega solo.
+
+> Nota: el usuario reportó un botón "ISSUE" que daba el crash; no existe string "ISSUE" en el código fuente — probablemente UI de Vercel o confusión. El crash real estaba en `cameraPosition`/`flyTo` leyendo coords no inicializadas.
+
 ## Handoff Maestro — Vision a Futuro
 
 El **Handoff Maestro** define la dirección completa del proyecto con una identidad visual propia:
@@ -223,7 +238,7 @@ El **Handoff Maestro** define la dirección completa del proyecto con una identi
 3. ✅ Noticias (RSS + UI)
 4. ✅ Transferencias (CRUD + RSS + UI + estadísticas)
 5. ✅ Estadísticas históricas
-6. 🔶 Deployment a producción — frontend en Vercel ✅; backend pendiente migrar de Railway (trial vencido) a Koyeb+Neon (gratis, sin tarjeta). Ver sección "Estado de despliegue".
+ 6. 🔶 Deployment a producción — frontend en Vercel ✅; backend en Koyeb+Neon (gratis, sin tarjeta). Ver sección "Estado de despliegue".
 
 ## Pendientes / Issues conocidos
 
@@ -248,12 +263,12 @@ El **Handoff Maestro** define la dirección completa del proyecto con una identi
 ### Estado de despliegue (ACTUALIZADO — leer antes de tocar infra)
 - **Frontend:** ✅ EN PRODUCCIÓN en Vercel → https://frontend-ten-swart-85.vercel.app
   - Project ID: `prj_uM7KzAcPV7zRwjWDGpHAIGXelCC2` (org `team_xTbaX86uhYJgVplW2yc6jTUj`)
-  - `NEXT_PUBLIC_API_URL` está inlinado en el build apuntando al backend de Railway **ya muerto** → debe actualizarse a la nueva URL del backend cuando se despliegue.
-- **Backend:** ⚠️ RAILWAY CAÍDO. El proyecto `blissful-nurturing` (servicio `backend`) venció su trial gratuito y devuelve `404 Application not found`. `railway up` está bloqueado.
-  - **Decisión del usuario:** NO pagar ningún plan. Migrar el backend a hosting gratuito **sin tarjeta** → **Koyeb (web service Docker) + Neon (Postgres gratis)**.
+  - `NEXT_PUBLIC_API_URL` apunta al backend de Koyeb en producción (antes apuntaba a Railway, ya muerto; actualizado).
+- **Backend:** ✅ EN PRODUCCIÓN en **Koyeb** (web service Docker) + **Neon** (Postgres gratis, sin tarjeta).
+  - **Decisión del usuario:** NO pagar ningún plan. Backend migrado a hosting gratuito sin tarjeta (Koyeb + Neon).
   - Alternativa si se puede agregar tarjeta: Render free (`render.yaml` ya está en el repo). Render free exige tarjeta SOLO para verificar (no cobra).
 - **Repositorio:** `DAW1BSergiomg26/liga.paraguaya.futbol` (rama `main`).
-- **Últimos commits en `main`:** `bedf988` (llama-cpp-python opcional), `0a6f634` (render.yaml), `9df911b` (hardening deploy: `_async_url` postgres:// + sync_loop no-op), `a3eedf5` (módulo Estadísticas Históricas).
+- **Últimos commits en `main`:** `efcef15` (fix red3d: sección entendible + crash-proof + nombres visibles + panel explicativo), `42d4fcd` (fix red3d: repara carga infinita + escudos reales #3), `2fd9153` (feat red3d: grafo 3D pro con escudos reales, bloom, starfield y UI albirroja), `de17a9b` (fix goleadores/predicciones).
 
 ### Pasos pendientes para completar el deploy (item 6 del roadmap)
 1. Usuario crea cuenta **Koyeb** (koyeb.com, sin tarjeta) y conecta el repo.
