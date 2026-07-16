@@ -25,6 +25,9 @@ interface ClubLink {
   value: number;
   label: string;
   w: number;
+  transferenciaId?: string;
+  tipo?: string;
+  monto?: number;
 }
 
 type GraphData = { nodes: ClubNode[]; links: ClubLink[] };
@@ -100,6 +103,7 @@ export default function Red3DPage() {
     () => false
   );
   const [selectedNode, setSelectedNode] = useState<ClubNode | null>(null);
+  const [selectedLink, setSelectedLink] = useState<ClubLink | null>(null);
   const [mode, setMode] = useState<"rivalidades" | "fichajes">("rivalidades");
   const [temporada, setTemporada] = useState<string>("todas");
   const [query, setQuery] = useState("");
@@ -144,6 +148,7 @@ export default function Red3DPage() {
 
   const fichajesData = useMemo<GraphData>(() => {
     const list = transfers as Array<{
+      id?: string;
       club_origen_id?: string;
       club_destino_id?: string;
       club_origen_nombre?: string;
@@ -151,10 +156,11 @@ export default function Red3DPage() {
       monto?: number;
       fecha?: string;
       jugador_nombre?: string;
+      tipo?: string;
     }>;
     const vis = temporada === "todas" ? list : list.filter((t) => String(new Date(t.fecha ?? "").getFullYear()) === temporada);
     const clubMap = new Map<string, { id: string; name: string; count: number }>();
-    const linkMap = new Map<string, { source: string; target: string; value: number; labels: string[] }>();
+    const linkMap = new Map<string, { source: string; target: string; value: number; labels: string[]; first?: (typeof list)[number] }>();
 
     for (const t of vis) {
       const oId = t.club_origen_id;
@@ -165,10 +171,10 @@ export default function Red3DPage() {
       if (dId) (clubMap.get(dId) as { count: number }).count++;
       if (!oId || !dId) continue;
       const key = `${oId}->${dId}`;
-      if (!linkMap.has(key)) linkMap.set(key, { source: oId, target: dId, value: 0, labels: [] });
-      const l = linkMap.get(key) as { value: number; labels: string[] };
+      if (!linkMap.has(key)) linkMap.set(key, { source: oId, target: dId, value: 0, labels: [], first: t });
+      const l = linkMap.get(key) as { value: number; labels: string[]; first?: (typeof list)[number] };
       l.value += t.monto ?? 0;
-      l.labels.push(`${t.jugador_nombre ?? ""} · $${(t.monto ?? 0)}M`);
+      l.labels.push(`${t.jugador_nombre ?? "Jugador"} · $${(t.monto ?? 0)}M`);
     }
 
     const nodes: ClubNode[] = [...clubMap.values()].map((c) => ({
@@ -186,6 +192,9 @@ export default function Red3DPage() {
       target: l.target,
       value: Math.max(l.value, 1),
       w: Math.max(0.5, Math.log10(l.value + 1) * 2),
+      transferenciaId: l.first?.id,
+      tipo: l.first?.tipo,
+      monto: l.first?.monto,
       label: `<div style="color:${APF_DORADO};font-weight:600">${l.labels.join("<br/>")}</div>`,
     }));
     return { nodes, links };
@@ -210,12 +219,22 @@ export default function Red3DPage() {
     h.setAutoRotate(autoRotate);
   }, [autoRotate]);
 
+  const clubName = useCallback(
+    (ref: string | ClubNode) => (typeof ref === "string" ? clubList.find((c) => c.id === ref)?.name ?? ref : ref.name),
+    [clubList]
+  );
+
   useEffect(() => {
     handleRef.current?.setAutoRotate(autoRotate);
   }, [autoRotate]);
 
   const flyTo = useCallback((id: string) => {
     handleRef.current?.flyTo(id);
+    setAutoRotate(false);
+  }, []);
+
+  const onLinkClick = useCallback((link: ClubLink) => {
+    setSelectedLink(link);
     setAutoRotate(false);
   }, []);
 
@@ -336,7 +355,7 @@ export default function Red3DPage() {
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-5">
           <div className="relative w-full rounded-2xl border border-borde-marca overflow-hidden bg-[#020a14] shadow-[0_0_40px_-10px_rgba(255,204,0,0.25)]">
             {isClient && (
-              <Graph3D data={graphData} autoRotate={autoRotate} onSelect={setSelectedNode} onReady={onReady} />
+              <Graph3D data={graphData} autoRotate={autoRotate} onSelect={setSelectedNode} onLinkClick={onLinkClick} onReady={onReady} />
             )}
 
             <div className="absolute top-3 left-3 flex flex-wrap gap-3 text-[11px] text-texto-secundario bg-bg-noche/70 backdrop-blur px-3 py-2 rounded-lg border border-borde-sutil">
@@ -378,6 +397,42 @@ export default function Red3DPage() {
                 >
                   Ver ficha completa →
                 </a>
+              </div>
+            )}
+
+            {/* Drawer de detalle de fichaje (modo Mercado de Fichajes) */}
+            {selectedLink && mode === "fichajes" && (
+              <div className="absolute bottom-4 left-4 right-4 lg:left-4 lg:right-auto lg:w-80 bg-bg-secundario/95 backdrop-blur-sm border-l-4 border-apf-dorado rounded-xl p-4 shadow-2xl ring-1 ring-white/10">
+                <div className="flex items-start gap-2">
+                  <div className="flex-1">
+                    <p className="text-[11px] uppercase tracking-wider text-apf-dorado font-semibold">Fichaje</p>
+                    <p className="text-texto-principal font-bold text-base leading-tight mt-0.5">
+                      {clubName(selectedLink.source)} → {clubName(selectedLink.target)}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setSelectedLink(null)}
+                    className="text-texto-apagado hover:text-apf-rojo text-xl leading-none"
+                  >
+                    ×
+                  </button>
+                </div>
+                <div className="mt-2 space-y-1 text-sm">
+                  <p className="text-texto-secundario">
+                    Inversión: <span className="text-apf-amarillo font-semibold">${selectedLink.monto ?? 0}M</span>
+                  </p>
+                  {selectedLink.tipo && (
+                    <p className="text-texto-secundario capitalize">Tipo: <span className="text-texto-principal">{selectedLink.tipo}</span></p>
+                  )}
+                </div>
+                {selectedLink.transferenciaId && (
+                  <a
+                    href={`/transferencias/${selectedLink.transferenciaId}`}
+                    className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-apf-rojo hover:text-white transition-colors"
+                  >
+                    Ver ficha del jugador →
+                  </a>
+                )}
               </div>
             )}
           </div>

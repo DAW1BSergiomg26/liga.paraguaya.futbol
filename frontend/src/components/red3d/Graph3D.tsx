@@ -23,6 +23,9 @@ interface ClubLink extends LinkObject {
   value: number;
   label: string;
   w: number;
+  transferenciaId?: string;
+  tipo?: string;
+  monto?: number;
 }
 
 type GraphData = { nodes: ClubNode[]; links: ClubLink[] };
@@ -61,6 +64,7 @@ interface GraphInstance {
   linkDirectionalParticleColor(accessor: (l: LinkObject) => string): GraphInstance;
   onNodeHover(cb: (node: NodeObject | null) => void): GraphInstance;
   onNodeClick(cb: (node: NodeObject) => void): GraphInstance;
+  onLinkClick(cb: (link: LinkObject) => void): GraphInstance;
   enablePointerInteraction(enabled: boolean): GraphInstance;
   enableNodeDrag(enabled: boolean): GraphInstance;
 }
@@ -163,10 +167,11 @@ interface Graph3DProps {
   data: GraphData | null;
   autoRotate: boolean;
   onSelect: (node: ClubNode | null) => void;
+  onLinkClick?: (link: ClubLink) => void;
   onReady: (handle: Graph3DHandle) => void;
 }
 
-export default function Graph3D({ data, autoRotate, onSelect, onReady }: Graph3DProps) {
+export default function Graph3D({ data, autoRotate, onSelect, onLinkClick, onReady }: Graph3DProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const graphRef = useRef<GraphInstance | null>(null);
   const autoRotateRef = useRef(autoRotate);
@@ -222,6 +227,9 @@ export default function Graph3D({ data, autoRotate, onSelect, onReady }: Graph3D
               const n = node as ClubNode;
               selectedRef.current = n;
               onSelect(n);
+            })
+            .onLinkClick((link: LinkObject) => {
+              if (onLinkClick) onLinkClick(link as ClubLink);
             })
             .enablePointerInteraction(true)
             .enableNodeDrag(true) as GraphInstance;

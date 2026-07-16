@@ -2,8 +2,10 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
 
 // Graph3D usa three/3d-force-graph (WebGL) -> lo mockeamos en jsdom.
+const captured = { onLinkClick: null as null | ((l: unknown) => void) };
 vi.mock("@/components/red3d/Graph3D", () => ({
-  default: ({ onReady }: { onReady?: (h: unknown) => void }) => {
+  default: ({ onReady, onLinkClick }: { onReady?: (h: unknown) => void; onLinkClick?: (l: unknown) => void }) => {
+    captured.onLinkClick = onLinkClick ?? null;
     if (onReady) {
       // Simula el handle que la pagina espera.
       setTimeout(() => onReady({ flyTo: vi.fn(), zoomToFit: vi.fn(), setAutoRotate: vi.fn() }), 0);
@@ -70,5 +72,29 @@ describe("Pagina /red3d", () => {
     expect(
       (await screen.findAllByText(/pases de jugadores/i)).length
     ).toBeGreaterThan(0);
+  });
+
+  it("al hacer click en un fichaje abre el drawer con enlace al jugador", async () => {
+    render(<Red3DPage />);
+    await screen.findAllByText("¿Qué es esto?");
+
+    const modoFichajes = screen.getAllByRole("button", { name: /Mercado de Fichajes/i })[0];
+    fireEvent.click(modoFichajes);
+
+    // El mock de Graph3D capturo onLinkClick; lo invoco con un link de fichaje.
+    expect(captured.onLinkClick).toBeTypeOf("function");
+    captured.onLinkClick?.({
+      source: "olimpia",
+      target: "cerro-porteno",
+      value: 10,
+      label: "",
+      w: 1,
+      transferenciaId: "tr-123",
+      tipo: "compra",
+      monto: 5,
+    });
+
+    expect(await screen.findByText(/Ver ficha del jugador/i)).toBeInTheDocument();
+    expect((await screen.findAllByText(/Inversión/i)).length).toBeGreaterThan(0);
   });
 });
