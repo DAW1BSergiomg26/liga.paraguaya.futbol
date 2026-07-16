@@ -194,13 +194,13 @@ liga.paraguaya.futbol/
 - [x] Task 4: `StripesBackground.tsx` — Parallax con GSAP ScrollTrigger
 - [x] Task 5: `CinematicHero.tsx` — Hero full-screen con SplitType reveal + sparticles + counters
 - [x] Task 6: Integración CinematicHero en home page
-- [ ] Task 7: Page Transitions (Framer Motion AnimatePresence)
-- [ ] Task 8: ScrollReveal en Tabla de Posiciones
-- [ ] Task 9: ScrollReveal en Goleadores
-- [ ] Task 10: ScrollReveal en Noticias
-- [ ] Task 11: ScrollReveal + Tilt en Clubes
-- [ ] Task 12: Glow Effect para líder
-- [ ] Task 13: Verificación final
+- [x] Task 7: Page Transitions — `app/template.tsx` con Framer Motion (fade + slide en cada navegación)
+- [x] Task 8: Tabla ya tenía animaciones (row-enter, pulse-lider, tilt)
+- [x] Task 9: ScrollReveal en Goleadores (`GoleadoresList.tsx`, stagger 0.06)
+- [x] Task 10: ScrollReveal en Noticias (ya aplicado en `NoticiaGrid.tsx`)
+- [x] Task 11: ScrollReveal + TiltCard en Clubes (`clubes/page.tsx`, stagger 0.08, maxTilt 12)
+- [x] Task 12: Glow Effect para líder — fila `posicion===1` con `shadow-[inset...]` dorado + ring APF
+- [ ] Task 13: Verificación final (build OK, tsc OK; pendiente smoke visual en producción)
 
 ### Red 3D de Clubes — `/red3d` (Julio 2026)
 - [x] Grafo 3D con `3d-force-graph` + Three.js: bloom, starfield, halo rojo APF y escudos reales.
@@ -252,11 +252,12 @@ El **Handoff Maestro** define la dirección completa del proyecto con una identi
 - Sin tests de frontend para la página `/cerezo`.
 - GSAP Experience: Tasks 7-13 pendientes (Page Transitions, ScrollReveal en páginas, Glow Effect).
 
-### Bug conocido en producción (pendiente de fix)
-- **`push_subscriptions` timezone crash:** en logs de producción el endpoint de push suscribe/repite crashea con
-  `can't subtract offset-naive and offset-aware datetimes`. Causa: se comparan `datetime` naive (sin tz) con
-  aware (con `timezone.utc`). No bloquea el arranque ni los endpoints nuevos (transferencias/historial), pero
-  hay que corregirlo (usar `datetime.now(timezone.utc)` en la columna de expiración) antes o después del deploy.
+### Bug conocido en producción (RESUELTO — Julio 2026)
+- **`datetime` naive/aware:** el único `datetime.utcnow()` (naive) restante en modelos estaba en
+  `backend/app/models/goleador.py` (`updated_at`). Corregido a `datetime.now(timezone.utc)` en commit `5138748`.
+  `push_subscription` y `push_service` ya usaban `timezone.utc`. Verificado: `grep` de `datetime.utcnow` en
+  `backend/app` devuelve 0 coincidencias. Tests backend: 172 pass / 1 fail (test de noticias preexistente por
+  seed local, ajeno a este cambio).
 - El backend viejo que corría en el equipo del dev (proceso uvicorn huérfano en puerto 8000) servía código/DB
   obsoleta y daba 500 en `/transferencias`. Ya fue matado y reemplazado; no replicar ese setup.
 
