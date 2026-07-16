@@ -1,6 +1,9 @@
+import os
+import secrets
 from pathlib import Path
 
 from pydantic_settings import BaseSettings
+from pydantic import Field
 
 _DEFAULT_DB_PATH = Path(__file__).resolve().parent.parent.parent / "data" / "liga.db"
 
@@ -17,7 +20,10 @@ class Settings(BaseSettings):
 
     admin_api_key: str = "Rufi141414%$"
 
-    jwt_secret: str = "change-me-in-production-2026"
+    # En produccion (Koyeb) se debe setear JWT_SECRET via variable de entorno.
+    # Si no se setea, se genera un secreto efimero por arranque (los tokens
+    # previos dejan de ser validos al reiniciar el contenedor).
+    jwt_secret: str = Field(default_factory=lambda: os.environ.get("JWT_SECRET", "") or secrets.token_hex(32))
     jwt_algorithm: str = "HS256"
     jwt_expire_days: int = 7
 
