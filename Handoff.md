@@ -185,7 +185,16 @@ liga.paraguaya.futbol/
 - [x] Navbar link a Historial
 - [x] Tests backend (service + api) pasando
 
-> Nota: los datos históricos son tablas finales por torneo (2020–2026). No incluye resultados fecha por fecha ni goleadores históricos (sin datos en JSON).
+> Nota: los datos históricos son tablas finales por torneo (2020–2026). No incluye resultados fecha por fecha.
+
+### Goleadores — Ranking Histórico (Julio 2026)
+- [x] `GoleadorService.get_historial()` — agrega por jugador (SUM goles/asistencias, COUNT torneos) para ranking all-time.
+- [x] Endpoint `GET /api/v1/goleadores/historial` (limit configurable).
+- [x] Frontend `GoleadoresHistorial.tsx` — ranking acumulado con ScrollReveal + CountUp (dorado APF).
+- [x] `goleadores/page.tsx` — tabs **Por torneo / Ranking histórico** + filtro de torneo.
+- [x] `GoleadoresList.tsx` mejorado a "nivel Dios": pódium top-3 (🥇🥈🥉 con glow), barras de progreso, CountUp animado.
+- [x] Tests backend: `test_goleadores_api.py` (3 tests, incluye agrupación histórica 14+10=24).
+- [x] `getGoleadoresHistorial` + tipo `Goleador` extendido (`torneo`/`temporada`) en `lib/api.ts`.
 
 ### GSAP Experience — Animaciones Cinematográficas (Julio 2026)
 - [x] Task 1: `lib/gsap.ts` — Config GSAP central + `ScrollReveal.tsx` (5 variantes)
