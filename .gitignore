@@ -42,3 +42,11 @@ desktop.ini
 .vercel
 .env*
 .aider*
+
+# Logs locales
+backend/uvicorn*.err
+backend/uvicorn*.out
+frontend/dev.err
+frontend/dev.out
+frontend/lh-*.json
+
