@@ -1,6 +1,6 @@
 from typing import Optional
 
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.app.models.club import Club
@@ -36,6 +36,45 @@ class GoleadorService:
                 temporada=g[0].temporada,
             )
             for g in result.all()
+        ]
+        return GoleadoresListOut(
+            goleadores=goleadores,
+            total=len(goleadores),
+        )
+
+    @staticmethod
+    async def get_historial(
+        db: AsyncSession,
+        limit: int = 20,
+    ) -> GoleadoresListOut:
+        """Ranking historico acumulado por jugador (suma goles/asistencias)."""
+        stmt = (
+            select(
+                Goleador.nombre,
+                Goleador.club_id,
+                Club.nombre.label("club_nombre"),
+                func.sum(Goleador.goles).label("goles"),
+                func.sum(Goleador.asistencias).label("asistencias"),
+                func.count(Goleador.id).label("torneos"),
+            )
+            .join(Club, Goleador.club_id == Club.id)
+            .group_by(Goleador.nombre, Goleador.club_id, Club.nombre)
+            .order_by(func.sum(Goleador.goles).desc())
+            .limit(limit)
+        )
+        result = await db.execute(stmt)
+        goleadores = [
+            GoleadorOut(
+                id=f"hist-{r.nombre}".lower().replace(" ", "-"),
+                nombre=r.nombre,
+                club_id=r.club_id,
+                club_nombre=r.club_nombre or "",
+                goles=int(r.goles or 0),
+                asistencias=int(r.asistencias or 0),
+                torneo=f"{int(r.torneos)} torneo(s)",
+                temporada="Histórico",
+            )
+            for r in result.all()
         ]
         return GoleadoresListOut(
             goleadores=goleadores,

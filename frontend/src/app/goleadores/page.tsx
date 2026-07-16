@@ -5,8 +5,12 @@ import { useQuery } from "@tanstack/react-query";
 import { getTorneos } from "@/lib/api";
 import PageHeader from "@/components/ui/PageHeader";
 import GoleadoresList from "@/components/GoleadoresList";
+import GoleadoresHistorial from "@/components/GoleadoresHistorial";
+
+type Tab = "torneo" | "historico";
 
 export default function GoleadoresPage() {
+  const [tab, setTab] = useState<Tab>("torneo");
   const [torneo, setTorneo] = useState("");
 
   const { data: torneos } = useQuery<string[]>({
@@ -40,7 +44,31 @@ export default function GoleadoresPage() {
           </select>
         }
       />
-      <GoleadoresList torneo={torneo} />
+
+      <div className="flex gap-2 p-1 rounded-xl bg-bg-secundario/70 backdrop-blur border border-borde-sutil mb-6">
+        <button
+          onClick={() => setTab("torneo")}
+          className={`flex-1 px-4 py-2 rounded-lg text-sm font-semibold transition ${
+            tab === "torneo" ? "bg-apf-rojo text-white shadow-lg" : "text-texto-secundario hover:text-texto-principal"
+          }`}
+        >
+          Por torneo
+        </button>
+        <button
+          onClick={() => setTab("historico")}
+          className={`flex-1 px-4 py-2 rounded-lg text-sm font-semibold transition ${
+            tab === "historico" ? "bg-apf-dorado text-black shadow-lg" : "text-texto-secundario hover:text-texto-principal"
+          }`}
+        >
+          Ranking histórico
+        </button>
+      </div>
+
+      {tab === "torneo" ? (
+        <GoleadoresList torneo={torneo} />
+      ) : (
+        <GoleadoresHistorial />
+      )}
     </div>
   );
 }

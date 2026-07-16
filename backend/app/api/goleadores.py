@@ -16,6 +16,14 @@ async def get_goleadores(
     return await GoleadorService.get_all(db, torneo=torneo, limit=limit)
 
 
+@router.get("/goleadores/historial")
+async def get_goleadores_historial(
+    limit: int = Query(20, ge=1, le=100),
+    db: AsyncSession = Depends(get_db),
+):
+    return await GoleadorService.get_historial(db, limit=limit)
+
+
 @router.get("/sync/status")
 async def get_sync_status():
     return {"status": "not_implemented"}

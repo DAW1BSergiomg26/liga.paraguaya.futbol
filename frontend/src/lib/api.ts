@@ -222,6 +222,10 @@ export async function getGoleadores(torneo?: string): Promise<{ goleadores: Gole
   return apiFetch(`/api/v1/goleadores${params}`);
 }
 
+export async function getGoleadoresHistorial(): Promise<{ goleadores: Goleador[]; total: number }> {
+  return apiFetch(`/api/v1/goleadores/historial`);
+}
+
 interface Goleador {
   id: string;
   nombre: string;
@@ -229,6 +233,8 @@ interface Goleador {
   club_nombre: string;
   goles: number;
   asistencias: number;
+  torneo?: string;
+  temporada?: string;
 }
 
 export async function getCampeones(): Promise<CampeonHistorico[]> {
