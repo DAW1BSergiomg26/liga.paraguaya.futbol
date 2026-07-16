@@ -271,25 +271,30 @@ El **Handoff Maestro** define la dirección completa del proyecto con una identi
 - El backend viejo que corría en el equipo del dev (proceso uvicorn huérfano en puerto 8000) servía código/DB
   obsoleta y daba 500 en `/transferencias`. Ya fue matado y reemplazado; no replicar ese setup.
 
-### Estado de despliegue (ACTUALIZADO — leer antes de tocar infra)
+### Estado de despliegue (VERIFICADO — Julio 2026)
 - **Frontend:** ✅ EN PRODUCCIÓN en Vercel → https://frontend-ten-swart-85.vercel.app
   - Project ID: `prj_uM7KzAcPV7zRwjWDGpHAIGXelCC2` (org `team_xTbaX86uhYJgVplW2yc6jTUj`)
-  - `NEXT_PUBLIC_API_URL` apunta al backend de Koyeb en producción (antes apuntaba a Railway, ya muerto; actualizado).
-- **Backend:** ✅ EN PRODUCCIÓN en **Koyeb** (web service Docker) + **Neon** (Postgres gratis, sin tarjeta).
-  - **Decisión del usuario:** NO pagar ningún plan. Backend migrado a hosting gratuito sin tarjeta (Koyeb + Neon).
-  - Alternativa si se puede agregar tarjeta: Render free (`render.yaml` ya está en el repo). Render free exige tarjeta SOLO para verificar (no cobra).
+  - ⚠️ **`NEXT_PUBLIC_API_URL` apunta a Railway MUERTO**: `https://backend-production-0b7d.up.railway.app`
+    (verificado: devuelve `{"status":"error","code":404,"message":"Application not found"}`). Por eso el
+    frontend carga pero los datos no llegan (`ERR_CONNECTION_REFUSED` en las llamadas al backend).
+- **Backend:** ❌ **NO HAY BACKEND EN LA NUBE ACTIVO.** El Handoff previo decía "Koyeb en producción"
+  pero eso NUNCA se ejecutó — el usuario no creó la cuenta de Koyeb. El backend SÍ funciona localmente
+  (`http://localhost:8000/health` → ok; verificado por el agente y por el usuario vía JSON de `/health`).
 - **Repositorio:** `DAW1BSergiomg26/liga.paraguaya.futbol` (rama `main`).
-- **Últimos commits en `main`:** `efcef15` (fix red3d: sección entendible + crash-proof + nombres visibles + panel explicativo), `42d4fcd` (fix red3d: repara carga infinita + escudos reales #3), `2fd9153` (feat red3d: grafo 3D pro con escudos reales, bloom, starfield y UI albirroja), `de17a9b` (fix goleadores/predicciones).
+- **Últimos commits en `main`:** `5826e7c` (docs handoff red3d), `dec58f3` (feat red3d: click en fichaje →
+  drawer), `a1431e9` (feat goleadores: ranking histórico + UI), `f2d4327`, `b0dff89` (tests frontend).
 
-### Pasos pendientes para completar el deploy (item 6 del roadmap)
-1. Usuario crea cuenta **Koyeb** (koyeb.com, sin tarjeta) y conecta el repo.
-2. Usuario crea proyecto Postgres gratis en **Neon** (neon.tech, sin tarjeta) y copia la *connection string* (`postgresql://...?sslmode=require`).
-3. En Koyeb: App desde el repo, runtime Docker, `Dockerfile` = `./Dockerfile.backend`, puerto `8000`, env vars:
-   - `DATABASE_URL` = string de Neon
-   - `SECRET_KEY` / `JWT_SECRET` = valores random
-   - `ADMIN_API_KEY=Rufi141414%$`
-   - `CORS_ORIGINS=http://localhost:3000,https://frontend-ten-swart-85.vercel.app`
-   - `FOOTBALL_DATA_API_KEY=` (vacío → el sync cron es no-op, solo datos demo)
+### Plan para producción (PENDIENTE — lo hace el usuario, la IA no puede crear cuentas)
+Ver `docs/DEPLOY_BACKEND.md` para la guía paso a paso. Resumen:
+1. Usuario crea cuenta **Koyeb** (app.koyeb.com, sin tarjeta) y crea el servicio con `koyeb.yaml`
+   (ya en la raíz) o conecta el repo. Alternativa: **Render** free con `render.yaml` (exige tarjeta solo
+   para verificar, no cobra).
+2. (Opcional, para Postgres real) Usuario crea proyecto **Neon** gratis (neon.tech, sin tarjeta) y copia
+   la *connection string* en `DATABASE_URL`. Sin esto, el backend usa SQLite local por defecto.
+3. Copiar la **Public URL** del backend (`.koyeb.app` o `.onrender.com`).
+4. En Vercel: setear `NEXT_PUBLIC_API_URL` = esa URL y redeploy. Esto arregla el `ERR_CONNECTION_REFUSED`.
+- **Decisión del usuario:** NO pagar ningún plan. Hosting gratuito sin tarjeta (Koyeb o Render free + Neon).
+- El código ya acepta `postgres://` y lo convierte a `postgresql+asyncpg://` (`backend/app/core/database.py`).
 4. Deployar y obtener la URL del backend.
 5. Verificar `/health`, `/api/v1/transferencias`, `/api/v1/historial/campeones` → 200.
 6. En Vercel: setear `NEXT_PUBLIC_API_URL` = nueva URL del backend y redeployar el frontend.
