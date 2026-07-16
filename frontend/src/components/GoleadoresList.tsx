@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { getGoleadores } from "@/lib/api";
+import ScrollReveal from "@/components/ui/ScrollReveal";
 
 interface Goleador {
   id: string;
@@ -65,7 +66,7 @@ export default function GoleadoresList({ torneo }: { torneo?: string }) {
   const podium = ["text-amber-300", "text-slate-300", "text-orange-400"];
 
   return (
-    <div className="space-y-2">
+    <ScrollReveal variant="from-bottom" stagger={0.06} duration={0.5}>
       {goleadores.map((g, i) => (
         <div
           key={g.id}
@@ -94,6 +95,6 @@ export default function GoleadoresList({ torneo }: { torneo?: string }) {
           </div>
         </div>
       ))}
-    </div>
+    </ScrollReveal>
   );
 }

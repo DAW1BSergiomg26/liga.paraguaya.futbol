@@ -8,6 +8,8 @@ import { CardSkeleton } from "@/components/ui/Skeleton";
 import ErrorMessage from "@/components/ui/ErrorMessage";
 import PageHeader from "@/components/ui/PageHeader";
 import ClubCard from "@/components/ui/ClubCard";
+import ScrollReveal from "@/components/ui/ScrollReveal";
+import TiltCard from "@/components/ui/TiltCard";
 
 export default function ClubesPage() {
   const [ciudad, setCiudad] = useState("");
@@ -77,11 +79,15 @@ export default function ClubesPage() {
           <p>No se encontraron clubes con ese filtro.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 justify-items-center">
-          {filtrados.map((club) => (
-            <ClubCard key={club.id} club={club} />
-          ))}
-        </div>
+        <ScrollReveal variant="scale-up" stagger={0.08} duration={0.5}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 justify-items-center">
+            {filtrados.map((club) => (
+              <TiltCard key={club.id} maxTilt={12} className="w-full flex justify-center">
+                <ClubCard club={club} />
+              </TiltCard>
+            ))}
+          </div>
+        </ScrollReveal>
       )}
     </div>
   );

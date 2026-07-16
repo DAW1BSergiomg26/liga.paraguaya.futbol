@@ -176,7 +176,7 @@ export default function TablaPage() {
                         ref={(el) => {
                           tiltRefs.current[i] = el;
                         }}
-                        className={`${rowBg} ${leftBorder} border-b border-borde-sutil transition-all duration-150 hover:bg-bg-terciario hover:translate-x-0.5 ${visible ? "animate-row-enter" : "opacity-0"} ${row.posicion === 1 ? "animate-pulse-lider" : ""}`}
+                        className={`${rowBg} ${leftBorder} border-b border-borde-sutil transition-all duration-150 hover:bg-bg-terciario hover:translate-x-0.5 ${visible ? "animate-row-enter" : "opacity-0"} ${row.posicion === 1 ? "animate-pulse-lider shadow-[inset_0_0_18px_-4px_rgba(255,204,0,0.55)] ring-1 ring-apf-amarillo/40" : ""}`}
                         style={{
                           animationDelay: visible ? `${i * 40}ms` : "0ms",
                         }}
