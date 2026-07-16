@@ -1,17 +1,20 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import type { Transferencia } from "@/types";
 import VerificationBadge from "./VerificationBadge";
 import TipoBadge from "./TipoBadge";
+import SmartImage from "@/components/ui/SmartImage";
 
-const PLACEHOLDER = "/placeholder-escudo.png";
+function EscudoFallback() {
+  return <span className="text-texto-secundario text-xs">?</span>;
+}
 
 export default function TransferCard({ transferencia: t }: { transferencia: Transferencia }) {
   return (
     <Link href={`/transferencias/${t.id}`}>
-      <div className="group bg-bg-secundario border border-borde-sutil rounded-xl p-4 hover:border-apf-rojo/50 transition-all duration-300 cursor-pointer">
+      <div className="group relative bg-bg-secundario border border-borde-sutil rounded-xl p-4 hover:border-apf-rojo/50 hover:shadow-lg hover:shadow-apf-rojo/5 transition-all duration-300 cursor-pointer overflow-hidden">
+        <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-apf-rojo to-apf-dorado opacity-0 group-hover:opacity-100 transition-opacity" />
         <div className="flex items-center justify-between mb-3">
           <TipoBadge tipo={t.tipo} />
           <VerificationBadge level={t.verification_level} />
@@ -27,11 +30,14 @@ export default function TransferCard({ transferencia: t }: { transferencia: Tran
         <div className="flex items-center justify-center gap-3 mb-3">
           <div className="flex flex-col items-center">
             <div className="w-12 h-12 rounded-full bg-bg-noche flex items-center justify-center overflow-hidden">
-              {t.club_origen_escudo ? (
-                <Image src={t.club_origen_escudo} alt="" width={40} height={40} className="object-contain" />
-              ) : (
-                <span className="text-texto-secundario text-xs">?</span>
-              )}
+              <SmartImage
+                src={t.club_origen_escudo}
+                alt=""
+                width={40}
+                height={40}
+                className="object-contain"
+                fallback={<EscudoFallback />}
+              />
             </div>
             <p className="text-texto-secundario text-xs mt-1 max-w-[80px] truncate">{t.club_origen_nombre || "Libre"}</p>
           </div>
@@ -42,11 +48,14 @@ export default function TransferCard({ transferencia: t }: { transferencia: Tran
 
           <div className="flex flex-col items-center">
             <div className="w-12 h-12 rounded-full bg-bg-noche flex items-center justify-center overflow-hidden">
-              {t.club_destino_escudo ? (
-                <Image src={t.club_destino_escudo} alt="" width={40} height={40} className="object-contain" />
-              ) : (
-                <span className="text-texto-secundario text-xs">?</span>
-              )}
+              <SmartImage
+                src={t.club_destino_escudo}
+                alt=""
+                width={40}
+                height={40}
+                className="object-contain"
+                fallback={<EscudoFallback />}
+              />
             </div>
             <p className="text-texto-secundario text-xs mt-1 max-w-[80px] truncate">{t.club_destino_nombre}</p>
           </div>
@@ -54,8 +63,10 @@ export default function TransferCard({ transferencia: t }: { transferencia: Tran
 
         <div className="flex items-center justify-between text-xs text-texto-secundario">
           <span>{new Date(t.fecha).toLocaleDateString("es-PY")}</span>
-          {t.monto && (
+          {t.monto ? (
             <span className="text-apf-dorado font-semibold">${t.monto}M</span>
+          ) : (
+            <span className="text-texto-apagado">Costo no divulgado</span>
           )}
         </div>
       </div>

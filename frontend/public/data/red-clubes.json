@@ -40,6 +40,10 @@
     { "source": "san-lorenzo",    "target": "luqueno",         "value": 30,  "name": "Clásico del Central" },
     { "source": "recoleta",       "target": "olimpia",         "value": 15,  "name": "Enfrentamientos recientes" },
     { "source": "tembetary",      "target": "colegiales",      "value": 10,  "name": "Rivalidad de barrio" },
-    { "source": "deportivo-capiata","target": "luqueno",       "value": 12,  "name": "Clásico del Departamento Central" }
+    { "source": "deportivo-capiata","target": "luqueno",       "value": 12,  "name": "Clásico del Departamento Central" },
+    { "source": "2-de-mayo",       "target": "general-caballero","value": 18, "name": "Clásico del Este" },
+    { "source": "2-de-mayo",       "target": "trinidense",     "value": 16,  "name": "Derbi del Interior" },
+    { "source": "general-diaz",    "target": "luqueno",        "value": 14,  "name": "Clásico de Luque" },
+    { "source": "san-lorenzo",     "target": "general-diaz",   "value": 12,  "name": "Rivalidad del Sur" }
   ]
 }

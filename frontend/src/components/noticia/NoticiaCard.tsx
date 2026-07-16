@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import type { Noticia } from "@/types";
 import { htmlToText } from "@/lib/html";
+import SmartImage from "@/components/ui/SmartImage";
 
 function formatearFecha(iso: string): string {
   const d = new Date(iso);
@@ -19,7 +19,7 @@ function formatearFecha(iso: string): string {
   return d.toLocaleDateString("es-PY", { day: "numeric", month: "short" });
 }
 
-function FuenteBadge({ fuente, origen }: { fuente: string; origen: string }) {
+function FuenteBadge({ fuente }: { fuente: string }) {
   const colors: Record<string, string> = {
     editorial: "bg-apf-rojo text-white",
     "ABC Color Deportes": "bg-blue-700 text-white",
@@ -54,36 +54,36 @@ export default function NoticiaCard({ noticia, variant = "normal", priority = fa
         isFeatured ? "col-span-2 row-span-2" : ""
       }`}
     >
-      {noticia.imagen_url ? (
-        <div className={`relative overflow-hidden ${isFeatured ? "h-64" : isCompact ? "h-32" : "h-48"}`}>
-          <Image
-            src={noticia.imagen_url}
-            alt={noticia.titulo}
-            fill
-            sizes="(max-width: 768px) 100vw, 33vw"
-            priority={priority}
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
-          />
-          {noticia.video_url && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-              <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center">
-                <svg className="w-5 h-5 text-apf-rojo ml-0.5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M8 5v14l11-7z" />
-                </svg>
-              </div>
+      <div className={`relative overflow-hidden ${isFeatured ? "h-64" : isCompact ? "h-32" : "h-48"}`}>
+        <SmartImage
+          src={noticia.imagen_url}
+          alt={noticia.titulo}
+          fill
+          sizes="(max-width: 768px) 100vw, 33vw"
+          priority={priority}
+          className="object-cover group-hover:scale-105 transition-transform duration-300"
+          fallback={
+            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-apf-azul/20 to-apf-rojo/20">
+              <svg className={`text-apf-rojo/40 ${isFeatured ? "w-16 h-16" : "w-10 h-10"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+              </svg>
             </div>
-          )}
-        </div>
-      ) : (
-        <div className={`flex items-center justify-center bg-gradient-to-br from-apf-azul/20 to-apf-rojo/20 ${isFeatured ? "h-64" : isCompact ? "h-32" : "h-48"}`}>
-          <svg className={`text-apf-rojo/40 ${isFeatured ? "w-16 h-16" : "w-10 h-10"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
-          </svg>
-        </div>
-      )}
+          }
+        />
+        {noticia.video_url && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+            <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center">
+              <svg className="w-5 h-5 text-apf-rojo ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            </div>
+          </div>
+        )}
+        <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      </div>
       <div className={`bg-bg-secundario ${isFeatured ? "p-6" : "p-4"}`}>
         <div className="flex items-center gap-2 mb-2">
-          <FuenteBadge fuente={noticia.fuente} origen={noticia.origen} />
+          <FuenteBadge fuente={noticia.fuente} />
           <span className="text-xs text-texto-apagado">{formatearFecha(noticia.pub_date)}</span>
         </div>
         <h3 className={`font-bold text-texto-principal group-hover:text-apf-rojo transition-colors ${

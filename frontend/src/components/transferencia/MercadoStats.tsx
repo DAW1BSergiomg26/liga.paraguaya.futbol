@@ -1,10 +1,8 @@
 // frontend/src/components/transferencia/MercadoStats.tsx
 "use client";
 
-import Image from "next/image";
 import type { EstadisticasTransferencias, GastoPorClub } from "@/types";
-
-const PLACEHOLDER = "/placeholder-escudo.png";
+import SmartImage from "@/components/ui/SmartImage";
 
 function formatMonto(m: number | null | undefined): string {
   if (m === null || m === undefined) return "-";
@@ -60,11 +58,14 @@ export default function MercadoStats({ data }: { data: EstadisticasTransferencia
             <li key={t.id} className="flex items-center gap-3">
               <span className="text-apf-dorado font-bold w-4 text-sm">{i + 1}</span>
               <div className="w-8 h-8 rounded-full bg-bg-noche flex items-center justify-center overflow-hidden flex-shrink-0">
-                {t.club_destino_escudo ? (
-                  <Image src={t.club_destino_escudo} alt="" width={28} height={28} className="object-contain" />
-                ) : (
-                  <span className="text-texto-secundario text-[10px]">?</span>
-                )}
+                <SmartImage
+                  src={t.club_destino_escudo}
+                  alt=""
+                  width={28}
+                  height={28}
+                  className="object-contain"
+                  fallback={<span className="text-texto-secundario text-[10px]">?</span>}
+                />
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-texto-principal text-sm font-medium truncate">{t.jugador_nombre}</p>
