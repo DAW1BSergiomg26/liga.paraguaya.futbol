@@ -11,10 +11,15 @@ Para producción necesitás un backend en la nube. Acá las dos opciones gratis 
 1. Crear cuenta en <https://app.koyeb.com> (NO pide tarjeta).
 2. **Create App** → elegir "With YAML" y pegar `koyeb.yaml` (está en la raíz del repo),
    o bien "GitHub" y conectar el repo `DAW1BSergiomg26/liga.paraguaya.futbol`.
-3. En env vars: `ADMIN_API_KEY`, `CORS_ORIGINS` y `FOOTBALL_DATA_API_KEY` ya vienen en el YAML.
-   `DATABASE_URL` es opcional (usa SQLite local). Para Postgres real, creá un proyecto
-   **Neon** gratis en <https://neon.tech> (sin tarjeta) y pegá la connection string en
-   `DATABASE_URL` (formato `postgresql://...?sslmode=require`).
+3. En env vars (secrets): `ADMIN_API_KEY`, `JWT_SECRET` y `DATABASE_URL` se setean en el
+   dashboard de Koyeb como **secrets** (NO van hardcodeados en el YAML). `CORS_ORIGINS` ya
+   viene por defecto. `FOOTBALL_DATA_API_KEY` es opcional.
+   `DATABASE_URL` es OBLIGATORIA para produccion real: creá un proyecto **Neon** gratis en
+   <https://neon.tech> (sin tarjeta) y pegá la connection string (formato
+   `postgresql://...?sslmode=require`). El codigo la convierte a `postgresql+asyncpg://`.
+   NOTA: el helper de columnas faltantes de Alembic usa `PRAGMA` (solo SQLite). En Postgres
+   ese fallback no aplica, pero `alembic upgrade head` SI corre en el arranque, asi que las
+   migraciones se aplican bien. No bloquea el deploy.
 4. El puerto lo toma de `$PORT` (el `Dockerfile.backend` usa `${PORT:-8001}`).
 5. Health check en `/health`.
 6. Cuando termine, copiá la **Public URL** (tipo `https://liga-backend-xxxx.koyeb.app`).

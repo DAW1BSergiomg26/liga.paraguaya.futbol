@@ -41,6 +41,8 @@ desktop.ini
 *.db
 .vercel
 .env*
+# Excepcion: el template de variables SI se versiona (no contiene secretos).
+!.env.example
 .aider*
 
 # Logs locales
