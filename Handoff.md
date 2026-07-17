@@ -27,7 +27,7 @@ liga.paraguaya.futbol/
 ├── backend/
 │   ├── alembic/              # Migraciones (8 revisiones: 001-008)
 │   ├── app/
-│   │   ├── api/              # Routers FastAPI (clubes, partidos, tabla, predicciones, chat, push, admin, cerezo, noticias, transferencias, goleadores, historial, tactico)
+│   │   ├── api/              # Routers FastAPI (clubes, partidos, tabla, predicciones, chat, push, admin, cerezo, noticias, transferencias, goleadores, historial, tactico, simulador)
 │   │   ├── core/             # Config, DB, dependencias (get_current_user, get_current_admin), API Key
 │   │   ├── models/           # SQLAlchemy (12 modelos: Club, Partido, TablaPosicion, Prediccion, User, APIKey, ChatMessage, Noticia, Transferencia, Goleador, Player, Team, MatchEvent, TacticalAnalysis, TacticalReport)
 │   │   ├── schemas/          # Pydantic v2
@@ -61,6 +61,7 @@ liga.paraguaya.futbol/
 │   │   │   ├── noticias/     # Noticias (grid + filtros + detalle)
 │   │   │   ├── transferencias/ # Transferencias (CRUD, mercado, historial, estadísticas)
 │   │   │   ├── red3d/        # Red de Clubes — grafo 2D/3D híbrido
+│   │   │   ├── simulador/    # Simulador de partidos — layout Visual VS con predicción Poisson
 │   │   │   └── cerezo/       # Asistente IA Cerezo Digital
 │   │   ├── components/
 │   │   │   ├── hero/         # CinematicHero (GSAP SplitType + sparticles)
@@ -261,6 +262,18 @@ liga.paraguaya.futbol/
 - [x] `ui-avatars.com` agregado a `remotePatterns` en `next.config.ts`.
 - [x] ESLint-disable comments limpiados en `red3d/page.tsx`.
 
+### Motor de Simulación Probabilística (Julio 2026)
+- [x] Schemas Pydantic: `SimulationInput`, `ExactScore`, `SimulationResultOut`
+- [x] `SimulatorService` — Poisson PMF, matrix 7×7 (goles 0-6), λ home/away por promedio histórico
+- [x] `POST /api/v1/simulador/prediccion` — endpoint completo
+- [x] Frontend types TypeScript: `ExactScore`, `SimulationResultOut`, `SimulationInput`
+- [x] Función API `predecirPartido()` — POST a `/api/v1/simulador/prediccion`
+- [x] Página `/simulador` — layout Visual VS (paneles enfrentados Local/VS/Visitante)
+- [x] Modal selector de clubes con grilla 19 clubes + buscador
+- [x] Barras de probabilidad animadas (local/empate/visitante)
+- [x] Top 3 resultados exactos con probabilidad
+- [x] Accesibilidad: aria-label, role=dialog, aria-modal, aria-disabled, focus trap, Escape key
+
 ### Red de Clubes `/red3d` — Grafo 2D/3D Híbrido (Julio 2026)
 - [x] **Arquitectura híbrida responsiva 2D/3D:**
   - `useIsMobile.ts` — Hook SSR-safe con `useSyncExternalStore` + `matchMedia` (breakpoint 768px, SSR-safe).
@@ -312,6 +325,7 @@ El **Handoff Maestro** define la dirección completa del proyecto con una identi
 6. ✅ Deployment a producción — Frontend en Vercel + Backend en Render (Docker) + DB en Neon Postgres.
 7. ✅ SEO + Meta Tags + PWA + Error Boundaries + Lazy Loading imágenes
 8. ✅ Red de Clubes `/red3d` — grafo 2D/3D híbrido responsivo con detección de dispositivo
+9. ✅ Motor de Simulación Probabilística — Poisson PMF, backend + frontend Visual VS
 
 ## Pendientes / Issues conocidos
 
