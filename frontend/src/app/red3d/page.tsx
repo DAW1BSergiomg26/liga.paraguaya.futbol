@@ -355,8 +355,10 @@ export default function Red3DPage() {
 
         {/* Controles principales */}
         <div className="flex flex-wrap items-center gap-3 mb-5">
-          <div className="flex gap-2 p-1 rounded-xl bg-bg-secundario/70 backdrop-blur border border-borde-sutil">
+          <div className="flex gap-2 p-1 rounded-xl bg-bg-secundario/70 backdrop-blur border border-borde-sutil" role="tablist" aria-label="Modo de visualización">
             <button
+              role="tab"
+              aria-selected={mode === "rivalidades"}
               onClick={() => setMode("rivalidades")}
               className={`px-4 py-2 rounded-lg text-sm font-semibold transition ${
                 mode === "rivalidades" ? "bg-apf-rojo text-white shadow-lg" : "text-texto-secundario hover:text-texto-principal"
@@ -365,6 +367,8 @@ export default function Red3DPage() {
               Rivalidades
             </button>
             <button
+              role="tab"
+              aria-selected={mode === "fichajes"}
               onClick={() => setMode("fichajes")}
               className={`px-4 py-2 rounded-lg text-sm font-semibold transition ${
                 mode === "fichajes" ? "bg-apf-rojo text-white shadow-lg" : "text-texto-secundario hover:text-texto-principal"
@@ -379,6 +383,7 @@ export default function Red3DPage() {
             <>
               <button
                 onClick={() => setAutoRotate((v) => !v)}
+                aria-pressed={autoRotate}
                 className={`px-4 py-2 rounded-xl text-sm font-medium transition border ${
                   autoRotate
                     ? "bg-apf-dorado/15 border-apf-dorado/40 text-apf-dorado"
@@ -390,6 +395,7 @@ export default function Red3DPage() {
 
               <button
                 onClick={resetCamera}
+                aria-label="Centrar cámara en el grafo"
                 className="px-4 py-2 rounded-xl text-sm font-medium bg-bg-secundario/70 border border-borde-sutil text-texto-secundario hover:text-texto-principal transition"
               >
                 ⟲ Centrar
@@ -401,6 +407,7 @@ export default function Red3DPage() {
             <select
               value={temporada}
               onChange={(e) => setTemporada(e.target.value)}
+              aria-label="Filtrar por temporada"
               className="px-4 py-2 rounded-xl bg-bg-noche border border-borde-sutil text-texto-principal text-sm focus:outline-none focus:border-apf-rojo/50 ml-auto"
             >
               {anios.map((a) => (
@@ -426,6 +433,7 @@ export default function Red3DPage() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Buscar club…"
+              aria-label="Buscar club"
               className="w-full px-4 py-2.5 rounded-xl bg-bg-noche border border-borde-sutil text-texto-principal text-sm placeholder:text-texto-apagado focus:outline-none focus:border-apf-dorado/50"
             />
           </div>
@@ -453,6 +461,7 @@ export default function Red3DPage() {
               <div className="flex justify-center pt-2">
                 <button
                   onClick={enable3D}
+                  aria-label="Activar mapa interactivo 3D"
                   className="group flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-[#1a0510] to-[#0d1a2e] border border-apf-rojo/40 text-texto-principal text-sm font-semibold shadow-[0_0_20px_-6px_rgba(204,0,28,0.4)] hover:shadow-[0_0_30px_-4px_rgba(204,0,28,0.6)] hover:border-apf-rojo/60 transition-all duration-300"
                 >
                   <span className="text-lg">🌐</span>
@@ -482,6 +491,7 @@ export default function Red3DPage() {
               </p>
               <button
                 onClick={disable3D}
+                aria-label="Volver a vista 2D"
                 className="px-3 py-1.5 rounded-lg text-xs font-medium bg-bg-secundario/70 border border-borde-sutil text-texto-secundario hover:text-texto-principal transition"
               >
                 ← Vista 2D
@@ -546,6 +556,7 @@ export default function Red3DPage() {
                       </div>
                       <button
                         onClick={() => setSelectedNode(null)}
+                        aria-label="Cerrar panel de club"
                         className="text-texto-apagado hover:text-apf-rojo text-xl leading-none"
                       >
                         ×
@@ -572,6 +583,7 @@ export default function Red3DPage() {
                       </div>
                       <button
                         onClick={() => setSelectedLink(null)}
+                        aria-label="Cerrar panel de fichaje"
                         className="text-texto-apagado hover:text-apf-rojo text-xl leading-none"
                       >
                         ×
@@ -598,7 +610,7 @@ export default function Red3DPage() {
               </div>
 
               {/* Lista lateral de clubes */}
-              <aside className="rounded-2xl border border-borde-sutil bg-bg-secundario/40 backdrop-blur p-3 h-[600px] lg:h-[720px] overflow-y-auto">
+              <aside aria-label="Lista de clubes" className="rounded-2xl border border-borde-sutil bg-bg-secundario/40 backdrop-blur p-3 h-[600px] lg:h-[720px] overflow-y-auto">
                 <p className="text-xs uppercase tracking-wider text-texto-apagado mb-2 px-1">Clubes ({clubList.length})</p>
                 <ul className="space-y-1">
                   {filteredList.map((c) => (

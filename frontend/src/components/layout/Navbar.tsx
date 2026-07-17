@@ -29,6 +29,7 @@ function NavLink({ href, children, active, onClick }: { href: string; children: 
     <Link
       href={href}
       onClick={onClick}
+      aria-current={active ? "page" : undefined}
       className={`relative whitespace-nowrap transition-colors duration-200 ${
         active ? "text-apf-rojo" : "text-texto-secundario hover:text-white"
       }`}
@@ -95,7 +96,7 @@ export default function Navbar() {
         </NavLink>
       )}
       {token ? (
-        <button onClick={handleLogout} className="text-texto-apagado hover:text-texto-secundario transition text-xs">
+        <button onClick={handleLogout} aria-label="Cerrar sesión" className="text-texto-apagado hover:text-texto-secundario transition text-xs">
           Salir
         </button>
       ) : (
@@ -128,7 +129,9 @@ export default function Navbar() {
         <button
           onClick={() => setMenuOpen(!menuOpen)}
           className="md:hidden p-2 text-texto-secundario hover:text-white transition"
-          aria-label="Abrir menú"
+          aria-label={menuOpen ? "Cerrar menú" : "Abrir menú"}
+          aria-expanded={menuOpen}
+          aria-controls="mobile-menu"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             {menuOpen ? (
@@ -142,7 +145,7 @@ export default function Navbar() {
 
       {/* Mobile */}
       {menuOpen && (
-        <div className="md:hidden border-t border-borde-sutil px-4 py-4 flex flex-col gap-4 text-sm font-medium navbar-blur">
+        <div id="mobile-menu" role="menu" aria-label="Menú de navegación" className="md:hidden border-t border-borde-sutil px-4 py-4 flex flex-col gap-4 text-sm font-medium navbar-blur">
           {navLinks}
         </div>
       )}

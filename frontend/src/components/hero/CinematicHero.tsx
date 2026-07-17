@@ -72,6 +72,7 @@ export default function CinematicHero() {
     return () => {
       split.revert();
       tl.kill();
+      ScrollTrigger.getAll().forEach((t) => t.kill());
     };
   }, []);
 
