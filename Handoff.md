@@ -314,7 +314,6 @@ El **Handoff Maestro** define la dirección completa del proyecto con una identi
 - D3.js — gráficos de datos (voronoi táctico, radar de stats)
 - GSAP + ScrollTrigger — animaciones de entrada, parallax, reveal
 - Three.js + React Three Fiber — visualización 3D (ya implementada en `/red3d`)
-- Supabase — migración futura desde SQLite
 
 ### Roadmap del Usuario
 1. ✅ Datos reales (scraping + Football-Data.org)
