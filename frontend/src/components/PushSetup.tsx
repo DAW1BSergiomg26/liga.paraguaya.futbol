@@ -11,7 +11,7 @@ export default function PushSetup() {
 
     // Set up push subscription if PushManager is available
     if (!("PushManager" in window)) return;
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://backend-production-0b7d.up.railway.app";
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
 
     async function setup() {
       try {

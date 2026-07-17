@@ -35,7 +35,7 @@ export default function ChatWidget({ partidoId }: ChatWidgetProps) {
   }, [token]);
 
   useEffect(() => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://backend-production-0b7d.up.railway.app";
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
     fetch(`${apiUrl}/api/v1/partidos/${partidoId}/chat?limit=50`)
       .then((r) => r.json())
       .then((data) => {
@@ -47,7 +47,7 @@ export default function ChatWidget({ partidoId }: ChatWidgetProps) {
 
   useEffect(() => {
     if (!token) return;
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://backend-production-0b7d.up.railway.app";
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
     const wsUrl = apiUrl.replace(/^http/, "ws");
     const ws = new WebSocket(`${wsUrl}/api/v1/ws/partidos/${partidoId}?token=${token}`);
 

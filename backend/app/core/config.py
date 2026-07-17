@@ -14,11 +14,14 @@ class Settings(BaseSettings):
     debug: bool = True
 
     database_url: str = f"sqlite+aiosqlite:///{_DEFAULT_DB_PATH.as_posix()}"
-    cors_origins: str = "http://localhost:3000,http://localhost:5173,https://liga.paraguaya.futbol"
+    cors_origins: str = "http://localhost:3000,http://localhost:5173,https://frontend-ten-swart-85.vercel.app"
 
     api_football_key: str = ""
 
-    admin_api_key: str = "Rufi141414%$"
+    # En produccion (Render) se setea via variable de entorno ADMIN_API_KEY.
+    # Si no se setea, queda vacia y las rutas admin quedan bloqueadas hasta
+    # configurarla. No hay default inseguro hardcodeado.
+    admin_api_key: str = ""
 
     # En produccion (Koyeb) se debe setear JWT_SECRET via variable de entorno.
     # Si no se setea, se genera un secreto efimero por arranque (los tokens

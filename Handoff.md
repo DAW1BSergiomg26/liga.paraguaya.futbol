@@ -14,7 +14,7 @@ Plataforma web para el seguimiento de la Primera División paraguaya de fútbol.
 | Scraping | selectolax, httpx, RSSSF + Wikipedia |
 | Auth | JWT (bcrypt + PyJWT), 7-day tokens |
 | APIs externas | Football-Data.org (competicion PA1) |
-| Infra | Docker (`render.yaml` para Render), Vercel (frontend en producción), backend migrando a host gratuito (Koyeb + Neon Postgres) tras vencer el trial de Railway |
+| Infra | **Oficial:** Frontend = Vercel · Backend = Render (Docker, `Dockerfile.backend`) · DB = Neon Postgres. Railway y Koyeb **descartados**. |
 
 ## Rama activa
 
@@ -248,7 +248,7 @@ El **Handoff Maestro** define la dirección completa del proyecto con una identi
 3. ✅ Noticias (RSS + UI)
 4. ✅ Transferencias (CRUD + RSS + UI + estadísticas)
 5. ✅ Estadísticas históricas
- 6. 🔶 Deployment a producción — frontend en Vercel ✅; backend en Koyeb+Neon (gratis, sin tarjeta). Ver sección "Estado de despliegue".
+  6. 🔶 Deployment a producción — **COMPLETADO** ✅. Frontend en Vercel + Backend en Render (Docker) + DB en Neon Postgres. Ver sección "Estado de despliegue".
 
 ## Pendientes / Issues conocidos
 
@@ -272,33 +272,31 @@ El **Handoff Maestro** define la dirección completa del proyecto con una identi
   obsoleta y daba 500 en `/transferencias`. Ya fue matado y reemplazado; no replicar ese setup.
 
 ### Estado de despliegue (VERIFICADO — Julio 2026)
-- **Frontend:** ✅ EN PRODUCCIÓN en Vercel → https://frontend-ten-swart-85.vercel.app
+Arquitectura oficial en producción:
+- **Frontend:** ✅ Vercel → https://frontend-ten-swart-85.vercel.app
   - Project ID: `prj_uM7KzAcPV7zRwjWDGpHAIGXelCC2` (org `team_xTbaX86uhYJgVplW2yc6jTUj`)
-  - ⚠️ **`NEXT_PUBLIC_API_URL` apunta a Railway MUERTO**: `https://backend-production-0b7d.up.railway.app`
-    (verificado: devuelve `{"status":"error","code":404,"message":"Application not found"}`). Por eso el
-    frontend carga pero los datos no llegan (`ERR_CONNECTION_REFUSED` en las llamadas al backend).
-- **Backend:** ❌ **NO HAY BACKEND EN LA NUBE ACTIVO.** El Handoff previo decía "Koyeb en producción"
-  pero eso NUNCA se ejecutó — el usuario no creó la cuenta de Koyeb. El backend SÍ funciona localmente
-  (`http://localhost:8000/health` → ok; verificado por el agente y por el usuario vía JSON de `/health`).
+  - `NEXT_PUBLIC_API_URL` → `https://liga-paraguaya-futbol.onrender.com` (backend de Render).
+  - Carga datos reales: 348 partidos, 892 goles, 19 equipos desde Neon.
+- **Backend:** ✅ Render (Web Service, runtime **Docker** → `Dockerfile.backend`)
+  - URL pública: `https://liga-paraguaya-futbol.onrender.com`
+  - Variables en Render (secrets): `DATABASE_URL` (Neon, SIN `sslmode`), `ADMIN_API_KEY`, `JWT_SECRET`.
+  - Start Command: `uvicorn backend.app.main:app --host 0.0.0.0 --port $PORT`
+  - Health check: `/health`.
+- **DB:** ✅ Neon Postgres (`ep-flat-mode-aws14q8g...neon.tech/neondb`, región us-east-1).
+  - **IMPORTANTE:** la connection string va SIN `?sslmode=require` (asyncpg no acepta ese parámetro
+    en el query string; si aparece, el deploy falla). El código convierte `postgres://`→`postgresql+asyncpg://`.
+- **Railway:** ❌ **DESCARTADO DEFINITIVAMENTE** (sin free tier útil; el backend anterior ahí estaba muerto).
+- **Koyeb:** ❌ **DESCARTADO** (cambios en la plataforma); se migró a Render.
 - **Repositorio:** `DAW1BSergiomg26/liga.paraguaya.futbol` (rama `main`).
-- **Últimos commits en `main`:** `5826e7c` (docs handoff red3d), `dec58f3` (feat red3d: click en fichaje →
-  drawer), `a1431e9` (feat goleadores: ranking histórico + UI), `f2d4327`, `b0dff89` (tests frontend).
 
-### Plan para producción (PENDIENTE — lo hace el usuario, la IA no puede crear cuentas)
-Ver `docs/DEPLOY_BACKEND.md` para la guía paso a paso. Resumen:
-1. Usuario crea cuenta **Koyeb** (app.koyeb.com, sin tarjeta) y crea el servicio con `koyeb.yaml`
-   (ya en la raíz) o conecta el repo. Alternativa: **Render** free con `render.yaml` (exige tarjeta solo
-   para verificar, no cobra).
-2. (Opcional, para Postgres real) Usuario crea proyecto **Neon** gratis (neon.tech, sin tarjeta) y copia
-   la *connection string* en `DATABASE_URL`. Sin esto, el backend usa SQLite local por defecto.
-3. Copiar la **Public URL** del backend (`.koyeb.app` o `.onrender.com`).
-4. En Vercel: setear `NEXT_PUBLIC_API_URL` = esa URL y redeploy. Esto arregla el `ERR_CONNECTION_REFUSED`.
-- **Decisión del usuario:** NO pagar ningún plan. Hosting gratuito sin tarjeta (Koyeb o Render free + Neon).
-- El código ya acepta `postgres://` y lo convierte a `postgresql+asyncpg://` (`backend/app/core/database.py`).
-4. Deployar y obtener la URL del backend.
-5. Verificar `/health`, `/api/v1/transferencias`, `/api/v1/historial/campeones` → 200.
-6. En Vercel: setear `NEXT_PUBLIC_API_URL` = nueva URL del backend y redeployar el frontend.
-7. Cerrar Handoff + marcar roadmap item 6 como ✅.
+### Reglas de automatización (aplicadas en cada cambio)
+1. **SSL/asyncpg:** al tocar `.env`, `config.py` o strings de conexión, NO debe haber `?sslmode=` ni
+   `ssl=true` (asyncpg los rechaza). El código ya convierte `postgres://`→`postgresql+asyncpg://`.
+2. **Rutas de DB/seed:** al tocar `seed.py` o migraciones, las rutas a JSON/DB locales deben ser
+   absolutas (basadas en `Path(__file__)`) para no generar DB incompletas.
+3. **Handoff:** se mantiene actualizado con la arquitectura oficial Vercel + Render + Neon y Railway descartado.
+4. **Tipos/imports:** antes de cerrar cualquier componente React/Next o ruta FastAPI, chequeo estricto de
+   imports duplicados y directivas `"use client"` para no romper el build de Vercel.
 
 ### Configuración
 - `FOOTBALL_DATA_API_KEY` no configurada (intencional) → el sync cron es no-op y solo se usan datos demo. No es un error.
@@ -348,18 +346,15 @@ npx vitest run  # Si hay tests configurados
 ## Variables de entorno
 
 ```bash
-# Backend
-DATABASE_URL=sqlite+aiosqlite:///./data/liga.db   # Local SQLite. En prod: postgresql://... de Neon (el código acepta postgres:// y lo convierte a postgresql+asyncpg://)
-SECRET_KEY=change-me-in-production-2026
-JWT_SECRET=change-me-in-production-2026
-VAPID_PUBLIC_KEY=
-VAPID_PRIVATE_KEY=
-ADMIN_API_KEY=Rufi141414%$
+# Backend (Render, secrets en el dashboard - NO hardcodeados en el repo)
+DATABASE_URL=postgresql://<neon-owner>:<pass>@<host>/neondb   # Sin ?sslmode (asyncpg lo rechaza)
+JWT_SECRET=<generado en Render>
+ADMIN_API_KEY=<seteado en Render>
 CORS_ORIGINS=http://localhost:3000,https://frontend-ten-swart-85.vercel.app
 FOOTBALL_DATA_API_KEY=  # Opcional — sin ella el sync cron es no-op, solo datos demo
 
-# Frontend
-NEXT_PUBLIC_API_URL=http://localhost:8000         # En Vercel: debe apuntar a la URL del backend en producción
+# Frontend (Vercel, Environment Variables)
+NEXT_PUBLIC_API_URL=https://liga-paraguaya-futbol.onrender.com
 NEXT_PUBLIC_VAPID_PUBLIC_KEY=
 ```
 
