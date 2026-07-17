@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getClub, getPartidos, getTabla, getTorneos } from "@/lib/api";
@@ -123,7 +124,7 @@ export default function ClubDetailPage() {
       <div className="p-8 rounded-2xl border border-borde-sutil bg-bg-secundario/80 shadow-xl">
           <div className="flex items-start gap-6 mb-6">
           {club.escudo && (
-            <img src={club.escudo} alt={club.nombre} className="w-20 h-20 object-contain shrink-0" />
+            <Image src={club.escudo} alt={club.nombre} width={80} height={80} loading="lazy" className="w-20 h-20 object-contain shrink-0" />
           )}
           <div className="flex-1">
             <div className="flex items-center gap-4 flex-wrap">

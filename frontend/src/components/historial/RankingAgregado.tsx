@@ -1,6 +1,7 @@
 // frontend/src/components/historial/RankingAgregado.tsx
 "use client";
 
+import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { getCampeones, getRankingClubes } from "@/lib/api";
@@ -37,7 +38,7 @@ export default function RankingAgregado() {
           {(campeones || []).map((c) => (
             <div key={c.torneo} className="bg-bg-secundario border border-borde-sutil rounded-xl p-4 flex items-center gap-3">
               {c.escudo ? (
-                <img src={c.escudo} alt="" className="w-10 h-10 object-contain" />
+                <Image src={c.escudo} alt="" width={40} height={40} loading="lazy" className="w-10 h-10 object-contain" />
               ) : (
                 <div className="w-10 h-10 rounded-full bg-bg-noche" />
               )}
@@ -70,7 +71,7 @@ export default function RankingAgregado() {
               {(ranking || []).map((r) => (
                 <tr key={r.club_id} className="border-b border-borde-sutil/50">
                   <td className="px-3 py-2 font-medium flex items-center gap-2">
-                    {r.escudo ? <img src={r.escudo} alt="" className="w-5 h-5 object-contain" /> : null}
+                    {r.escudo ? <Image src={r.escudo} alt="" width={20} height={20} loading="lazy" className="w-5 h-5 object-contain" /> : null}
                     {r.club}
                   </td>
                   <td className="px-2 py-2 text-center font-bold text-apf-dorado">{r.titulos}</td>

@@ -1,6 +1,7 @@
 // frontend/src/app/red3d/page.tsx
 "use client";
 
+import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import PageHeader from "@/components/ui/PageHeader";
 import { apiFetch } from "@/lib/api";
@@ -368,8 +369,7 @@ export default function Red3DPage() {
               <div className="absolute bottom-4 left-4 right-4 lg:left-4 lg:right-auto lg:w-80 bg-bg-secundario/95 backdrop-blur-sm border-l-4 border-apf-rojo rounded-xl p-4 shadow-2xl ring-1 ring-white/10">
                 <div className="flex items-start gap-3">
                   {selectedNode.escudo && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={selectedNode.escudo} alt={selectedNode.name} fetchPriority="high" className="w-14 h-14 object-contain rounded-lg bg-white/10 p-1 shadow" />
+                    <Image src={selectedNode.escudo} alt={selectedNode.name} width={56} height={56} loading="lazy" className="w-14 h-14 object-contain rounded-lg bg-white/10 p-1 shadow" />
                   )}
                   <div className="flex-1">
                     <h3 className="text-texto-principal font-bold text-lg leading-tight">{selectedNode.name}</h3>
@@ -450,8 +450,7 @@ export default function Red3DPage() {
                     }`}
                   >
                     {c.escudo && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={c.escudo} alt="" fetchPriority="high" className="w-7 h-7 object-contain rounded bg-white/5 p-0.5" />
+                      <Image src={c.escudo} alt="" width={28} height={28} loading="lazy" className="w-7 h-7 object-contain rounded bg-white/5 p-0.5" />
                     )}
                     <span className="text-sm text-texto-principal truncate">{c.name}</span>
                   </button>

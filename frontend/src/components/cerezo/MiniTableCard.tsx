@@ -1,9 +1,13 @@
 "use client";
+import Image from "next/image";
 import { MiniTableData } from "@/types";
+import { useState } from "react";
 
 interface Props { data: MiniTableData }
 
 export default function MiniTableCard({ data }: Props) {
+  const [escudoErrors, setEscudoErrors] = useState<Record<string, boolean>>({});
+
   return (
     <div className="max-w-[80%] rounded-2xl p-4 bg-bg-secundario border border-borde-sutil text-sm space-y-2">
       <p className="text-apf-rojo font-semibold text-xs uppercase tracking-wider">
@@ -18,8 +22,8 @@ export default function MiniTableCard({ data }: Props) {
               className={`flex items-center gap-2 text-xs py-1 px-2 rounded ${isHighlighted ? "bg-apf-rojo/10 border border-[#76e4f7]/30" : ""}`}
             >
               <span className="w-5 text-center font-bold text-gray-400">{c.pos}</span>
-              {c.escudo && (
-                <img src={c.escudo} alt="" className="w-4 h-4 object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = "none" }} />
+              {c.escudo && !escudoErrors[c.nombre] && (
+                <Image src={c.escudo} alt="" width={16} height={16} loading="lazy" className="w-4 h-4 object-contain" onError={() => setEscudoErrors(prev => ({ ...prev, [c.nombre]: true }))} />
               )}
               <span className="flex-1 text-white truncate">{c.nombre}</span>
               <span className="text-gray-400 w-6 text-right">{c.pj}</span>

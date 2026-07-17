@@ -15,16 +15,74 @@ const barlowCondensed = Barlow_Condensed({
 });
 
 export const metadata: Metadata = {
-  title: "Liga Paraguaya de Fútbol",
-  description: "Clubes, partidos, tabla de posiciones y datos base del fútbol paraguayo.",
-  icons: "/favicon.svg",
-  metadataBase: new URL("https://ligapy.com"),
+  title: {
+    default: "Liga Paraguaya de Fútbol | Datos y Estadísticas",
+    template: "%s | Liga PY",
+  },
+  description:
+    "Clubes, partidos, tabla de posiciones, goleadores, transferencias y datos del fútbol paraguayo en tiempo real.",
+  keywords: [
+    "fútbol paraguayo",
+    "liga paraguaya",
+    "primera división",
+    "clubes",
+    "partidos",
+    "tabla de posiciones",
+    "goleadores",
+    "transferencias",
+    "APF",
+    "Cerro Porteño",
+    "Olimpia",
+    "Libertad",
+  ],
+  authors: [{ name: "Liga Paraguaya de Fútbol" }],
+  creator: "Liga PY",
+  publisher: "Liga PY",
+  formatDetection: { telephone: false },
+  icons: {
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
+    apple: "/apple-touch-icon.png",
+  },
+  manifest: "/manifest.json",
+  metadataBase: new URL("https://frontend-ten-swart-85.vercel.app"),
+  alternates: {
+    canonical: "https://frontend-ten-swart-85.vercel.app",
+  },
   openGraph: {
-    title: "Liga Paraguaya de Fútbol",
-    description: "Clubes, partidos, tabla de posiciones y datos base del fútbol paraguayo.",
+    title: "Liga Paraguaya de Fútbol | Datos y Estadísticas",
+    description:
+      "Clubes, partidos, tabla de posiciones, goleadores, transferencias y datos del fútbol paraguayo en tiempo real.",
+    url: "https://frontend-ten-swart-85.vercel.app",
     siteName: "Liga PY",
     locale: "es_PY",
     type: "website",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Liga Paraguaya de Fútbol",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Liga Paraguaya de Fútbol | Datos y Estadísticas",
+    description:
+      "Clubes, partidos, tabla de posiciones, goleadores, transferencias y datos del fútbol paraguayo en tiempo real.",
+    images: ["/og-image.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
 };
 
@@ -32,8 +90,14 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="es">
-      <body className={`${inter.className} ${barlowCondensed.variable} bg-bg-primario text-texto-principal min-h-screen flex flex-col`}>
+    <html lang="es" className="scroll-smooth">
+      <head>
+        <meta name="theme-color" content="#CC001C" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="mobile-web-app-capable" content="yes" />
+      </head>
+      <body className={`${inter.className} ${barlowCondensed.variable} bg-bg-primario text-texto-principal min-h-screen flex flex-col antialiased`}>
         <StripesBackground />
         <Providers>
           <Navbar />

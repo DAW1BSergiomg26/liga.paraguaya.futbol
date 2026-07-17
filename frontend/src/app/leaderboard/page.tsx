@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
 import { getLeaderboard } from "@/lib/api";
 import type { LeaderboardEntry } from "@/types";
@@ -60,9 +61,11 @@ export default function LeaderboardPage() {
                   <td className="p-3 sm:p-4">
                     <div className="flex items-center gap-3">
                       {entry.image && (
-                        <img
+                        <Image
                           src={entry.image}
                           alt=""
+                          width={32}
+                          height={32}
                           loading="lazy"
                           className="w-8 h-8 rounded-full ring-1 ring-borde-sutil"
                         />

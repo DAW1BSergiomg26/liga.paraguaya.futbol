@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getClubes, getH2H } from "@/lib/api";
@@ -76,14 +77,14 @@ export default function H2HPage() {
           <div className="flex items-center justify-center gap-6 mb-8 p-6 rounded-2xl border border-borde-sutil bg-bg-secundario/60">
             <div className="flex flex-col items-center gap-2">
               {h2h.club_a.escudo && (
-                <img src={h2h.club_a.escudo} alt={h2h.club_a.nombre} className="w-16 h-16 object-contain" />
+                <Image src={h2h.club_a.escudo} alt={h2h.club_a.nombre} width={64} height={64} loading="lazy" className="w-16 h-16 object-contain" />
               )}
               <span className="font-bold text-lg text-center">{h2h.club_a.nombre}</span>
             </div>
             <span className="text-2xl font-bold text-texto-apagado">VS</span>
             <div className="flex flex-col items-center gap-2">
               {h2h.club_b.escudo && (
-                <img src={h2h.club_b.escudo} alt={h2h.club_b.nombre} className="w-16 h-16 object-contain" />
+                <Image src={h2h.club_b.escudo} alt={h2h.club_b.nombre} width={64} height={64} loading="lazy" className="w-16 h-16 object-contain" />
               )}
               <span className="font-bold text-lg text-center">{h2h.club_b.nombre}</span>
             </div>

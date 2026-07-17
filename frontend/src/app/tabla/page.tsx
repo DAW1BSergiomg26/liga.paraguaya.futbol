@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getTabla, getTorneos } from "@/lib/api";
@@ -192,9 +193,11 @@ export default function TablaPage() {
                         <td className="py-3 px-3 sm:px-4 font-medium text-texto-principal">
                           <div className="flex items-center gap-3">
                             {row.escudo && (
-                              <img
+                              <Image
                                 src={row.escudo}
                                 alt=""
+                                width={24}
+                                height={24}
                                 loading="lazy"
                                 className="w-6 h-6 object-contain shrink-0 rounded-sm shadow-[0_1px_3px_rgba(0,0,0,0.3)] transition-transform duration-200 ease-out hover:scale-110 hover:-rotate-3"
                               />

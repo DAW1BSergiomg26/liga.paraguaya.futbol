@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { misPredicciones, getLeaderboard, getSavedToken, setAuthToken } from "@/lib/api";
@@ -115,7 +116,7 @@ export default function PrediccionesPage() {
                     <td className="p-4">
                       <div className="flex items-center gap-3">
                         {entry.image && (
-                          <img src={entry.image} alt="" loading="lazy" className="w-8 h-8 rounded-full" />
+                          <Image src={entry.image} alt="" width={32} height={32} loading="lazy" className="w-8 h-8 rounded-full" />
                         )}
                         <span className="text-white font-medium">{entry.name}</span>
                         <span className="text-texto-apagado text-xs">@{entry.username}</span>

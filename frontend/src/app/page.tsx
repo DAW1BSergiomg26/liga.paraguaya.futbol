@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { getClubes, getPartidos, getTabla, getTorneos } from "@/lib/api";
 import type { PartidoPage } from "@/types";
 import Link from "next/link";
@@ -83,7 +84,7 @@ export default async function HomePage() {
                     <td className="p-4">
                       <div className="flex items-center gap-2">
                         {row.escudo && (
-                          <img src={row.escudo} alt="" className="w-5 h-5 object-contain shrink-0 rounded-sm shadow-[0_1px_3px_rgba(0,0,0,0.3)]" />
+                          <Image src={row.escudo} alt="" width={20} height={20} loading="lazy" className="w-5 h-5 object-contain shrink-0 rounded-sm shadow-[0_1px_3px_rgba(0,0,0,0.3)]" />
                         )}
                         {row.club}
                       </div>
