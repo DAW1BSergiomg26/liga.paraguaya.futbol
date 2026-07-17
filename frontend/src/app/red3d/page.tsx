@@ -2,10 +2,17 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import PageHeader from "@/components/ui/PageHeader";
 import { apiFetch } from "@/lib/api";
 import { escudoUrl } from "@/lib/escudos";
+import { useIsMobile } from "@/hooks/useIsMobile";
+import Red2DFallback from "@/components/red3d/Red2DFallback";
+
+/* ── Lazy-load del componente 3D (solo se carga bajo demanda) ── */
+const Graph3D = lazy(() => import("@/components/red3d/Graph3D"));
+
+/* ── Interfaces ───────────────────────────────────────────── */
 
 interface ClubNode {
   id: string;
@@ -32,6 +39,28 @@ interface ClubLink {
 }
 
 type GraphData = { nodes: ClubNode[]; links: ClubLink[] };
+
+interface TransferItem {
+  id?: string;
+  club_origen_id?: string;
+  club_destino_id?: string;
+  club_origen_nombre?: string;
+  club_destino_nombre?: string;
+  monto?: number;
+  fecha?: string;
+  jugador_nombre?: string;
+  tipo?: string;
+}
+
+interface Graph3DHandle {
+  flyTo: (id: string) => void;
+  zoomToFit: (ms?: number, pad?: number) => void;
+  setAutoRotate: (v: boolean) => void;
+}
+
+type ViewMode = "2d" | "3d";
+
+/* ── Constantes ───────────────────────────────────────────── */
 
 const APF_DORADO = "#FFCC00";
 
@@ -89,13 +118,7 @@ const RIVALIDADES_FALLBACK: GraphData = {
   ],
 };
 
-interface Graph3DHandle {
-  flyTo: (id: string) => void;
-  zoomToFit: (ms?: number, pad?: number) => void;
-  setAutoRotate: (v: boolean) => void;
-}
-
-import Graph3D from "@/components/red3d/Graph3D";
+/* ── Componente ───────────────────────────────────────────── */
 
 export default function Red3DPage() {
   const isClient = useSyncExternalStore(
@@ -103,16 +126,34 @@ export default function Red3DPage() {
     () => true,
     () => false
   );
+  const isMobile = useIsMobile();
+
+  /* Estado de vista: en móvil arranca en 2D, en desktop en 3D */
+  const [viewMode, setViewMode] = useState<ViewMode>("2d");
+  const [autoRotate, setAutoRotate] = useState(true);
+  const [graphError, setGraphError] = useState(false);
+
+  /* Datos */
   const [selectedNode, setSelectedNode] = useState<ClubNode | null>(null);
   const [selectedLink, setSelectedLink] = useState<ClubLink | null>(null);
   const [mode, setMode] = useState<"rivalidades" | "fichajes">("rivalidades");
   const [temporada, setTemporada] = useState<string>("todas");
   const [query, setQuery] = useState("");
-  const [autoRotate, setAutoRotate] = useState(true);
   const [rivalidadesData, setRivalidadesData] = useState<GraphData>(RIVALIDADES_FALLBACK);
-  const [transfers, setTransfers] = useState<unknown[]>([]);
+  const [transfers, setTransfers] = useState<TransferItem[]>([]);
   const handleRef = useRef<Graph3DHandle | null>(null);
 
+  /* Inicializar vista según dispositivo */
+  useEffect(() => {
+    setViewMode(isMobile ? "2d" : "3d");
+  }, [isMobile]);
+
+  /* En móvil, auto-rotate apagado por defecto */
+  useEffect(() => {
+    if (isMobile) setAutoRotate(false);
+  }, [isMobile]);
+
+  /* Carga de datos */
   useEffect(() => {
     let active = true;
 
@@ -134,7 +175,7 @@ export default function Red3DPage() {
         if (active) setRivalidadesData(RIVALIDADES_FALLBACK);
       });
 
-    apiFetch<{ transferencias: unknown[] }>("/api/v1/transferencias?per_page=100")
+    apiFetch<{ transferencias: TransferItem[] }>("/api/v1/transferencias?per_page=100")
       .then((d) => {
         if (active) setTransfers(d.transferencias ?? []);
       })
@@ -147,35 +188,26 @@ export default function Red3DPage() {
     };
   }, []);
 
+  /* Fichajes derivados */
   const fichajesData = useMemo<GraphData>(() => {
-    const list = transfers as Array<{
-      id?: string;
-      club_origen_id?: string;
-      club_destino_id?: string;
-      club_origen_nombre?: string;
-      club_destino_nombre?: string;
-      monto?: number;
-      fecha?: string;
-      jugador_nombre?: string;
-      tipo?: string;
-    }>;
+    const list = transfers;
     const vis = temporada === "todas" ? list : list.filter((t) => String(new Date(t.fecha ?? "").getFullYear()) === temporada);
     const clubMap = new Map<string, { id: string; name: string; count: number }>();
-    const linkMap = new Map<string, { source: string; target: string; value: number; labels: string[]; first?: (typeof list)[number] }>();
+    const linkMap = new Map<string, { source: string; target: string; value: number; labels: string[]; first?: TransferItem }>();
 
     for (const t of vis) {
       const oId = t.club_origen_id;
       const dId = t.club_destino_id;
       if (oId && !clubMap.has(oId)) clubMap.set(oId, { id: oId, name: t.club_origen_nombre ?? oId, count: 0 });
       if (dId && !clubMap.has(dId)) clubMap.set(dId, { id: dId, name: t.club_destino_nombre ?? dId, count: 0 });
-      if (oId) (clubMap.get(oId) as { count: number }).count++;
-      if (dId) (clubMap.get(dId) as { count: number }).count++;
+      if (oId) clubMap.get(oId)!.count++;
+      if (dId) clubMap.get(dId)!.count++;
       if (!oId || !dId) continue;
       const key = `${oId}->${dId}`;
       if (!linkMap.has(key)) linkMap.set(key, { source: oId, target: dId, value: 0, labels: [], first: t });
-      const l = linkMap.get(key) as { value: number; labels: string[]; first?: (typeof list)[number] };
+      const l = linkMap.get(key)!;
       l.value += t.monto ?? 0;
-      l.labels.push(`${t.jugador_nombre ?? "Jugador"} · $${(t.monto ?? 0)}M`);
+      l.labels.push(`${t.jugador_nombre ?? "Jugador"} · $${t.monto ?? 0}M`);
     }
 
     const nodes: ClubNode[] = [...clubMap.values()].map((c) => ({
@@ -215,10 +247,15 @@ export default function Red3DPage() {
     [clubList, query]
   );
 
-  const onReady = useCallback((h: Graph3DHandle) => {
-    handleRef.current = h;
-    h.setAutoRotate(autoRotate);
-  }, [autoRotate]);
+  /* ── Callbacks del grafo 3D ─────────────────────────────── */
+
+  const onReady = useCallback(
+    (h: Graph3DHandle) => {
+      handleRef.current = h;
+      h.setAutoRotate(autoRotate && !isMobile);
+    },
+    [autoRotate, isMobile]
+  );
 
   const clubName = useCallback(
     (ref: string | ClubNode) => (typeof ref === "string" ? clubList.find((c) => c.id === ref)?.name ?? ref : ref.name),
@@ -246,7 +283,7 @@ export default function Red3DPage() {
 
   const anios = useMemo(() => {
     const set = new Set<string>();
-    (transfers as Array<{ fecha?: string }>).forEach((t) => {
+    transfers.forEach((t) => {
       if (t.fecha) set.add(String(new Date(t.fecha).getFullYear()));
     });
     return ["todas", ...[...set].sort().reverse()];
@@ -255,28 +292,68 @@ export default function Red3DPage() {
   const totalLinks = graphData?.links.length ?? 0;
   const totalNodes = graphData?.nodes.length ?? 0;
 
+  /* ── Toggle 3D con validación WebGL ─────────────────────── */
+
+  const enable3D = useCallback(() => {
+    // Verificar soporte WebGL antes de intentar cargar el grafo
+    try {
+      const canvas = document.createElement("canvas");
+      const gl = canvas.getContext("webgl2") ?? canvas.getContext("webgl");
+      if (!gl) {
+        setGraphError(true);
+        setViewMode("2d");
+        return;
+      }
+    } catch {
+      setGraphError(true);
+      setViewMode("2d");
+      return;
+    }
+    setGraphError(false);
+    setViewMode("3d");
+  }, []);
+
+  const disable3D = useCallback(() => {
+    setSelectedNode(null);
+    setSelectedLink(null);
+    setViewMode("2d");
+  }, []);
+
+  /* ── Error handler para el grafo 3D ─────────────────────── */
+
+  const onGraphError = useCallback(() => {
+    setGraphError(true);
+    setViewMode("2d");
+    setSelectedNode(null);
+    setSelectedLink(null);
+  }, []);
+
+  /* ── Render ─────────────────────────────────────────────── */
+
   return (
     <div className="min-h-screen">
       <PageHeader
-        titulo="Red 3D de Clubes"
-        subtitulo="El universo de la Primera División paraguaya, visualizado en 3D"
+        titulo="Red de Clubes"
+        subtitulo="El universo de la Primera División paraguaya, visualizado de forma interactiva"
       />
 
       <div className="max-w-7xl mx-auto px-4 pb-12">
-        {/* Explicación clara de para qué sirve la sección */}
+        {/* Explicación */}
         <div className="mb-6 rounded-2xl border border-borde-marca bg-gradient-to-r from-[#1a0510] to-[#020a14] p-5 shadow-[0_0_30px_-12px_rgba(204,0,28,0.5)]">
           <h2 className="text-texto-principal font-bold text-lg mb-1">¿Qué es esto?</h2>
           <p className="text-texto-secundario text-sm leading-relaxed">
-            Es un <span className="text-apf-dorado font-semibold">mapa interactivo en 3D</span> de los clubes de la Primera División.
+            Es un <span className="text-apf-dorado font-semibold">mapa interactivo</span> de los clubes de la Primera División.
             Cada <span className="text-texto-principal font-medium">escudo</span> es un club y cada
             <span className="text-apf-dorado font-semibold"> línea</span> es una relación entre ellos: en
             <span className="text-texto-principal font-medium"> Rivalidades</span> son los clásicos y enfrentamientos históricos;
             en <span className="text-texto-principal font-medium">Mercado de Fichajes</span> son los pases de jugadores entre clubes.
-            El tamaño del escudo crece con la importancia del club (títulos o movimientos).
+            {viewMode === "2d"
+              ? " Tocá un club para ver sus rivalidades."
+              : " El tamaño del escudo crece con la importancia del club."}
           </p>
         </div>
 
-        {/* Controles */}
+        {/* Controles principales */}
         <div className="flex flex-wrap items-center gap-3 mb-5">
           <div className="flex gap-2 p-1 rounded-xl bg-bg-secundario/70 backdrop-blur border border-borde-sutil">
             <button
@@ -297,23 +374,28 @@ export default function Red3DPage() {
             </button>
           </div>
 
-          <button
-            onClick={() => setAutoRotate((v) => !v)}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition border ${
-              autoRotate
-                ? "bg-apf-dorado/15 border-apf-dorado/40 text-apf-dorado"
-                : "bg-bg-secundario/70 border-borde-sutil text-texto-secundario"
-            }`}
-          >
-            {autoRotate ? "⏸ Pausar giro" : "▶ Girar"}
-          </button>
+          {/* Solo mostrar controles 3D cuando estamos en vista 3D */}
+          {viewMode === "3d" && (
+            <>
+              <button
+                onClick={() => setAutoRotate((v) => !v)}
+                className={`px-4 py-2 rounded-xl text-sm font-medium transition border ${
+                  autoRotate
+                    ? "bg-apf-dorado/15 border-apf-dorado/40 text-apf-dorado"
+                    : "bg-bg-secundario/70 border-borde-sutil text-texto-secundario"
+                }`}
+              >
+                {autoRotate ? "⏸ Pausar giro" : "▶ Girar"}
+              </button>
 
-          <button
-            onClick={resetCamera}
-            className="px-4 py-2 rounded-xl text-sm font-medium bg-bg-secundario/70 border border-borde-sutil text-texto-secundario hover:text-texto-principal transition"
-          >
-            ⟲ Centrar
-          </button>
+              <button
+                onClick={resetCamera}
+                className="px-4 py-2 rounded-xl text-sm font-medium bg-bg-secundario/70 border border-borde-sutil text-texto-secundario hover:text-texto-principal transition"
+              >
+                ⟲ Centrar
+              </button>
+            </>
+          )}
 
           {mode === "fichajes" && (
             <select
@@ -330,7 +412,7 @@ export default function Red3DPage() {
           )}
         </div>
 
-        {/* Subtítulo del modo actual */}
+        {/* Subtítulo del modo */}
         <p className="text-sm text-texto-secundario mb-4">
           {mode === "rivalidades"
             ? "🟥 Líneas = clásicos y enfrentamientos. Más gruesa = más historia en común."
@@ -352,114 +434,194 @@ export default function Red3DPage() {
           </div>
         </div>
 
-        {/* Grafo + lista lateral */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-5">
-          <div className="relative w-full rounded-2xl border border-borde-marca overflow-hidden bg-[#020a14] shadow-[0_0_40px_-10px_rgba(255,204,0,0.25)]">
-            {isClient && (
-              <Graph3D data={graphData} autoRotate={autoRotate} onSelect={setSelectedNode} onLinkClick={onLinkClick} onReady={onReady} />
-            )}
+        {/* ═══════════════════════════════════════════════════════
+            VISTA 2D (fallback de alta calidad)
+            ═══════════════════════════════════════════════════════ */}
+        {viewMode === "2d" && (
+          <div className="space-y-5">
+            <Red2DFallback
+              rivalidadesData={rivalidadesData}
+              transfers={transfers}
+              onClubClick={(id) => {
+                /* En 2D, scrollear al club seleccionado */
+                setQuery(rivalidadesData.nodes.find((n) => n.id === id)?.name ?? "");
+              }}
+            />
 
-            <div className="absolute top-3 left-3 flex flex-wrap gap-3 text-[11px] text-texto-secundario bg-bg-noche/70 backdrop-blur px-3 py-2 rounded-lg border border-borde-sutil">
-              <span>🖱 Arrastrá para rotar</span>
-              <span>🔍 Scroll para zoom</span>
-              <span>⚡ Click en un club para acercarte</span>
-            </div>
-
-            {selectedNode && (
-              <div className="absolute bottom-4 left-4 right-4 lg:left-4 lg:right-auto lg:w-80 bg-bg-secundario/95 backdrop-blur-sm border-l-4 border-apf-rojo rounded-xl p-4 shadow-2xl ring-1 ring-white/10">
-                <div className="flex items-start gap-3">
-                  {selectedNode.escudo && (
-                    <Image src={selectedNode.escudo} alt={selectedNode.name} width={56} height={56} loading="lazy" className="w-14 h-14 object-contain rounded-lg bg-white/10 p-1 shadow" />
-                  )}
-                  <div className="flex-1">
-                    <h3 className="text-texto-principal font-bold text-lg leading-tight">{selectedNode.name}</h3>
-                    <div className="flex gap-4 mt-1 text-sm">
-                      {mode === "rivalidades" ? (
-                        <>
-                          <span className="text-apf-dorado font-semibold">{selectedNode.titulos ?? 0} títulos</span>
-                          <span className="text-texto-secundario">{selectedNode.intl ?? 0} int.</span>
-                        </>
-                      ) : (
-                        <span className="text-apf-dorado font-semibold">{selectedNode.movimientos ?? 0} movimientos</span>
-                      )}
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => setSelectedNode(null)}
-                    className="text-texto-apagado hover:text-apf-rojo text-xl leading-none"
-                  >
-                    ×
-                  </button>
-                </div>
-                <a
-                  href={`/clubes/${selectedNode.id}`}
-                  className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-apf-rojo hover:text-white transition-colors"
+            {/* Botón flotante para activar 3D */}
+            {isClient && !graphError && (
+              <div className="flex justify-center pt-2">
+                <button
+                  onClick={enable3D}
+                  className="group flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-[#1a0510] to-[#0d1a2e] border border-apf-rojo/40 text-texto-principal text-sm font-semibold shadow-[0_0_20px_-6px_rgba(204,0,28,0.4)] hover:shadow-[0_0_30px_-4px_rgba(204,0,28,0.6)] hover:border-apf-rojo/60 transition-all duration-300"
                 >
-                  Ver ficha completa →
-                </a>
+                  <span className="text-lg">🌐</span>
+                  <span>Activar Mapa Interactivo 3D</span>
+                  <span className="text-texto-apagado group-hover:text-apf-rojo transition-colors">→</span>
+                </button>
               </div>
             )}
 
-            {/* Drawer de detalle de fichaje (modo Mercado de Fichajes) */}
-            {selectedLink && mode === "fichajes" && (
-              <div className="absolute bottom-4 left-4 right-4 lg:left-4 lg:right-auto lg:w-80 bg-bg-secundario/95 backdrop-blur-sm border-l-4 border-apf-dorado rounded-xl p-4 shadow-2xl ring-1 ring-white/10">
-                <div className="flex items-start gap-2">
-                  <div className="flex-1">
-                    <p className="text-[11px] uppercase tracking-wider text-apf-dorado font-semibold">Fichaje</p>
-                    <p className="text-texto-principal font-bold text-base leading-tight mt-0.5">
-                      {clubName(selectedLink.source)} → {clubName(selectedLink.target)}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => setSelectedLink(null)}
-                    className="text-texto-apagado hover:text-apf-rojo text-xl leading-none"
-                  >
-                    ×
-                  </button>
-                </div>
-                <div className="mt-2 space-y-1 text-sm">
-                  <p className="text-texto-secundario">
-                    Inversión: <span className="text-apf-amarillo font-semibold">${selectedLink.monto ?? 0}M</span>
-                  </p>
-                  {selectedLink.tipo && (
-                    <p className="text-texto-secundario capitalize">Tipo: <span className="text-texto-principal">{selectedLink.tipo}</span></p>
-                  )}
-                </div>
-                {selectedLink.transferenciaId && (
-                  <a
-                    href={`/transferencias/${selectedLink.transferenciaId}`}
-                    className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-apf-rojo hover:text-white transition-colors"
-                  >
-                    Ver ficha del jugador →
-                  </a>
-                )}
+            {graphError && (
+              <div className="text-center py-3 text-texto-apagado text-xs">
+                El modo 3D no está disponible en este dispositivo. Usando vista optimizada.
               </div>
             )}
           </div>
+        )}
 
-          {/* Lista lateral de clubes con escudo + nombre */}
-          <aside className="rounded-2xl border border-borde-sutil bg-bg-secundario/40 backdrop-blur p-3 h-[600px] lg:h-[720px] overflow-y-auto">
-            <p className="text-xs uppercase tracking-wider text-texto-apagado mb-2 px-1">Clubes ({clubList.length})</p>
-            <ul className="space-y-1">
-              {filteredList.map((c) => (
-                <li key={c.id}>
-                  <button
-                    onClick={() => flyTo(c.id)}
-                    className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-left transition ${
-                      selectedNode?.id === c.id ? "bg-apf-rojo/15 ring-1 ring-apf-rojo/40" : "hover:bg-bg-noche"
-                    }`}
-                  >
-                    {c.escudo && (
-                      <Image src={c.escudo} alt="" width={28} height={28} loading="lazy" className="w-7 h-7 object-contain rounded bg-white/5 p-0.5" />
+        {/* ═══════════════════════════════════════════════════════
+            VISTA 3D (grafo WebGL)
+            ═══════════════════════════════════════════════════════ */}
+        {viewMode === "3d" && (
+          <>
+            {/* Botón para volver a 2D (siempre visible en 3D) */}
+            <div className="flex justify-between items-center mb-3">
+              <p className="text-xs text-texto-apagado">
+                {isMobile ? "Modo 3D activo — usa los gestos para rotar y zoom" : "Modo interactivo 3D"}
+              </p>
+              <button
+                onClick={disable3D}
+                className="px-3 py-1.5 rounded-lg text-xs font-medium bg-bg-secundario/70 border border-borde-sutil text-texto-secundario hover:text-texto-principal transition"
+              >
+                ← Vista 2D
+              </button>
+            </div>
+
+            {/* Grafo + lista lateral */}
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-5">
+              <div
+                className="relative w-full rounded-2xl border border-borde-marca overflow-hidden bg-[#020a14] shadow-[0_0_40px_-10px_rgba(255,204,0,0.25)]"
+                /* En móvil, limitar gestos para no secuestrar scroll */
+                style={{ touchAction: isMobile ? "pinch-zoom" : "auto" }}
+              >
+                {isClient && (
+                  <ErrorBoundary3D onError={onGraphError}>
+                    <Suspense
+                      fallback={
+                        <div className="w-full h-[600px] lg:h-[720px] flex items-center justify-center">
+                          <div className="text-center space-y-3">
+                            <div className="w-10 h-10 border-2 border-apf-rojo border-t-transparent rounded-full animate-spin mx-auto" />
+                            <p className="text-texto-apagado text-sm">Cargando grafo 3D…</p>
+                          </div>
+                        </div>
+                      }
+                    >
+                      <Graph3D
+                        data={graphData}
+                        autoRotate={autoRotate && !isMobile}
+                        onSelect={setSelectedNode}
+                        onLinkClick={onLinkClick}
+                        onReady={onReady}
+                      />
+                    </Suspense>
+                  </ErrorBoundary3D>
+                )}
+
+                <div className="absolute top-3 left-3 flex flex-wrap gap-3 text-[11px] text-texto-secundario bg-bg-noche/70 backdrop-blur px-3 py-2 rounded-lg border border-borde-sutil">
+                  <span>🖱 Arrastrá para rotar</span>
+                  <span>🔍 Scroll para zoom</span>
+                  <span>⚡ Click en un club para acercarte</span>
+                </div>
+
+                {/* Panel de nodo seleccionado */}
+                {selectedNode && (
+                  <div className="absolute bottom-4 left-4 right-4 lg:left-4 lg:right-auto lg:w-80 bg-bg-secundario/95 backdrop-blur-sm border-l-4 border-apf-rojo rounded-xl p-4 shadow-2xl ring-1 ring-white/10">
+                    <div className="flex items-start gap-3">
+                      {selectedNode.escudo && (
+                        <Image src={selectedNode.escudo} alt={selectedNode.name} width={56} height={56} loading="lazy" className="w-14 h-14 object-contain rounded-lg bg-white/10 p-1 shadow" />
+                      )}
+                      <div className="flex-1">
+                        <h3 className="text-texto-principal font-bold text-lg leading-tight">{selectedNode.name}</h3>
+                        <div className="flex gap-4 mt-1 text-sm">
+                          {mode === "rivalidades" ? (
+                            <>
+                              <span className="text-apf-dorado font-semibold">{selectedNode.titulos ?? 0} títulos</span>
+                              <span className="text-texto-secundario">{selectedNode.intl ?? 0} int.</span>
+                            </>
+                          ) : (
+                            <span className="text-apf-dorado font-semibold">{selectedNode.movimientos ?? 0} movimientos</span>
+                          )}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setSelectedNode(null)}
+                        className="text-texto-apagado hover:text-apf-rojo text-xl leading-none"
+                      >
+                        ×
+                      </button>
+                    </div>
+                    <a
+                      href={`/clubes/${selectedNode.id}`}
+                      className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-apf-rojo hover:text-white transition-colors"
+                    >
+                      Ver ficha completa →
+                    </a>
+                  </div>
+                )}
+
+                {/* Drawer de fichaje */}
+                {selectedLink && mode === "fichajes" && (
+                  <div className="absolute bottom-4 left-4 right-4 lg:left-4 lg:right-auto lg:w-80 bg-bg-secundario/95 backdrop-blur-sm border-l-4 border-apf-dorado rounded-xl p-4 shadow-2xl ring-1 ring-white/10">
+                    <div className="flex items-start gap-2">
+                      <div className="flex-1">
+                        <p className="text-[11px] uppercase tracking-wider text-apf-dorado font-semibold">Fichaje</p>
+                        <p className="text-texto-principal font-bold text-base leading-tight mt-0.5">
+                          {clubName(selectedLink.source)} → {clubName(selectedLink.target)}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => setSelectedLink(null)}
+                        className="text-texto-apagado hover:text-apf-rojo text-xl leading-none"
+                      >
+                        ×
+                      </button>
+                    </div>
+                    <div className="mt-2 space-y-1 text-sm">
+                      <p className="text-texto-secundario">
+                        Inversión: <span className="text-apf-amarillo font-semibold">${selectedLink.monto ?? 0}M</span>
+                      </p>
+                      {selectedLink.tipo && (
+                        <p className="text-texto-secundario capitalize">Tipo: <span className="text-texto-principal">{selectedLink.tipo}</span></p>
+                      )}
+                    </div>
+                    {selectedLink.transferenciaId && (
+                      <a
+                        href={`/transferencias/${selectedLink.transferenciaId}`}
+                        className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-apf-rojo hover:text-white transition-colors"
+                      >
+                        Ver ficha del jugador →
+                      </a>
                     )}
-                    <span className="text-sm text-texto-principal truncate">{c.name}</span>
-                  </button>
-                </li>
-              ))}
-              {filteredList.length === 0 && <li className="text-sm text-texto-apagado px-2 py-2">Sin resultados</li>}
-            </ul>
-          </aside>
-        </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Lista lateral de clubes */}
+              <aside className="rounded-2xl border border-borde-sutil bg-bg-secundario/40 backdrop-blur p-3 h-[600px] lg:h-[720px] overflow-y-auto">
+                <p className="text-xs uppercase tracking-wider text-texto-apagado mb-2 px-1">Clubes ({clubList.length})</p>
+                <ul className="space-y-1">
+                  {filteredList.map((c) => (
+                    <li key={c.id}>
+                      <button
+                        onClick={() => flyTo(c.id)}
+                        className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-left transition ${
+                          selectedNode?.id === c.id ? "bg-apf-rojo/15 ring-1 ring-apf-rojo/40" : "hover:bg-bg-noche"
+                        }`}
+                      >
+                        {c.escudo && (
+                          <Image src={c.escudo} alt="" width={28} height={28} loading="lazy" className="w-7 h-7 object-contain rounded bg-white/5 p-0.5" />
+                        )}
+                        <span className="text-sm text-texto-principal truncate">{c.name}</span>
+                      </button>
+                    </li>
+                  ))}
+                  {filteredList.length === 0 && <li className="text-sm text-texto-apagado px-2 py-2">Sin resultados</li>}
+                </ul>
+              </aside>
+            </div>
+          </>
+        )}
 
         {/* Leyenda */}
         <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
@@ -476,11 +638,61 @@ export default function Red3DPage() {
             </p>
           </div>
           <div className="p-4 rounded-xl bg-bg-secundario/60 border border-borde-sutil">
-            <p className="text-texto-principal font-semibold mb-1">Cómo navegar</p>
-            <p className="text-texto-secundario">Arrastrá para rotar, scroll para zoom y click en un club para acercarte.</p>
+            <p className="text-texto-principal font-semibold mb-1">
+              {viewMode === "2d" ? "Cómo navegar" : "Cómo navegar el 3D"}
+            </p>
+            <p className="text-texto-secundario">
+              {viewMode === "2d"
+                ? "Tocá un club para ver sus rivalidades. Desplegá para ver detalles."
+                : "Arrastrá para rotar, scroll para zoom y click en un club para acercarte."}
+            </p>
           </div>
         </div>
       </div>
     </div>
   );
+}
+
+/* ── Error Boundary ligero para el grafo 3D ────────────────── */
+
+import { Component, type ReactNode } from "react";
+
+interface ErrorBoundary3DProps {
+  onError: () => void;
+  children: ReactNode;
+}
+
+interface ErrorBoundary3DState {
+  hasError: boolean;
+}
+
+class ErrorBoundary3D extends Component<ErrorBoundary3DProps, ErrorBoundary3DState> {
+  constructor(props: ErrorBoundary3DProps) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(): ErrorBoundary3DState {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error): void {
+    console.error("[red3d] Error en el grafo 3D, revirtiendo a 2D:", error);
+    this.props.onError();
+  }
+
+  render(): ReactNode {
+    if (this.state.hasError) {
+      return (
+        <div className="w-full h-[600px] lg:h-[720px] flex items-center justify-center bg-[#020a14] rounded-2xl">
+          <div className="text-center space-y-3 px-6">
+            <p className="text-texto-secundario text-sm">
+              El grafo 3D no pudo cargarse. Volviendo a la vista 2D…
+            </p>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
 }
