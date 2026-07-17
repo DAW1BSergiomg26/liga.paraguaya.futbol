@@ -27,38 +27,71 @@ liga.paraguaya.futbol/
 ├── backend/
 │   ├── alembic/              # Migraciones (8 revisiones: 001-008)
 │   ├── app/
-│   │   ├── api/              # Routers FastAPI (clubes, partidos, tabla, predicciones, chat, push, admin, cerezo, noticias, transferencias)
+│   │   ├── api/              # Routers FastAPI (clubes, partidos, tabla, predicciones, chat, push, admin, cerezo, noticias, transferencias, goleadores, historial, tactico)
 │   │   ├── core/             # Config, DB, dependencias (get_current_user, get_current_admin), API Key
-│   │   ├── models/           # SQLAlchemy (11 modelos: Club, Partido, TablaPosicion, Prediccion, User, APIKey, ChatMessage, Noticia, Transferencia, etc.)
+│   │   ├── models/           # SQLAlchemy (12 modelos: Club, Partido, TablaPosicion, Prediccion, User, APIKey, ChatMessage, Noticia, Transferencia, Goleador, Player, Team, MatchEvent, TacticalAnalysis, TacticalReport)
 │   │   ├── schemas/          # Pydantic v2
 │   │   ├── scripts/          # Seed de datos
-│   │   ├── services/         # Lógica de negocio (noticia_service, rss_sync, football_data_sync, transferencia_service, transferencia_rss_sync, etc.)
+│   │   ├── services/         # Lógica de negocio (noticia_service, rss_sync, football_data_sync, transferencia_service, historial_service, goleador_service, tactical_engine, etc.)
 │   │   └── main.py           # Entry point
 │   ├── scripts/              # Scrapers (Wikipedia, RSSSF)
+│   ├── export_data.py        # SQLite local → data/export/*.json (migración)
+│   ├── import_data.py        # JSON → Neon (TRUNCATE CASCADE, orden FKs)
 │   └── tests/                # 140+ tests (pytest)
 ├── frontend/
-│   ├── public/sw.js          # Service Worker (push + PWA)
+│   ├── public/
+│   │   ├── manifest.json     # PWA manifest (Liga PY, colores #CC001C/#0a0f1a)
+│   │   ├── sw.js             # Service Worker (push + PWA)
+│   │   ├── data/red-clubes.json  # Datos de rivalidades (19 nodos, 24 links)
+│   │   └── escudos/          # 19 PNGs reales de escudos
 │   ├── src/
-│   │   ├── app/              # Next.js App Router pages
+│   │   ├── app/
+│   │   │   ├── layout.tsx    # Root layout con metadata SEO completa + PWA meta tags
+│   │   │   ├── error.tsx     # Error Boundary global (UI amigable + reintentar)
+│   │   │   ├── not-found.tsx # Página 404 amigable "Cancha no encontrada"
+│   │   │   ├── page.tsx      # Home (CinematicHero GSAP)
+│   │   │   ├── template.tsx  # Page transitions (Framer Motion)
+│   │   │   ├── login/page.tsx
+│   │   │   ├── clubes/       # Listado + detalle clubes
+│   │   │   ├── partidos/     # Listado + detalle partidos
+│   │   │   ├── tabla/        # Tabla de posiciones
+│   │   │   ├── predicciones/ # Predicciones en vivo
+│   │   │   ├── goleadores/   # Goleadores (por torneo + ranking histórico)
+│   │   │   ├── historial/    # Estadísticas históricas (tabs: por año, ranking, por club)
+│   │   │   ├── noticias/     # Noticias (grid + filtros + detalle)
+│   │   │   ├── transferencias/ # Transferencias (CRUD, mercado, historial, estadísticas)
+│   │   │   ├── red3d/        # Red de Clubes — grafo 2D/3D híbrido
+│   │   │   └── cerezo/       # Asistente IA Cerezo Digital
 │   │   ├── components/
 │   │   │   ├── hero/         # CinematicHero (GSAP SplitType + sparticles)
 │   │   │   ├── layout/       # Navbar, StripesBackground (GSAP parallax)
 │   │   │   ├── noticia/      # NoticiaCard, NoticiaGrid, FiltrosNoticias
+│   │   │   ├── red3d/        # Graph3D.tsx (grafo 3D), Red2DFallback.tsx (vista 2D de alta calidad)
 │   │   │   ├── sidebar/      # FeedNoticias
 │   │   │   └── ui/           # ScrollReveal, CountUp, TiltCard, PageTransition
-│   │   ├── lib/              # api.ts, gsap.ts
+│   │   ├── hooks/
+│   │   │   └── useIsMobile.ts # Hook SSR-safe detección móvil (useSyncExternalStore + matchMedia)
+│   │   ├── lib/
+│   │   │   ├── api.ts        # API_URL (sin fallback Railway), fetch wrappers
+│   │   │   ├── escudos.ts    # ESCUDOS_LOCALES (19 PNG) + escudoUrl()
+│   │   │   └── gsap.ts       # Config GSAP central
 │   │   └── types/            # TypeScript types
-│   └── next.config.ts        # images.remotePatterns (todos los dominios RSS)
+│   ├── next.config.ts        # images.remotePatterns (14+ dominios RSS)
+│   ├── Dockerfile.frontend   # Docker multi-stage (Next.js standalone)
+│   ├── .dockerignore         # Docker ignore
+│   ├── Dockerfile            # Aliás de Dockerfile.frontend
+│   └── vercel.json           # Config Vercel overrides
 ├── data/
 │   ├── liga.db               # SQLite (19 clubes, noticias, users con is_admin)
 │   ├── clubes_paraguay.json  # 19 clubes con datos enrichidos
 │   ├── partidos_demo.json
 │   ├── tabla_posiciones_demo.json
-│   └── partidos_historicos/  # Temporadas 2020-2026
+│   ├── partidos_historicos/  # Temporadas 2020-2026
+│   └── export/               # JSON exportados desde SQLite (para migración a Neon)
 └── docs/
     └── superpowers/          # Specs de diseño + planes
-        ├── specs/            # 10 specs de diseño
-        └── plans/            # 10 planes de implementación
+        ├── specs/            # 10+ specs de diseño
+        └── plans/            # 10+ planes de implementación
 ```
 
 ## Funcionalidades implementadas
@@ -132,7 +165,7 @@ liga.paraguaya.futbol/
 - [x] 5 tests backend pasando
 
 ### Football-Data.org Integration (Julio 2026)
-- [x] Servicio de syncronización con Football-Data.org API
+- [x] Servicio de sincronización con Football-Data.org API
 - [x] Competición configurada: código `PA1` (Paraguay Primera División)
 - [x] Cron job cada 10 minutos para sync automática
 - [x] Migraciones 005_add_tactical_tables + 006
@@ -211,21 +244,49 @@ liga.paraguaya.futbol/
 - [x] Task 12: Glow Effect para líder — fila `posicion===1` con `shadow-[inset...]` dorado + ring APF
 - [ ] Task 13: Verificación final (build OK, tsc OK; pendiente smoke visual en producción)
 
-### Red 3D de Clubes — `/red3d` (Julio 2026)
-- [x] Grafo 3D con `3d-force-graph` + Three.js: bloom, starfield, halo rojo APF y escudos reales.
-- [x] `frontend/public/escudos/` — 19 PNG reales mapeados 1:1 en `frontend/src/lib/escudos.ts` (sin nombres inventados; `capiata.png` → `deportivo-capiata`).
-- [x] `Graph3D.tsx` reescrito: `buildNodeObject` dibuja escudo real + anillo de color + halo + **nombre SIEMPRE visible** (`makeLabelSprite`).
-- [x] **Crash `Cannot read properties of undefined (reading 'x')` ELIMINADO**: `flyTo` valida `Number.isFinite(node.x/y/z)` y cae a `zoomToFit`; `autoRotate` blindado; import dinámico de `3d-force-graph` + `useEffect` de precarga.
-- [x] Tipos estrictos `GraphInstance` / `ClubNode` / `ClubLink` sin `any`; comentarios en español.
-- [x] `page.tsx`: panel "¿Qué es esto?" (explica el propósito), subtítulos por modo, leyenda visual, buscador, lista lateral clicable (escudo + nombre) de los 19 clubes, auto-rotación, centrado de cámara, panel de detalle.
-- [x] Dos modos: **Rivalidades** (clásicos, grosor = historia) y **Mercado de Fichajes** (pases por temporada, grosor = inversión).
-- [x] Tests Vitest: `datos.test.ts` (estructura de red) + `escudos.test.ts` (mapeo 1:1) — 7 pasan.
-- [x] Verificación Playwright desktop + mobile: canvas OK, 19 clubes en lista, **0 page errors**; solo `ERR_CONNECTION_REFUSED` del backend Koyeb dormido (no del grafo).
-- [x] PR #3 mergeado a `main` (`42d4fcd`): repara carga infinita + escudos reales.
-- [x] Commit `efcef15`: sección entendible + crash-proof + nombres visibles + panel explicativo. Pusheado a `main` → Vercel despliega solo.
-- [x] Click en fichaje (modo Mercado de Fichajes) abre drawer con origen→destino, inversión ($M), tipo y enlace "Ver ficha del jugador" → `/transferencias/[id]`. `Graph3D` expone `onLinkClick`; links de fichaje llevan `transferenciaId`/`tipo`/`monto`. Test frontend cubre el drawer (commit `dec58f3`).
+### SEO + Meta Tags + PWA (Julio 2026)
+- [x] `layout.tsx`: title con template (`%s | Liga PY`), keywords, authors, creator, publisher.
+- [x] `openGraph` completo con imagen, `twitter` card `summary_large_image`.
+- [x] `robots` con googleBot detallado, `canonical` URL, `manifest` link, `theme-color` (#CC001C).
+- [x] Meta tags PWA: `apple-mobile-web-app-capable`, `mobile-web-app-capable`, `apple-mobile-web-app-status-bar-style`.
+- [x] `scroll-smooth` en `<html>`, `antialiased` en `<body>`.
+- [x] `public/manifest.json`: nombre "Liga PY", colores #CC001C/#0a0f1a, display standalone, ícono SVG, categories sports/entertainment.
 
-> Nota: el usuario reportó un botón "ISSUE" que daba el crash; no existe string "ISSUE" en el código fuente — probablemente UI de Vercel o confusión. El crash real estaba en `cameraPosition`/`flyTo` leyendo coords no inicializadas.
+### Error Boundary + Not Found (Julio 2026)
+- [x] `error.tsx`: Error Boundary global con UI amigable, botón "Reintentar" + "Volver al inicio", muestra `error.digest`.
+- [x] `not-found.tsx`: Página 404 amigable "Cancha no encontrada" con icono de campo, link a inicio.
+
+### Lazy Loading de Imágenes con `next/image` (Julio 2026)
+- [x] 16 `<img>` → `<Image loading="lazy">` en 12 archivos.
+- [x] `ui-avatars.com` agregado a `remotePatterns` en `next.config.ts`.
+- [x] ESLint-disable comments limpiados en `red3d/page.tsx`.
+
+### Red de Clubes `/red3d` — Grafo 2D/3D Híbrido (Julio 2026)
+- [x] **Arquitectura híbrida responsiva 2D/3D:**
+  - `useIsMobile.ts` — Hook SSR-safe con `useSyncExternalStore` + `matchMedia` (breakpoint 768px, SSR-safe).
+  - `Red2DFallback.tsx` — Vista 2D de alta calidad con tabs rivalidades/fichajes, cards expandibles, escudos con `<Image loading="lazy">`, barras de intensidad.
+  - `page.tsx` — Auto-detección dispositivo: 2D por defecto en móvil, 3D en desktop.
+- [x] **Modo 3D:** Grafo 3D con `3d-force-graph` + Three.js: bloom, starfield, halo rojo APF y escudos reales.
+  - `Graph3D.tsx` reescrito: `buildNodeObject` dibuja escudo real + anillo de color + halo + nombre SIEMPRE visible.
+  - Crash `Cannot read properties of undefined (reading 'x')` ELIMINADO: `flyTo` valida `Number.isFinite(node.x/y/z)`.
+- [x] **Modo 2D:** Vista nativa de alta calidad (no placeholder), tabs rivalidades/fichajes, cards expandibles con escudos, barras de intensidad.
+- [x] **Controles responsivos:**
+  - Botón flotante "Activar Mapa Interactivo 3D" en vista 2D móvil.
+  - Botón "← Vista 2D" para volver desde 3D.
+  - Auto-rotate desactivado por defecto en móvil.
+  - `touch-action: pinch-zoom` en canvas 3D para no secuestrar scroll vertical.
+- [x] **Robustez:** ErrorBoundary3D con auto-revert a 2D. WebGL detection antes de activar 3D. Notificación amigable si WebGL no soportado.
+- [x] **Dos modos funcionales:**
+  - **Rivalidades** (clásicos, grosor = historia)
+  - **Mercado de Fichajes** (pases por temporada, grosor = inversión; drawer de fichaje con origen→destino, inversión ($M), tipo, enlace a `/transferencias/[id]`)
+- [x] `frontend/public/escudos/` — 19 PNGs reales mapeados 1:1 en `frontend/src/lib/escudos.ts`.
+- [x] `frontend/public/data/red-clubes.json` — 19 nodos, 24 links.
+- [x] `frontend/src/hooks/useIsMobile.ts` — Hook SSR-safe (commit `c487c62`).
+- [x] Tests Vitest: `datos.test.ts` (estructura de red) + `escudos.test.ts` (mapeo 1:1) — 7 pasan.
+- [x] Verificación Playwright desktop + mobile: canvas OK, 19 clubes en lista, **0 page errors**.
+- [x] PR #3 mergeado a `main` (`42d4fcd`): repara carga infinita + escudos reales.
+- [x] Commit `efcef15`: sección entendible + crash-proof + nombres visibles + panel explicativo.
+- [x] Commit `c487c62`: arquitectura híbrida 2D/3D con detección de dispositivo, ErrorBoundary3D, fallback de alta calidad.
 
 ## Handoff Maestro — Vision a Futuro
 
@@ -239,7 +300,7 @@ El **Handoff Maestro** define la dirección completa del proyecto con una identi
 ### Stack Visual Definitivo
 - D3.js — gráficos de datos (voronoi táctico, radar de stats)
 - GSAP + ScrollTrigger — animaciones de entrada, parallax, reveal
-- Three.js + React Three Fiber — visualización 3D (futuro)
+- Three.js + React Three Fiber — visualización 3D (ya implementada en `/red3d`)
 - Supabase — migración futura desde SQLite
 
 ### Roadmap del Usuario
@@ -248,7 +309,9 @@ El **Handoff Maestro** define la dirección completa del proyecto con una identi
 3. ✅ Noticias (RSS + UI)
 4. ✅ Transferencias (CRUD + RSS + UI + estadísticas)
 5. ✅ Estadísticas históricas
-   6. 🔶 Deployment a producción — **COMPLETADO Y CERRADO** ✅. Frontend en Vercel + Backend en Render (Docker) + DB en Neon Postgres. Ver sección "Estado de despliegue". Backend sirviendo 19 clubes / 348 partidos / 133 tabla / 16 goleadores / 14 transferencias / 30 noticias desde Neon, verificado de extremo a extremo (incógnito) sin errores. Incidencias de despliegue (rama Render + var Vercel) documentadas arriba.
+6. ✅ Deployment a producción — Frontend en Vercel + Backend en Render (Docker) + DB en Neon Postgres.
+7. ✅ SEO + Meta Tags + PWA + Error Boundaries + Lazy Loading imágenes
+8. ✅ Red de Clubes `/red3d` — grafo 2D/3D híbrido responsivo con detección de dispositivo
 
 ## Pendientes / Issues conocidos
 
@@ -260,16 +323,12 @@ El **Handoff Maestro** define la dirección completa del proyecto con una identi
 - Mejorar la cobertura de tests en el frontend.
 - Cerezo ResponseGenerator: `table_position` y `match_result` intents usan mensajes placeholder estáticos.
 - Sin tests de frontend para la página `/cerezo`.
-- GSAP Experience: Tasks 7-13 pendientes (Page Transitions, ScrollReveal en páginas, Glow Effect).
+- GSAP Experience: Task 13 pendiente (verificación final smoke visual en producción).
 
 ### Bug conocido en producción (RESUELTO — Julio 2026)
-- **`datetime` naive/aware:** el único `datetime.utcnow()` (naive) restante en modelos estaba en
-  `backend/app/models/goleador.py` (`updated_at`). Corregido a `datetime.now(timezone.utc)` en commit `5138748`.
-  `push_subscription` y `push_service` ya usaban `timezone.utc`. Verificado: `grep` de `datetime.utcnow` en
-  `backend/app` devuelve 0 coincidencias. Tests backend: 172 pass / 1 fail (test de noticias preexistente por
-  seed local, ajeno a este cambio).
-- El backend viejo que corría en el equipo del dev (proceso uvicorn huérfano en puerto 8000) servía código/DB
-  obsoleta y daba 500 en `/transferencias`. Ya fue matado y reemplazado; no replicar ese setup.
+- **`datetime` naive/aware:** corregido a `datetime.now(timezone.utc)` en commit `5138748`.
+  Verificado: `grep` de `datetime.utcnow` en `backend/app` devuelve 0 coincidencias. Tests backend: 172 pass / 1 fail (test de noticias preexistente por seed local, ajeno a este cambio).
+- El backend viejo que corría en el equipo del dev (proceso uvicorn huérfano en puerto 8000) servía código/DB obsoleta y daba 500 en `/transferencias`. Ya fue matado y reemplazado; no replicar ese setup.
 
 ### Estado de despliegue (VERIFICADO — Julio 2026)
 Arquitectura oficial en producción:
@@ -282,7 +341,9 @@ Arquitectura oficial en producción:
   - Variables en Render (secrets): `DATABASE_URL` (Neon, SIN `sslmode`), `ADMIN_API_KEY`, `JWT_SECRET`.
   - Start Command: `uvicorn backend.app.main:app --host 0.0.0.0 --port $PORT`
   - Health check: `/health`.
-- **DB:** ✅ Neon Postgres (`ep-flat-mode-aws14q8g...neon.tech/neondb`, región us-east-1).
+  - Branch settings: **`main`** (verificado; la causa raíz de la incidencia anterior).
+- **DB:** ✅ Neon Postgres (`ep-flat-mode-aws24q8g.c-12.us-east-1.aws.neon.tech/neondb`, región us-east-1).
+  - 561 filas: 19 clubes, 348 partidos, 133 tabla_posiciones, 16 goleadores, 14 transferencias, 30 noticias, 1 user.
   - **IMPORTANTE:** la connection string va SIN `?sslmode=require` (asyncpg no acepta ese parámetro
     en el query string; si aparece, el deploy falla). El código convierte `postgres://`→`postgresql+asyncpg://`.
 - **Railway:** ❌ **DESCARTADO DEFINITIVAMENTE** (sin free tier útil; el backend anterior ahí estaba muerto).
@@ -301,8 +362,7 @@ Arquitectura oficial en producción:
   2. **Manual Deploy → "Clear build cache & deploy"** para forzar un build limpio desde `c360648`.
   3. El deploy terminó OK; Uvicorn arrancó y `/health` respondió `ok`.
 - **✅ Resultado verificado:** `GET /api/v1/clubes` → 19 · `GET /api/v1/partidos?per_page=500` →
-  `total: 348` (los 348 accesibles; la API pagina 25/pág por defecto). Neon tiene 561 filas
-  (19 clubes, 348 partidos, 133 tabla_posiciones, 16 goleadores, 14 transferencias, 30 noticias, 1 user).
+  `total: 348`. Neon tiene 561 filas.
 - **🚨 Si el backend vuelve a caer en Render (para los 6 compañeros del equipo):** MIRAR AQUÍ →
   - **Render → Settings → Branch** debe decir **`main`** (NO `feature/*`). Si dice otra rama, el
     auto-deploy no verá los fixes y quedará bucleando en un commit viejo.
@@ -335,6 +395,15 @@ Arquitectura oficial en producción:
 - **🚨 Regla para el equipo:** las vars `NEXT_PUBLIC_*` se **incrustan en el build**, no en runtime.
   Si se cambia una, hay que **redeploy** en Vercel (no alcanza con setearla). Y nunca dejar un
   fallback a un backend muerto en el código frontend.
+
+### Incidencia de producción — 500 en `/api/v1/tabla/torneos` (RESUELTO — Julio 2026)
+- **Síntoma:** `GET /api/v1/tabla/torneos` retornaba 500; la ruta `/historial` no cargaba datos en producción.
+- **Causa raíz:** `TablaService.get_torneos()` intentaba acceder a `row.torneo` cuando era `None` (una de las 133 filas de `TablaPosicion` en Neon tenía `torneo = NULL`), y luego `dict.get(None)` lanzaba `TypeError`.
+- **Solución (commit `bc0bdc2`):**
+  1. `tabla_service.py`: agregado `.where(TablaPosicion.torneo.isnot(None))` + filtrado `None` en Python.
+  2. `tabla.py` (router): `.model_dump()` sin `mode="json"`.
+  3. `handoff.md` actualizado con incidencia y reglas.
+- **Verificado:** `/api/v1/tabla/torneos` → 200 con 7 torneos.
 
 ### Reglas de automatización (aplicadas en cada cambio)
 1. **SSL/asyncpg:** al tocar `.env`, `config.py` o strings de conexión, NO debe haber `?sslmode=` ni
@@ -389,6 +458,8 @@ npx vitest run  # Si hay tests configurados
 | `test_tactical_analysis.py` | 5 | Análisis táctico |
 | `test_transferencias_api.py` | 11 | CRUD transferencias, filtros, auth, mercado, historial, estadísticas |
 | `test_deploy_readiness.py` | 4 | `_async_url` postgres://, `sync_loop` no-op sin API key, health check |
+| `test_historial_api.py` | — | Servicio + API de estadísticas históricas |
+| `test_goleadores_api.py` | 3 | Agrupación histórica (14+10=24), endpoint historial |
 
 ## Variables de entorno
 
@@ -430,6 +501,10 @@ docker compose up --build
 - Ambos setean `PYTHONPATH` a la raíz y usan SQLite local por defecto (sin `DATABASE_URL`).
 - Requieren `python` y `npm` en el PATH.
 
+### Scripts de migración de datos (SQLite → Neon)
+- `backend/export_data.py` — Exporta SQLite local a `data/export/*.json` (migración FK-safe).
+- `backend/import_data.py` — Importa JSON a Neon (TRUNCATE CASCADE, orden de FKs respetado). Validado: 561 filas.
+
 ## Workflow de desarrollo (LEER ANTES DE EMPEZAR)
 
 **Idioma:** El usuario se comunica en **castellano**. Responder SIEMPRE en español, sin excepción.
@@ -442,7 +517,7 @@ docker compose up --build
   4. Planes y specs vivos en `docs/superpowers/plans/` y `docs/superpowers/specs/`.
 - **Rama:** todo el trabajo va directo a `main` (no se crean branches de feature salvo que el usuario lo pida). No crear PRs salvo indicación explícita.
 - **Commits:** mensajes cortos y descriptivos en castellano. No commitear secrets (ya hay `ADMIN_API_KEY` en el repo por decisión del usuario; no agregar más).
-- **No pagar nada:** el usuario no quiere planes de pago. Hosting gratuito sin tarjeta (Koyeb + Neon, o Render free si se puede verificar con tarjeta). La IA **no puede** crear las cuentas de hosting; eso lo hace el usuario.
+- **No pagar nada:** el usuario no quiere planes de pago. Hosting gratuito sin tarjeta (Render free si se puede verificar con tarjeta). La IA **no puede** crear las cuentas de hosting; eso lo hace el usuario.
 
 **Testing antes de declarar "listo":**
 - Backend: `cd backend; $env:PYTHONPATH=".."; python -m pytest tests/ -v` (140+ tests, deben pasar).
@@ -460,6 +535,7 @@ docker compose up --build
 - `backend/app/core/database.py` — `_async_url` convierte `postgres://` → `postgresql+asyncpg://`.
 - `backend/app/main.py` — `sync_loop` es no-op si `FOOTBALL_DATA_API_KEY` está vacío.
 - `frontend/.vercel/project.json` — config del proyecto Vercel ya linkeado.
+- `frontend/public/manifest.json` — PWA manifest (nombre "Liga PY", colores APF).
 
 ## Documentación de diseño
 
