@@ -248,7 +248,7 @@ El **Handoff Maestro** define la dirección completa del proyecto con una identi
 3. ✅ Noticias (RSS + UI)
 4. ✅ Transferencias (CRUD + RSS + UI + estadísticas)
 5. ✅ Estadísticas históricas
-  6. 🔶 Deployment a producción — **COMPLETADO** ✅. Frontend en Vercel + Backend en Render (Docker) + DB en Neon Postgres. Ver sección "Estado de despliegue".
+   6. 🔶 Deployment a producción — **COMPLETADO Y CERRADO** ✅. Frontend en Vercel + Backend en Render (Docker) + DB en Neon Postgres. Ver sección "Estado de despliegue". Backend sirviendo 19 clubes / 348 partidos / 133 tabla / 16 goleadores / 14 transferencias / 30 noticias desde Neon, verificado de extremo a extremo (incógnito) sin errores. Incidencias de despliegue (rama Render + var Vercel) documentadas arriba.
 
 ## Pendientes / Issues conocidos
 
@@ -313,6 +313,28 @@ Arquitectura oficial en producción:
   - Recordatorio: `run_alembic_upgrade()` en Postgres **omite Alembic** (usa `create_all`); no correr
     `alembic upgrade head` a mano contra Neon (la migración `6fbc92ce284a` altera `clubes` que no existe
     vía migraciones y rompe). El esquema ya está creado con `create_all` + `alembic stamp head`.
+
+### Incidencia de frontend — variable horneada en Vercel (RESUELTO — Julio 2026)
+- **Síntoma:** la web cargaba pero todas las secciones daban `API error: 404 Not Found`
+  (clubes, partidos, tabla, torneos) y carteles rojos de "Error de conexión con el backend".
+  El backend de Render respondía 200 en esas mismas rutas.
+- **Causa raíz:** `frontend/src/lib/api.ts` tenía un **fallback a Railway muerto**
+  (`backend-production-0b7d.up.railway.app`). Como la var `NEXT_PUBLIC_API_URL` no se había
+  propagado en el build de Vercel, el frontend "horneó" ese fallback muerto y apuntaba a un
+  backend inexistente → 404 en todo.
+- **Solución aplicada (commit `a22bb29`):**
+  1. `api.ts`: `NEXT_PUBLIC_API_URL` ya **NO** cae a Railway; si falta la var, `API_URL` queda
+     vacío y se loguea un error claro en consola (en vez de apuntar a un backend muerto).
+  2. Vercel → **Settings → Environment Variables**: setear `NEXT_PUBLIC_API_URL` =
+     `https://liga-paraguaya-futbol.onrender.com` (sin `/` final, a Production/Preview/Dev).
+  3. **Redeploy limpio** en Vercel para que la var `NEXT_PUBLIC_*` se hornee en el build.
+- **✅ Resultado verificado (incógnito):** web fluido, 19 clubes + 348 partidos + tabla con datos
+  reales de Neon, cero carteles rojos. Endpoints clave vivos: `/health`, `/api/v1/clubes`,
+  `/api/v1/clubes/{id}`, `/api/v1/partidos`, `/api/v1/partidos/{id}`, `/api/v1/tabla`,
+  `/api/v1/auth/login`, `/api/v1/predicciones`, `/api/v1/leaderboard`.
+- **🚨 Regla para el equipo:** las vars `NEXT_PUBLIC_*` se **incrustan en el build**, no en runtime.
+  Si se cambia una, hay que **redeploy** en Vercel (no alcanza con setearla). Y nunca dejar un
+  fallback a un backend muerto en el código frontend.
 
 ### Reglas de automatización (aplicadas en cada cambio)
 1. **SSL/asyncpg:** al tocar `.env`, `config.py` o strings de conexión, NO debe haber `?sslmode=` ni
@@ -426,6 +448,9 @@ docker compose up --build
 - Backend: `cd backend; $env:PYTHONPATH=".."; python -m pytest tests/ -v` (140+ tests, deben pasar).
 - Frontend: `cd frontend; npm run build` (TypeScript + build limpio).
 - Deploy-readiness: `backend/tests/test_deploy_readiness.py` (4 tests: `_async_url` acepta `postgres://`, `sync_loop` no-op sin API key, etc.).
+- **Vars `NEXT_PUBLIC_*` (frontend):** se hornean en el build de Vercel, NO en runtime. Si se
+  cambia/setea una, hay que **redeploy** (no alcanza con guardarla). Nunca dejar fallback a un
+  backend muerto en `frontend/src/lib/api.ts` (incidencia resuelta en commit `a22bb29`).
 
 **Archivos clave de infra/deploy:**
 - `render.yaml` (raíz) — Blueprint para Render.
