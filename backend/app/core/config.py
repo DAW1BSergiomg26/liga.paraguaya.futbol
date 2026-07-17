@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     debug: bool = True
 
     database_url: str = f"sqlite+aiosqlite:///{_DEFAULT_DB_PATH.as_posix()}"
-    cors_origins: str = "http://localhost:3000,http://localhost:5173,https://frontend-ten-swart-85.vercel.app"
+    cors_origins: str = "http://localhost:3000,http://localhost:5173,https://ligaparaguayafutbol-qq067uc6x-daw1bsergiomg26s-projects.vercel.app"
 
     api_football_key: str = ""
 

@@ -75,6 +75,9 @@ async def api_key_middleware(request: Request, call_next):
     if not path.startswith("/api/v1/") or path.startswith("/api/v1/admin/"):
         return await call_next(request)
 
+    if request.method == "OPTIONS":
+        return await call_next(request)
+
     x_api_key = request.headers.get("X-API-Key", "")
     if x_api_key:
         info = await rate_limit_info(x_api_key)
