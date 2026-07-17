@@ -7,6 +7,13 @@ import StripesBackground from "@/components/layout/StripesBackground";
 import Providers from "./providers";
 import PushSetup from "@/components/PushSetup";
 
+// URL de producción del sitio (se hornea en build). Destruye el alias viejo
+// front-end-ten-swart-85.vercel.app. Usa NEXT_PUBLIC_SITE_URL en Vercel;
+// fallback al dominio de deploy actual si la var no estuviera seteada.
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  "https://ligaparaguayafutbol-ebbsksgys-daw1bsergiomg26s-projects.vercel.app";
+
 const inter = Inter({ subsets: ["latin"] });
 const barlowCondensed = Barlow_Condensed({
   subsets: ["latin"],
@@ -45,15 +52,15 @@ export const metadata: Metadata = {
     apple: "/apple-touch-icon.png",
   },
   manifest: "/manifest.json",
-  metadataBase: new URL("https://frontend-ten-swart-85.vercel.app"),
+  metadataBase: new URL(SITE_URL),
   alternates: {
-    canonical: "https://frontend-ten-swart-85.vercel.app",
+    canonical: SITE_URL,
   },
   openGraph: {
     title: "Liga Paraguaya de Fútbol | Datos y Estadísticas",
     description:
       "Clubes, partidos, tabla de posiciones, goleadores, transferencias y datos del fútbol paraguayo en tiempo real.",
-    url: "https://frontend-ten-swart-85.vercel.app",
+    url: SITE_URL,
     siteName: "Liga PY",
     locale: "es_PY",
     type: "website",

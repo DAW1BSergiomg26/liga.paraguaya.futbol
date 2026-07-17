@@ -346,9 +346,11 @@ El **Handoff Maestro** define la dirección completa del proyecto con una identi
 
 ### Estado de despliegue (VERIFICADO — Julio 2026)
 Arquitectura oficial en producción:
-- **Frontend:** ✅ Vercel → https://frontend-ten-swart-85.vercel.app
+- **Frontend:** ✅ Vercel → https://ligaparaguayafutbol-ebbsksgys-daw1bsergiomg26s-projects.vercel.app
+  - Alias de producción activo: `https://frontend-ten-swart-85.vercel.app` (Vercel lo mantiene como Production URL; NO se hornea en el código).
   - Project ID: `prj_uM7KzAcPV7zRwjWDGpHAIGXelCC2` (org `team_xTbaX86uhYJgVplW2yc6jTUj`)
   - `NEXT_PUBLIC_API_URL` → `https://liga-paraguaya-futbol.onrender.com` (backend de Render).
+  - `NEXT_PUBLIC_SITE_URL` → dominio de deploy actual (se hornea en build; reemplaza el alias viejo hardcodeado `frontend-ten-swart-85.vercel.app` que estaba en `layout.tsx` y provocaba fallos de hidratación).
   - Carga datos reales: 348 partidos, 892 goles, 19 equipos desde Neon.
 - **Backend:** ✅ Render (Web Service, runtime **Docker** → `Dockerfile.backend`)
   - URL pública: `https://liga-paraguaya-futbol.onrender.com`
@@ -482,11 +484,12 @@ npx vitest run  # Si hay tests configurados
 DATABASE_URL=postgresql://<neon-owner>:<pass>@<host>/neondb   # Sin ?sslmode (asyncpg lo rechaza)
 JWT_SECRET=<generado en Render>
 ADMIN_API_KEY=<seteado en Render>
-CORS_ORIGINS=http://localhost:3000,https://frontend-ten-swart-85.vercel.app
+CORS_ORIGINS=http://localhost:3000,https://frontend-ten-swart-85.vercel.app,https://ligaparaguayafutbol-ebbsksgys-daw1bsergiomg26s-projects.vercel.app
 FOOTBALL_DATA_API_KEY=  # Opcional — sin ella el sync cron es no-op, solo datos demo
 
 # Frontend (Vercel, Environment Variables)
 NEXT_PUBLIC_API_URL=https://liga-paraguaya-futbol.onrender.com
+NEXT_PUBLIC_SITE_URL=https://ligaparaguayafutbol-ebbsksgys-daw1bsergiomg26s-projects.vercel.app
 NEXT_PUBLIC_VAPID_PUBLIC_KEY=
 ```
 
