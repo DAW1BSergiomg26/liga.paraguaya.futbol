@@ -44,6 +44,12 @@ class TablaService:
 
     @staticmethod
     async def get_torneos(db: AsyncSession) -> list[str]:
-        stmt = select(TablaPosicion.torneo).distinct().order_by(TablaPosicion.torneo)
+        # Filtramos NULLs: response_model=list[str] rompe (500) si hay un None.
+        stmt = (
+            select(TablaPosicion.torneo)
+            .where(TablaPosicion.torneo.isnot(None))
+            .distinct()
+            .order_by(TablaPosicion.torneo)
+        )
         result = await db.execute(stmt)
-        return result.scalars().all()
+        return [t for t in result.scalars().all() if t is not None]
