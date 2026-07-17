@@ -31,7 +31,19 @@ async def get_connection():
         yield conn
 
 
+def _is_postgres() -> bool:
+    return _async_url(settings.database_url).startswith("postgresql+")
+
+
 async def run_alembic_upgrade():
+    if _is_postgres():
+        # En Postgres el esquema ya se crea con create_all (ver init_db).
+        # No corremos Alembic en runtime: sus migraciones usan PRAGMA/ALTER
+        # incompatibles con Postgres y rompen el arranque del contenedor.
+        sys.stderr.write("Postgres detectado: se omite Alembic en runtime (create_all gestiona el esquema)\n")
+        sys.stderr.flush()
+        return
+
     import os as _os
     backend_dir = Path(__file__).resolve().parent.parent.parent
     env = {k: v for k, v in _os.environ.items() if not k.startswith("PYTHON")}
@@ -128,7 +140,16 @@ async def _ensure_columns_exist():
 
 
 async def init_db():
+    # Registra todos los modelos antes de crear el esquema.
+    from backend.app import models  # noqa: F401  (importa models/__init__ y goleador)
+    import backend.app.models.goleador  # noqa: F401  (no exportado en __init__)
+
     async with engine.begin() as conn:
-        from backend.app.models import club, partido, prediction, tabla, user
-        await conn.run_sync(Base.metadata.drop_all)
-        await conn.run_sync(Base.metadata.create_all)
+        if _is_postgres():
+            # En Postgres NO borramos datos: solo creamos tablas faltantes.
+            # El esquema ya fue poblado (import_data.py / seed).
+            await conn.run_sync(Base.metadata.create_all)
+        else:
+            from backend.app.models import club, partido, prediction, tabla, user
+            await conn.run_sync(Base.metadata.drop_all)
+            await conn.run_sync(Base.metadata.create_all)
