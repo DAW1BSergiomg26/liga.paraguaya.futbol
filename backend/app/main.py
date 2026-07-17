@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy import select
 
-from backend.app.api import admin, auth, clubes, goleadores, health, leaderboard, partidos, predicciones, tabla
+from backend.app.api import admin, auth, clubes, goleadores, health, leaderboard, partidos, predicciones, simulator, tabla
 from backend.app.api.cerezo import router as cerezo_router
 from backend.app.api.chat import router as chat_router
 from backend.app.api.notificaciones import router as notificaciones_router
@@ -110,6 +110,7 @@ app.include_router(tactico_router)
 app.include_router(goleadores.router)
 app.include_router(transferencias_router)
 app.include_router(historial_router)
+app.include_router(simulator.router)
 
 
 @app.get("/")
