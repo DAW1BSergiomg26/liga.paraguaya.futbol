@@ -412,3 +412,28 @@ export interface ClubTemporadaHistorica {
   puntos: number;
   dg: number;
 }
+
+// === Simulador de Partidos (Poisson) ===
+export interface ExactScore {
+  goles_local: number;
+  goles_visitante: number;
+  probabilidad: number;
+}
+
+export interface SimulationResultOut {
+  home_club_id: string;
+  home_club_name: string;
+  away_club_id: string;
+  away_club_name: string;
+  probabilidad_local: number;
+  probabilidad_empate: number;
+  probabilidad_visitante: number;
+  lambda_local: number;
+  lambda_visitante: number;
+  resultados_mas_probables: ExactScore[];
+}
+
+export interface SimulationInput {
+  home_club_id: string;
+  away_club_id: string;
+}

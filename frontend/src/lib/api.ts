@@ -17,7 +17,7 @@ export async function apiFetch<T>(path: string, options?: RequestInit): Promise<
   return res.json();
 }
 
-import type { Club, ClubDetail, Partido, PartidoDetail, PartidoPage, TablaRow, User, PredictionCreate, PredictionDetail, LeaderboardEntry, Noticia, NoticiasPaginatedResponse, H2HResponse, EquipoTactico, AnalisisPartido, EquipoResumenTactico, AuthUser, TokenResponse, CampeonHistorico, RankingClubHistorico, ClubTemporadaHistorica, EstadisticasTransferencias } from "@/types";
+import type { Club, ClubDetail, Partido, PartidoDetail, PartidoPage, TablaRow, User, PredictionCreate, PredictionDetail, LeaderboardEntry, Noticia, NoticiasPaginatedResponse, H2HResponse, EquipoTactico, AnalisisPartido, EquipoResumenTactico, AuthUser, TokenResponse, CampeonHistorico, RankingClubHistorico, ClubTemporadaHistorica, EstadisticasTransferencias, SimulationInput, SimulationResultOut } from "@/types";
 
 export async function getClubes(ciudad?: string): Promise<Club[]> {
   const params = ciudad ? `?ciudad=${encodeURIComponent(ciudad)}` : "";
@@ -260,4 +260,12 @@ export async function getClubHistorial(clubId: string): Promise<ClubTemporadaHis
 
 export async function getEstadisticasTransferencias(): Promise<EstadisticasTransferencias> {
   return apiFetch<EstadisticasTransferencias>("/api/v1/transferencias/estadisticas");
+}
+
+export async function predecirPartido(data: SimulationInput): Promise<SimulationResultOut> {
+  return apiFetch<SimulationResultOut>("/api/v1/simulador/prediccion", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
 }
