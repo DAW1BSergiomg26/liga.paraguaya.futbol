@@ -1,4 +1,13 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://backend-production-0b7d.up.railway.app";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
+
+if (!API_URL) {
+  if (typeof window !== "undefined") {
+    console.error(
+      "NEXT_PUBLIC_API_URL no configurada: el frontend no puede conectar al backend. " +
+        "Seteala en Vercel (Settings -> Environment Variables) y redeploy."
+    );
+  }
+}
 
 export async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${API_URL}${path}`, options);
