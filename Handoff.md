@@ -10,7 +10,7 @@ Plataforma web para el seguimiento de la Primera División paraguaya de fútbol.
 |------|-----------|
 | Frontend | Next.js 16.2.10 (App Router), TypeScript, Tailwind CSS v4, TanStack Query, GSAP 3.15, Framer Motion 12, Recharts, D3, Three.js |
 | Backend | FastAPI, Python 3.14+, SQLAlchemy async, Pydantic v2, WebSockets |
-| DB | SQLite (dev) / PostgreSQL (prod via Alembic) |
+| DB | SQLite (dev) / PostgreSQL Neon (prod; esquema vía `create_all`, no Alembic en runtime) |
 | Scraping | selectolax, httpx, RSSSF + Wikipedia |
 | Auth | JWT (bcrypt + PyJWT), 7-day tokens |
 | APIs externas | Football-Data.org (competicion PA1) |
@@ -288,6 +288,31 @@ Arquitectura oficial en producción:
 - **Railway:** ❌ **DESCARTADO DEFINITIVAMENTE** (sin free tier útil; el backend anterior ahí estaba muerto).
 - **Koyeb:** ❌ **DESCARTADO** (cambios en la plataforma); se migró a Render.
 - **Repositorio:** `DAW1BSergiomg26/liga.paraguaya.futbol` (rama `main`).
+
+### Incidencia de despliegue — Render apuntaba a rama equivocada (RESUELTO — Julio 2026)
+- **Síntoma:** el backend en Render no levantaba y el dashboard mostraba builds fallidos con
+  `Exited with status 3`. El servicio estaba atascado haciendo **rollbacks automáticos al commit roto
+  `aabec36`** (error de `PRAGMA table_info` — sintaxis SQLite en un backend Postgres).
+- **Causa raíz:** en **Settings → Branch** del servicio de Render, la rama conectada era
+  **`feature/frontend-react-v1`**, no `main`. Por eso el auto-deploy ignoraba los pushes a `main`
+  (incluido el fix `c360648` que eliminaba `PRAGMA` y corregía `init_db`/`run_alembic_upgrade`).
+- **Solución aplicada:**
+  1. En Render → **Settings → Branch**: cambiar a **`main`**.
+  2. **Manual Deploy → "Clear build cache & deploy"** para forzar un build limpio desde `c360648`.
+  3. El deploy terminó OK; Uvicorn arrancó y `/health` respondió `ok`.
+- **✅ Resultado verificado:** `GET /api/v1/clubes` → 19 · `GET /api/v1/partidos?per_page=500` →
+  `total: 348` (los 348 accesibles; la API pagina 25/pág por defecto). Neon tiene 561 filas
+  (19 clubes, 348 partidos, 133 tabla_posiciones, 16 goleadores, 14 transferencias, 30 noticias, 1 user).
+- **🚨 Si el backend vuelve a caer en Render (para los 6 compañeros del equipo):** MIRAR AQUÍ →
+  - **Render → Settings → Branch** debe decir **`main`** (NO `feature/*`). Si dice otra rama, el
+    auto-deploy no verá los fixes y quedará bucleando en un commit viejo.
+  - **Render → Deploys / Events:** si hay un build "in progress" colgado o rollback automático,
+    usá **Manual Deploy → "Clear build cache & deploy"** para destrabarlo.
+  - **Render → Logs:** si el build falla con `Exited with status 3` + error de `PRAGMA`/`ALTER TABLE`,
+    es el bug de migraciones SQLite en Postgres ya corregido en `c360648`; no revertir, hacer deploy de `main`.
+  - Recordatorio: `run_alembic_upgrade()` en Postgres **omite Alembic** (usa `create_all`); no correr
+    `alembic upgrade head` a mano contra Neon (la migración `6fbc92ce284a` altera `clubes` que no existe
+    vía migraciones y rompe). El esquema ya está creado con `create_all` + `alembic stamp head`.
 
 ### Reglas de automatización (aplicadas en cada cambio)
 1. **SSL/asyncpg:** al tocar `.env`, `config.py` o strings de conexión, NO debe haber `?sslmode=` ni
