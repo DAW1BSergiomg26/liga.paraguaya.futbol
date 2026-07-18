@@ -24,6 +24,7 @@ interface ClubNode {
   titulos?: number;
   intl?: number;
   movimientos?: number;
+  conexiones?: number;
   escudo?: string;
 }
 
@@ -103,6 +104,26 @@ const CLUB_COLORS: Record<string, string> = {
   "rubio-nu": "#10B981",
 };
 
+/* Cuenta las conexiones (grado) de cada nodo a partir de los links. */
+function computeDegree(links: ClubLink[]): Record<string, number> {
+  const map: Record<string, number> = {};
+  for (const l of links) {
+    const s = typeof l.source === "string" ? l.source : (l.source as ClubNode).id;
+    const t = typeof l.target === "string" ? l.target : (l.target as ClubNode).id;
+    if (s) map[s] = (map[s] ?? 0) + 1;
+    if (t) map[t] = (map[t] ?? 0) + 1;
+  }
+  return map;
+}
+
+/* Construye el HTML del tooltip de hover (tarjeta compacta con datos clave). */
+function richLabel(name: string, lines: string[]): string {
+  const body = lines
+    .map((l) => `<span style="font-size:11px;color:#222;font-weight:600">${l}</span>`)
+    .join("<br/>");
+  return `<div style="color:#020a14;background:${APF_DORADO};padding:8px 12px;border-radius:8px;font-weight:700;font-size:13px;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,0.45);text-align:left;line-height:1.5">${name}<br/>${body}</div>`;
+}
+
 const RIVALIDADES_FALLBACK: GraphData = {
   nodes: [
     { id: "olimpia", name: "Club Olimpia", short: "Olimpia", val: 48, color: "#FFFFFF", titulos: 48, intl: 8, label: "" },
@@ -143,6 +164,25 @@ export default function Red3DPage() {
   const [transfers, setTransfers] = useState<TransferItem[]>([]);
   const handleRef = useRef<Graph3DHandle | null>(null);
 
+  /* Guía de usuario: aparece si el grafo 3D no recibe interacción en 5s */
+  const [showGuide, setShowGuide] = useState(false);
+  const guideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const markInteraction = useCallback(() => {
+    setShowGuide(false);
+    if (guideTimer.current) clearTimeout(guideTimer.current);
+    guideTimer.current = setTimeout(() => setShowGuide(true), 5000);
+  }, []);
+  useEffect(() => {
+    if (viewMode !== "3d") return;
+    markInteraction();
+    return () => {
+      if (guideTimer.current) clearTimeout(guideTimer.current);
+    };
+  }, [viewMode, markInteraction]);
+  useEffect(() => {
+    markInteraction();
+  }, [selectedNode, mode, autoRotate, markInteraction]);
+
   /* Inicializar vista según dispositivo */
   useEffect(() => {
     setViewMode(isMobile ? "2d" : "3d");
@@ -161,12 +201,17 @@ export default function Red3DPage() {
       .then((r) => r.json())
       .then((d: GraphData) => {
         if (!active) return;
+        const deg = computeDegree(d.links);
         const nodes = d.nodes.map((n) => ({
           ...n,
           short: SHORT[n.id] ?? n.name,
           color: CLUB_COLORS[n.id] ?? n.color,
           escudo: escudoUrl(n.id),
-          label: `<div style="color:#020a14;background:${APF_DORADO};padding:6px 10px;border-radius:6px;font-weight:700;font-size:13px;white-space:nowrap">${n.name}<br/><span style="font-size:11px;color:#333">${n.titulos ?? 0} títulos · ${n.intl ?? 0} int.</span></div>`,
+          conexiones: deg[n.id] ?? 0,
+          label: richLabel(n.name, [
+            `${(n.titulos ?? 0)} títulos · ${(n.intl ?? 0)} int.`,
+            `${deg[n.id] ?? 0} rivalidades`,
+          ]),
         }));
         const links = d.links.map((l) => ({ ...l, w: Math.max(0.5, (l.value || 1) / 50) }));
         setRivalidadesData({ nodes, links });
@@ -218,7 +263,8 @@ export default function Red3DPage() {
       color: CLUB_COLORS[c.id] ?? APF_DORADO,
       movimientos: c.count,
       escudo: escudoUrl(c.id),
-      label: `<div style="color:#020a14;background:${APF_DORADO};padding:6px 10px;border-radius:6px;font-weight:700;font-size:13px;white-space:nowrap">${c.name}<br/><span style="font-size:11px;color:#333">${c.count} movimientos</span></div>`,
+      conexiones: 0,
+      label: `<div style="color:#020a14;background:${APF_DORADO};padding:8px 12px;border-radius:8px;font-weight:700;font-size:13px;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,0.45);text-align:left;line-height:1.5">${c.name}<br/><span style="font-size:11px;color:#222;font-weight:600">${c.count} movimientos</span></div>`,
     }));
     const links: ClubLink[] = [...linkMap.values()].map((l) => ({
       source: l.source,
@@ -230,6 +276,8 @@ export default function Red3DPage() {
       monto: l.first?.monto,
       label: `<div style="color:${APF_DORADO};font-weight:600">${l.labels.join("<br/>")}</div>`,
     }));
+    const deg = computeDegree(links);
+    for (const n of nodes) n.conexiones = deg[n.id] ?? 0;
     return { nodes, links };
   }, [transfers, temporada]);
 
@@ -271,6 +319,15 @@ export default function Red3DPage() {
     setAutoRotate(false);
   }, []);
 
+  const handleClubPick = useCallback(
+    (c: ClubNode) => {
+      flyTo(c.id);
+      setSelectedNode(c);
+      markInteraction();
+    },
+    [flyTo]
+  );
+
   const onLinkClick = useCallback((link: ClubLink) => {
     setSelectedLink(link);
     setAutoRotate(false);
@@ -279,6 +336,7 @@ export default function Red3DPage() {
   const resetCamera = useCallback(() => {
     setAutoRotate(false);
     handleRef.current?.zoomToFit(1000, 80);
+    markInteraction();
   }, []);
 
   const anios = useMemo(() => {
@@ -520,8 +578,14 @@ export default function Red3DPage() {
                       <Graph3D
                         data={graphData}
                         autoRotate={autoRotate && !isMobile}
-                        onSelect={setSelectedNode}
-                        onLinkClick={onLinkClick}
+                        onSelect={(n) => {
+                          setSelectedNode(n);
+                          markInteraction();
+                        }}
+                        onLinkClick={(l) => {
+                          onLinkClick(l);
+                          markInteraction();
+                        }}
                         onReady={onReady}
                       />
                     </Suspense>
@@ -534,6 +598,58 @@ export default function Red3DPage() {
                   <span>⚡ Click en un club para acercarte</span>
                 </div>
 
+                {/* Botón flotante Reset View / Centrar todo */}
+                <button
+                  onClick={resetCamera}
+                  aria-label="Restablecer la vista del grafo (centrar todo)"
+                  title="Centrar todo"
+                  className="absolute bottom-4 right-4 z-10 flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-bg-secundario/90 backdrop-blur border border-borde-sutil text-texto-principal shadow-lg hover:border-apf-dorado/50 hover:text-apf-dorado transition"
+                >
+                  <span className="text-base leading-none">⟲</span>
+                  Centrar todo
+                </button>
+
+                {/* Guía de usuario tras 5s sin interacción */}
+                {showGuide && (
+                  <div
+                    role="dialog"
+                    aria-label="Guía rápida de la Red 3D"
+                    className="absolute inset-x-3 top-16 mx-auto max-w-md z-20 bg-bg-secundario/95 backdrop-blur-sm border border-apf-dorado/40 rounded-2xl p-5 shadow-2xl ring-1 ring-white/10"
+                  >
+                    <div className="flex items-start gap-3">
+                      <span className="text-2xl">🧭</span>
+                      <div className="flex-1">
+                        <h3 className="text-texto-principal font-bold text-base">Cómo explorar la Red 3D</h3>
+                        <ul className="mt-2 space-y-1 text-sm text-texto-secundario list-disc list-inside">
+                          <li>Arrastá el grafo para <span className="text-texto-principal">rotar</span> la cámara.</li>
+                          <li>Usá la rueda o el pinza para hacer <span className="text-texto-principal">zoom</span>.</li>
+                          <li>Clic en un club para <span className="text-apf-dorado">acercarte</span> y ver su ficha.</li>
+                          <li>Seleccioná un club de la lista lateral para centrarlo.</li>
+                        </ul>
+                      </div>
+                      <button
+                        onClick={() => {
+                          setShowGuide(false);
+                          if (guideTimer.current) clearTimeout(guideTimer.current);
+                        }}
+                        aria-label="Cerrar guía"
+                        className="text-texto-apagado hover:text-apf-rojo text-xl leading-none"
+                      >
+                        ×
+                      </button>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setShowGuide(false);
+                        if (guideTimer.current) clearTimeout(guideTimer.current);
+                      }}
+                      className="mt-3 w-full px-4 py-2 rounded-xl text-sm font-semibold bg-apf-rojo text-white hover:bg-apf-rojo/90 transition"
+                    >
+                      Entendido
+                    </button>
+                  </div>
+                )}
+
                 {/* Panel de nodo seleccionado */}
                 {selectedNode && (
                   <div className="absolute bottom-4 left-4 right-4 lg:left-4 lg:right-auto lg:w-80 bg-bg-secundario/95 backdrop-blur-sm border-l-4 border-apf-rojo rounded-xl p-4 shadow-2xl ring-1 ring-white/10">
@@ -542,8 +658,9 @@ export default function Red3DPage() {
                         <Image src={selectedNode.escudo} alt={selectedNode.name} width={56} height={56} loading="lazy" className="w-14 h-14 object-contain rounded-lg bg-white/10 p-1 shadow" />
                       )}
                       <div className="flex-1">
+                        <p className="text-[11px] uppercase tracking-wider text-apf-dorado font-semibold">Detalles del club</p>
                         <h3 className="text-texto-principal font-bold text-lg leading-tight">{selectedNode.name}</h3>
-                        <div className="flex gap-4 mt-1 text-sm">
+                        <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-sm">
                           {mode === "rivalidades" ? (
                             <>
                               <span className="text-apf-dorado font-semibold">{selectedNode.titulos ?? 0} títulos</span>
@@ -552,6 +669,7 @@ export default function Red3DPage() {
                           ) : (
                             <span className="text-apf-dorado font-semibold">{selectedNode.movimientos ?? 0} movimientos</span>
                           )}
+                          <span className="text-texto-secundario">{selectedNode.conexiones ?? 0} conexiones</span>
                         </div>
                       </div>
                       <button
@@ -614,13 +732,14 @@ export default function Red3DPage() {
                 <p className="text-xs uppercase tracking-wider text-texto-apagado mb-2 px-1">Clubes ({clubList.length})</p>
                 <ul className="space-y-1">
                   {filteredList.map((c) => (
-                    <li key={c.id}>
-                      <button
-                        onClick={() => flyTo(c.id)}
-                        className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-left transition ${
-                          selectedNode?.id === c.id ? "bg-apf-rojo/15 ring-1 ring-apf-rojo/40" : "hover:bg-bg-noche"
-                        }`}
-                      >
+                      <li key={c.id}>
+                        <button
+                          onClick={() => handleClubPick(c)}
+                          aria-label={`Centrar y ver ${c.name}`}
+                          className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-left transition ${
+                            selectedNode?.id === c.id ? "bg-apf-rojo/15 ring-1 ring-apf-rojo/40" : "hover:bg-bg-noche"
+                          }`}
+                        >
                         {c.escudo && (
                           <Image src={c.escudo} alt="" width={28} height={28} loading="lazy" className="w-7 h-7 object-contain rounded bg-white/5 p-0.5" />
                         )}
