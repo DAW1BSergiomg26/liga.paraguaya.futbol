@@ -3,8 +3,8 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from starlette.responses import Response
 from sqlalchemy import select
 
 from backend.app.api import admin, auth, clubes, goleadores, health, leaderboard, partidos, predicciones, simulator, tabla
@@ -60,13 +60,8 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.cors_origin_list,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# CORS se maneja con cors_middleware (abajo) para soportar los dominios
+# efimeros de Vercel (cambian por deploy) sin hardcodearlos.
 
 
 @app.middleware("http")
@@ -93,8 +88,51 @@ async def api_key_middleware(request: Request, call_next):
         if info.get("reset_in"):
             response.headers["X-RateLimit-Reset"] = str(info["reset_in"])
         return response
-
     return await call_next(request)
+
+
+def _is_allowed_origin(origin: str) -> bool:
+    """Valida si un Origin puede acceder a la API.
+
+    Ademas de la lista estatica de config.py, se aceptan los
+    dominios efimeros de Vercel (*.vercel.app, que cambian por
+    deploy) y localhost en desarrollo. Esto evita el bloqueo CORS
+    del browser cuando el frontend se sirve desde un deploy nuevo.
+    """
+    if not origin:
+        return False
+    if origin in settings.cors_origin_list:
+        return True
+    if origin.endswith(".vercel.app"):
+        return True
+    if origin.startswith("http://localhost:") or origin.startswith("http://127.0.0.1:"):
+        return True
+    return False
+
+
+@app.middleware("http")
+async def cors_middleware(request: Request, call_next):
+    origin = request.headers.get("origin", "")
+    allowed = _is_allowed_origin(origin)
+
+    if request.method == "OPTIONS":
+        # Preflight: responder directamente sin tocar el endpoint.
+        headers = {}
+        if allowed:
+            headers["Access-Control-Allow-Origin"] = origin
+            headers["Access-Control-Allow-Credentials"] = "true"
+            headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+            headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-API-Key"
+        return Response(content="", status_code=200, headers=headers)
+
+    response = await call_next(request)
+    if allowed:
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-API-Key"
+    return response
+
 
 app.include_router(health.router)
 app.include_router(clubes.router)
