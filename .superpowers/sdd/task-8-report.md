@@ -1,13 +1,13 @@
-# Task 8: TransferCard Component — Report
+## Task 8: E2E Playwright Tests for Radar Comparison Feature
 
-- **Status:** DONE
-- **Commit:** `cbd07ec` — `feat: add TransferCard, VerificationBadge, TipoBadge components`
-- **Build result:** 0 errors (Next.js 16.2.10, TypeScript compiled successfully)
+**Status:** ✅ Complete
 
-## Files created
-- `frontend/src/components/transferencia/VerificationBadge.tsx`
-- `frontend/src/components/transferencia/TipoBadge.tsx`
-- `frontend/src/components/transferencia/TransferCard.tsx`
+**Commit:** `bd322ba` — `test(e2e): add Playwright tests for radar comparison feature`
 
-## Concerns
-- None.
+**File created:** `frontend/e2e/radar-comparativo.spec.ts` (145 lines)
+
+**Test summary:** 6 Playwright tests covering tab visibility, select loading, radar rendering, same-club warning, metrics table, and console error checks.
+
+**Fix applied:** Replaced non-existent `toHaveCountGreaterThan` matcher with `expect.poll(...).toBeGreaterThan()` and added missing `selectB` declaration in the same-club warning test.
+
+**Report:** `.superpowers/sdd/task-8-report.md`

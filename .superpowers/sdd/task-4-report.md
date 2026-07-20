@@ -1,26 +1,21 @@
-## Task 4: API Endpoints — Completion Report
+# Task 4: GSAP Animation on Formation Change
 
-**Status:** ✅ COMPLETE
+## Status: DONE
 
-**Commits:** `d7b17a1` — feat: add Transferencias API endpoints (CRUD, filters, stats, mercado, historial)
+## Changes Applied
+- Added `useEffect` and `useRef` to React imports
+- Added `initGSAP` and `gsap` imports from `@/lib/gsap`
+- Added `voronoiGroupRef` for the SVG `<g>` element
+- Added `useEffect` that animates Voronoi cell paths on formation change using GSAP `to` with `attr.d` interpolation
+- Wrapped Voronoi `<path>` elements in `<g ref={voronoiGroupRef}>`
+- Respects `prefers-reduced-motion` media query (falls back to instant `gsap.set`)
 
-**Test summary:** Import verification passed (`from backend.app.api.transferencias import router` → OK)
+## Commit
+`4138d79` — `feat(tactico): add GSAP animation for Voronoi cells on formation change`
 
-**Concerns:** None
+## Verification
+- TypeScript compile (`tsc --noEmit`): PASS
+- Next.js production build: PASS
 
-**Files created/modified:**
-- Created: `backend/app/api/transferencias.py` (113 lines)
-- Modified: `backend/app/main.py` (added import + `app.include_router(transferencias_router)`)
-
-**9 endpoints implemented:**
-1. `GET /api/v1/transferencias` — list with filters (club_id, tipo, estado, fecha_desde/hasta, jugador) + pagination
-2. `GET /api/v1/transferencias/mercado` — recent transfers (configurable dias)
-3. `GET /api/v1/transferencias/estadisticas` — stats dashboard data
-4. `GET /api/v1/transferencias/historial/{club_id}` — transfer history per club
-5. `GET /api/v1/transferencias/{transferencia_id}` — get single transfer
-6. `POST /api/v1/transferencias` — create (admin only, same-club validation)
-7. `PUT /api/v1/transferencias/{transferencia_id}` — update (admin only)
-8. `DELETE /api/v1/transferencias/{transferencia_id}` — delete (admin only, 204)
-9. `SyncResponse` BaseModel added for future `sync-rss` endpoint (Task 6)
-
-**Report path:** `.superpowers/sdd/task-4-report.md`
+## Concerns
+None.
