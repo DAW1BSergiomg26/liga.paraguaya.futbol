@@ -16,11 +16,15 @@ async def get_global_stats(db: AsyncSession = Depends(get_db)):
     clubes_result = await db.execute(select(func.count(Club.id)))
     total_clubes = clubes_result.scalar() or 0
 
-    partidos_result = await db.execute(select(func.sum(TablaPosicion.pj)))
+    partidos_result = await db.execute(
+        select(func.sum(TablaPosicion.pj)).where(TablaPosicion.jornada == 0)
+    )
     total_pj = partidos_result.scalar() or 0
     total_partidos = total_pj // 2
 
-    goles_result = await db.execute(select(func.sum(TablaPosicion.gf)))
+    goles_result = await db.execute(
+        select(func.sum(TablaPosicion.gf)).where(TablaPosicion.jornada == 0)
+    )
     total_goles = goles_result.scalar() or 0
 
     return {
