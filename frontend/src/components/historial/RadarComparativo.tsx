@@ -19,7 +19,7 @@ const MAX_RADIUS = 180;
 const LEVELS = 5;
 
 function getAxisAngle(index: number): number {
-  return -Math.PI / 2 + (index * Math.PI * 3) / (AXES.length);
+  return -Math.PI / 2 + (index * Math.PI * 2) / (AXES.length);
 }
 
 function getPolygonPath(values: number[], maxVal: number): string {

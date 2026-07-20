@@ -122,3 +122,97 @@ async def test_comparar_clubes_endpoint(client, db_session, seed_comparar):
 async def test_comparar_clubes_endpoint_missing_param(client, db_session, seed_comparar):
     resp = await client.get("/api/v1/historial/comparar?club_a=olimpia")
     assert resp.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_defensa_mayor_con_menos_goles(db_session):
+    """El club que concede MENOS goles por partido debe tener MAYOR defensa.
+
+    Reproduce el bug exacto: cuando gc ≥ pj para un club (gc/pj ≥ 1),
+    la fórmula 1-(gc/pj) da ≤ 0 → se clampea a 0. Si el otro club
+    tiene gc < pj, ese queda como máximo → 100. Resultado invertido.
+    """
+    clubs = [
+        Club(id="buena", nombre="Buena Defensa", ciudad="Test", apodo="BD", colores=[], estadio="Test", escudo="bd.png"),
+        Club(id="mala", nombre="Mala Defensa", ciudad="Test", apodo="MD", colores=[], estadio="Test", escudo="md.png"),
+    ]
+    for c in clubs:
+        db_session.add(c)
+    await db_session.flush()
+
+    # Buena defensa: concede 0.45 goles/partido (10/22) → gc < pj ✓
+    # Mala defensa: concede 1.82 goles/partido (40/22) → gc > pj ✓
+    tabla_rows = [
+        TablaPosicion(torneo="Apertura 2024", jornada=0, club_id="buena", posicion=1, pj=22, pg=15, pe=5, pp=2, gf=40, gc=10, dg=30, puntos=50),
+        TablaPosicion(torneo="Apertura 2024", jornada=0, club_id="mala", posicion=3, pj=22, pg=8, pe=4, pp=10, gf=25, gc=40, dg=-15, puntos=28),
+    ]
+    for r in tabla_rows:
+        db_session.add(r)
+    await db_session.flush()
+
+    svc = HistorialService(db_session)
+    result = await svc.comparar_clubes("buena", "mala")
+    buena_def = result.club_a.metricas.defensa
+    mala_def = result.club_b.metricas.defensa
+
+    # Ambas deben estar en rango válido
+    assert 0 <= buena_def <= 100, f"buena_def fuera de rango: {buena_def}"
+    assert 0 <= mala_def <= 100, f"mala_def fuera de rango: {mala_def}"
+
+    # FIX esperado: buena_def > mala_def (menos goles = mejor defensa)
+    assert buena_def > mala_def, (
+        f"Defensa invertida: club con MENOS goles ({buena_def}) "
+        f"<= club con MÁS goles ({mala_def})"
+    )
+    # Club con 10 gc en 22 pj no puede tener defensa=0
+    assert buena_def > 0, "Club con datos defensivos reales no puede tener defensa=0"
+    # Club con gc > pj (40>22) no debe arrastrar la normalización a 0
+    # BUG: mala_def actualmente = 0.0 por clamp, el fix debe dar un valor > 0
+    assert mala_def > 0, (
+        f"Club con gc/pj=1.82 debería tener defensa > 0 (tiene datos reales), "
+        f"no {mala_def}"
+    )
+
+
+@pytest.mark.asyncio
+async def test_defensa_no_cero_si_gc_menor_que_pj(db_session):
+    """Un club con gc < pj no puede tener defensa=0.
+
+    Reproduce bug de Olimpia: gc=38, pj=44 → fórmula actual da
+    1-(38/44)=0.136, que tras normalización puede dar 0 si el máximo
+    es mucho mayor (otro club con gc/pj muy bajo).
+    """
+    clubs = [
+        Club(id="olimpia_t", nombre="Olimpia Test", ciudad="Test", apodo="O", colores=[], estadio="Test", escudo="o.png"),
+        Club(id="cerro_t", nombre="Cerro Test", ciudad="Test", apodo="C", colores=[], estadio="Test", escudo="c.png"),
+    ]
+    for c in clubs:
+        db_session.add(c)
+    await db_session.flush()
+
+    # Olimpia: gc=38, pj=44 → gc/pj=0.86 → 1-(gc/pj)=0.136
+    # Cerro: gc=53, pj=44 → gc/pj=1.20 → 1-(gc/pj)=-0.20 → clamp 0
+    tabla_rows = [
+        TablaPosicion(torneo="Apertura 2024", jornada=0, club_id="olimpia_t", posicion=1, pj=22, pg=13, pe=5, pp=4, gf=40, gc=19, dg=21, puntos=44),
+        TablaPosicion(torneo="Clausura 2024", jornada=0, club_id="olimpia_t", posicion=2, pj=22, pg=14, pe=4, pp=4, gf=38, gc=19, dg=19, puntos=46),
+        TablaPosicion(torneo="Apertura 2024", jornada=0, club_id="cerro_t", posicion=3, pj=22, pg=10, pe=6, pp=6, gf=30, gc=26, dg=4, puntos=36),
+        TablaPosicion(torneo="Clausura 2024", jornada=0, club_id="cerro_t", posicion=4, pj=22, pg=9, pe=5, pp=8, gf=28, gc=27, dg=1, puntos=32),
+    ]
+    for r in tabla_rows:
+        db_session.add(r)
+    await db_session.flush()
+
+    svc = HistorialService(db_session)
+    result = await svc.comparar_clubes("olimpia_t", "cerro_t")
+    olimpia_def = result.club_a.metricas.defensa
+    cerro_def = result.club_b.metricas.defensa
+
+    # Olimpia (gc/pj=0.86) > Cerro (gc/pj=1.20) en defensa
+    assert olimpia_def > cerro_def, (
+        f"Olimpia (gc/pj=0.86) debería > Cerro (gc/pj=1.20): "
+        f"Olimpia={olimpia_def}, Cerro={cerro_def}"
+    )
+    # Olimpia con gc < pj no puede tener defensa=0
+    assert olimpia_def > 0, (
+        f"Olimpia con gc=38, pj=44 no puede tener defensa=0.0"
+    )

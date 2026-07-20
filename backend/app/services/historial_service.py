@@ -182,7 +182,6 @@ class HistorialService:
         # 4. Compute league maximums for normalization
         all_club_ids = set(agg.keys()) | set(goles_por_club.keys()) | set(monto_por_club.keys()) | set(titulos.keys())
         max_ataque = 0.0
-        max_defensa_inv = 0.0
         max_titulos = max(titulos.values()) if titulos else 1
         max_goles = max(goles_por_club.values()) if goles_por_club else 1
         max_monto = max(monto_por_club.values()) if monto_por_club else 1
@@ -192,17 +191,12 @@ class HistorialService:
             pj = a["pj"]
             if pj > 0:
                 ataque_rate = a["gf"] / pj
-                defensa_inv = 1 - (a["gc"] / pj)
                 if ataque_rate > max_ataque:
                     max_ataque = ataque_rate
-                if defensa_inv > max_defensa_inv:
-                    max_defensa_inv = defensa_inv
 
         # Avoid division by zero
         if max_ataque == 0:
             max_ataque = 1
-        if max_defensa_inv == 0:
-            max_defensa_inv = 1
         if max_titulos == 0:
             max_titulos = 1
         if max_goles == 0:
@@ -215,7 +209,8 @@ class HistorialService:
             pj = a["pj"]
             if pj > 0:
                 ataque = min(100.0, (a["gf"] / pj) / max_ataque * 100)
-                defensa = min(100.0, max(0, (1 - a["gc"] / pj)) / max_defensa_inv * 100)
+                gc_per_pj = a["gc"] / pj
+                defensa = min(100.0, 100.0 * (1.0 / max(1.0, gc_per_pj)))
                 rendimiento = min(100.0, a["puntos"] / (pj * 3) * 100)
             else:
                 ataque = defensa = rendimiento = 0.0
