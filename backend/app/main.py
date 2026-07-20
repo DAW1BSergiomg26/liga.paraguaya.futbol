@@ -16,6 +16,7 @@ from backend.app.api.noticias import router as noticias_router
 from backend.app.api.tactico import router as tactico_router
 from backend.app.api.transferencias import router as transferencias_router
 from backend.app.api.historial import router as historial_router
+from backend.app.api.stats import router as stats_router
 from backend.app.core.api_key import RATE_LIMIT_MAX, rate_limit_info
 from backend.app.core.config import settings
 from backend.app.core.database import async_session, run_alembic_upgrade
@@ -151,6 +152,7 @@ app.include_router(tactico_router)
 app.include_router(goleadores.router)
 app.include_router(transferencias_router)
 app.include_router(historial_router)
+app.include_router(stats_router, prefix="/api/v1/stats", tags=["stats"])
 app.include_router(simulator.router)
 
 
@@ -193,5 +195,6 @@ async def root():
             "/api/v1/chat/{partido_id}",
             "/api/v1/simulador/prediccion",
             "/api/v1/admin/partidos/{partido_id}",
+            "/api/v1/stats/global",
         ],
     }

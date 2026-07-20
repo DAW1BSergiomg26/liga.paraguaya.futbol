@@ -5,16 +5,31 @@ import SplitType from "split-type";
 import { initGSAP, gsap, ScrollTrigger } from "@/lib/gsap";
 import CountUp from "@/components/ui/CountUp";
 
-const stats = [
+const DEFAULT_STATS = [
   { label: "PARTIDOS", value: 348 },
   { label: "GOLES", value: 892 },
   { label: "EQUIPOS", value: 19 },
 ];
 
-export default function CinematicHero() {
+export default function CinematicHero({
+  stats,
+}: {
+  stats?: { partidos: number; goles: number; clubes: number };
+}) {
   const heroRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const statsRef = useRef<HTMLDivElement>(null);
+
+  const statValues = [
+    stats?.partidos ?? DEFAULT_STATS[0].value,
+    stats?.goles ?? DEFAULT_STATS[1].value,
+    stats?.clubes ?? DEFAULT_STATS[2].value,
+  ];
+
+  const heroStats = DEFAULT_STATS.map((s, i) => ({
+    ...s,
+    value: statValues[i],
+  }));
 
   useEffect(() => {
     initGSAP();
@@ -115,7 +130,7 @@ export default function CinematicHero() {
           ref={statsRef}
           className="mt-12 flex flex-wrap justify-center gap-8 md:gap-16"
         >
-          {stats.map((stat) => (
+          {heroStats.map((stat) => (
             <div key={stat.label} className="text-center">
               <div className="hero-title-glow font-barlow text-4xl md:text-[3.4rem] font-bold">
                  <CountUp end={stat.value} duration={2.5} />

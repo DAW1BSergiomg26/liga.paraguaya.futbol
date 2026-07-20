@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { getClubes, getPartidos, getTabla, getTorneos } from "@/lib/api";
+import { getClubes, getPartidos, getTabla, getTorneos, getGlobalStats } from "@/lib/api";
 import type { PartidoPage } from "@/types";
 import Link from "next/link";
 import HeroStats from "@/components/HeroStats";
@@ -31,10 +31,11 @@ function torneoActual(torneos: string[]): string | null {
 }
 
 export default async function HomePage() {
-  const [[clubes, errClubes], [partidosData, errPartidos], [torneos, errTorneos]] = await Promise.all([
+  const [[clubes, errClubes], [partidosData, errPartidos], [torneos, errTorneos], [stats, errStats]] = await Promise.all([
     safeFetch(() => getClubes(), []),
     safeFetch(() => getPartidos(), { data: [], total: 0, page: 1, per_page: 25, total_pages: 1 } satisfies PartidoPage),
     safeFetch(() => getTorneos(), []),
+    safeFetch(() => getGlobalStats(), { total_partidos: 348, total_goles: 892, total_clubes: 19 }),
   ]);
 
   const torneo = errTorneos ? null : torneoActual(torneos);
@@ -42,11 +43,17 @@ export default async function HomePage() {
     safeFetch(() => getTabla(torneo ?? undefined), []),
   ]);
 
-  const hasErrors = errClubes || errPartidos || errTabla;
+  const hasErrors = errClubes || errPartidos || errTabla || errStats;
 
   return (
     <>
-      <CinematicHero />
+      <CinematicHero
+        stats={{
+          partidos: stats?.total_partidos ?? 348,
+          goles: stats?.total_goles ?? 892,
+          clubes: stats?.total_clubes ?? 19,
+        }}
+      />
       <div className="max-w-6xl mx-auto px-4 py-12">
       <HeroStats
         clubesCount={clubes.length}

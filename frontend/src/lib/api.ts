@@ -56,6 +56,18 @@ export async function getTorneos(): Promise<string[]> {
   return apiFetch<string[]>("/api/v1/tabla/torneos");
 }
 
+export async function getGlobalStats(): Promise<{
+  total_partidos: number;
+  total_goles: number;
+  total_clubes: number;
+}> {
+  return apiFetch<{
+    total_partidos: number;
+    total_goles: number;
+    total_clubes: number;
+  }>("/api/v1/stats/global");
+}
+
 let authToken: string | null = null;
 
 export function setAuthToken(token: string | null) {
