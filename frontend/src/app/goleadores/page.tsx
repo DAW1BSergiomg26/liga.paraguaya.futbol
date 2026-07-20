@@ -6,6 +6,7 @@ import { getTorneos } from "@/lib/api";
 import PageHeader from "@/components/ui/PageHeader";
 import GoleadoresList from "@/components/GoleadoresList";
 import GoleadoresHistorial from "@/components/GoleadoresHistorial";
+import ScrollReveal from "@/components/ui/ScrollReveal";
 
 type Tab = "torneo" | "historico";
 
@@ -65,9 +66,13 @@ export default function GoleadoresPage() {
       </div>
 
       {tab === "torneo" ? (
-        <GoleadoresList torneo={torneo} />
+        <ScrollReveal variant="from-bottom" stagger={0.05}>
+          <GoleadoresList torneo={torneo} />
+        </ScrollReveal>
       ) : (
-        <GoleadoresHistorial />
+        <ScrollReveal variant="from-bottom">
+          <GoleadoresHistorial />
+        </ScrollReveal>
       )}
     </div>
   );

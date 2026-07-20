@@ -7,6 +7,7 @@ import type { LeaderboardEntry } from "@/types";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import ErrorMessage from "@/components/ui/ErrorMessage";
 import PageHeader from "@/components/ui/PageHeader";
+import ScrollReveal from "@/components/ui/ScrollReveal";
 
 export default function LeaderboardPage() {
   const { data: leaderboard, isLoading, error } = useQuery<LeaderboardEntry[]>({
@@ -30,7 +31,8 @@ export default function LeaderboardPage() {
           <p className="text-texto-apagado">Todavía no hay participantes.</p>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-borde-sutil bg-bg-secundario/60">
+        <ScrollReveal variant="from-bottom">
+          <div className="overflow-x-auto rounded-xl border border-borde-sutil bg-bg-secundario/60">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-borde-sutil text-texto-secundario uppercase text-xs">
@@ -90,6 +92,7 @@ export default function LeaderboardPage() {
             </tbody>
           </table>
         </div>
+        </ScrollReveal>
       )}
     </div>
   );

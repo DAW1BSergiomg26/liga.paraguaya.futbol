@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -19,11 +21,14 @@ async def list_noticias(
 ):
     svc = NoticiaService(db)
     result = await svc.list_noticias(page=page, limit=limit, fuente=fuente, search=search)
+    fuentes = sorted({n.fuente for n in result["noticias"]})
     return NoticiasPaginatedResponse(
         noticias=[NoticiaOut.model_validate(n) for n in result["noticias"]],
         total=result["total"],
         page=result["page"],
         total_pages=result["total_pages"],
+        fuentes=fuentes,
+        actualizado=datetime.now(timezone.utc).isoformat(),
     )
 
 

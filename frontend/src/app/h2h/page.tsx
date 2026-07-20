@@ -8,6 +8,7 @@ import type { Club, H2HResponse } from "@/types";
 import { TableSkeleton } from "@/components/ui/Skeleton";
 import ErrorMessage from "@/components/ui/ErrorMessage";
 import PageHeader from "@/components/ui/PageHeader";
+import ScrollReveal from "@/components/ui/ScrollReveal";
 
 export default function H2HPage() {
   const [clubA, setClubA] = useState("");
@@ -72,7 +73,7 @@ export default function H2HPage() {
       ) : error ? (
         <ErrorMessage message="Error al cargar el historial" />
       ) : h2h ? (
-        <>
+        <ScrollReveal variant="from-bottom">
           {/* Header con escudos */}
           <div className="flex items-center justify-center gap-6 mb-8 p-6 rounded-2xl border border-borde-sutil bg-bg-secundario/60">
             <div className="flex flex-col items-center gap-2">
@@ -186,7 +187,7 @@ export default function H2HPage() {
               </table>
             </div>
           )}
-        </>
+        </ScrollReveal>
       ) : null}
     </div>
   );
