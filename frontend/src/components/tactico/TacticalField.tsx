@@ -126,6 +126,13 @@ export default function TacticalField({
     );
   }, [showVoronoi, jugadoresConPosicion]);
 
+  const voronoiFill = colorEquipo === "#D52B1E" || colorEquipo === "#CC001C"
+    ? "rgba(204, 0, 28, 0.20)"
+    : "rgba(0, 97, 158, 0.20)";
+  const voronoiStroke = colorEquipo === "#D52B1E" || colorEquipo === "#CC001C"
+    ? "rgba(204, 0, 28, 0.6)"
+    : "rgba(0, 97, 158, 0.6)";
+
   useEffect(() => {
     if (!showVoronoi || !voronoiGroupRef.current) return;
     initGSAP();
@@ -208,16 +215,8 @@ export default function TacticalField({
                 <path
                   key={cell.cellIndex}
                   d={cell.d}
-                  fill={
-                    cell.teamIndex === 0
-                      ? "rgba(204, 0, 28, 0.20)"
-                      : "rgba(0, 97, 158, 0.20)"
-                  }
-                  stroke={
-                    cell.teamIndex === 0
-                      ? "rgba(204, 0, 28, 0.6)"
-                      : "rgba(0, 97, 158, 0.6)"
-                  }
+                  fill={voronoiFill}
+                  stroke={voronoiStroke}
                   strokeWidth="0.3"
                 />
               ))}
