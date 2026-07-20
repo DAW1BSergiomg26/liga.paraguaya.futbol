@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { computeVoronoiPaths } from "@/lib/voronoi";
 import PlayerDot from "./PlayerDot";
 import FormationSelector from "./FormationSelector";
 import type { JugadorTactico } from "@/types";
@@ -103,6 +104,7 @@ export default function TacticalField({
 }: TacticalFieldProps) {
   const [formacion, setFormacion] = useState(formacionPrincipal);
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
+  const [showVoronoi, setShowVoronoi] = useState(false);
 
   const posiciones = FORMACIONES_POSICIONES[formacion] || FORMACIONES_POSICIONES["4-3-3"];
 
@@ -112,15 +114,37 @@ export default function TacticalField({
     y: posiciones[i]?.y ?? j.y,
   }));
 
+  const FIELD_BOUNDS = { xmin: 0, ymin: 0, xmax: 100, ymax: 150 };
+
+  const voronoiPaths = useMemo(() => {
+    if (!showVoronoi || jugadoresConPosicion.length < 2) return [];
+    return computeVoronoiPaths(
+      jugadoresConPosicion.map((j) => ({ x: j.x * 100, y: j.y * 150 })),
+      FIELD_BOUNDS
+    );
+  }, [showVoronoi, jugadoresConPosicion]);
+
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-4">
         {titulo && <h3 className="text-lg font-bold text-white">{titulo}</h3>}
-        <FormationSelector
-          formaciones={formacionesDisponibles}
-          actual={formacion}
-          onChange={setFormacion}
-        />
+        <div className="flex items-center gap-3">
+          <FormationSelector
+            formaciones={formacionesDisponibles}
+            actual={formacion}
+            onChange={setFormacion}
+          />
+          <button
+            onClick={() => setShowVoronoi(!showVoronoi)}
+            className={`px-3 py-2 rounded-lg text-xs font-medium transition border ${
+              showVoronoi
+                ? "bg-apf-dorado/20 border-apf-dorado text-apf-dorado"
+                : "bg-bg-terciario border-borde-sutil text-texto-secundario hover:text-texto-principal"
+            }`}
+          >
+            {showVoronoi ? "Ocultar zonas" : "Zonas de cobertura"}
+          </button>
+        </div>
       </div>
 
       <div className="relative w-full aspect-[2/3] bg-[#2d5a27] rounded-xl border-4 border-white/20 overflow-hidden shadow-2xl">
@@ -148,6 +172,32 @@ export default function TacticalField({
             onClick={setSelectedPlayer}
           />
         ))}
+
+        {showVoronoi && voronoiPaths.length > 0 && (
+          <svg
+            viewBox="0 0 100 150"
+            className="absolute inset-0 w-full h-full pointer-events-none"
+            preserveAspectRatio="none"
+          >
+            {voronoiPaths.map((cell) => (
+              <path
+                key={cell.cellIndex}
+                d={cell.d}
+                fill={
+                  cell.cellIndex < 11
+                    ? "rgba(204, 0, 28, 0.20)"
+                    : "rgba(0, 97, 158, 0.20)"
+                }
+                stroke={
+                  cell.cellIndex < 11
+                    ? "rgba(204, 0, 28, 0.6)"
+                    : "rgba(0, 97, 158, 0.6)"
+                }
+                strokeWidth="0.3"
+              />
+            ))}
+          </svg>
+        )}
       </div>
 
       <div className="mt-4 flex flex-wrap gap-2 justify-center">
