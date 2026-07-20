@@ -16,11 +16,13 @@ interface Bounds {
 export interface VoronoiPath {
   d: string;
   cellIndex: number;
+  teamIndex: number;
 }
 
 export function computeVoronoiPaths(
   points: Point[],
-  bounds: Bounds
+  bounds: Bounds,
+  teamSplit: number = 11
 ): VoronoiPath[] {
   if (points.length === 0) return [];
 
@@ -39,12 +41,14 @@ export function computeVoronoiPaths(
   return points.map((_, i) => ({
     d: voronoi.renderCell(i),
     cellIndex: i,
+    teamIndex: i < teamSplit ? 0 : 1,
   }));
 }
 
 export function computeCellCentroids(
   points: Point[],
-  bounds: Bounds
+  bounds: Bounds,
+  _teamSplit: number = 11
 ): Point[] {
   if (points.length === 0) return [];
 

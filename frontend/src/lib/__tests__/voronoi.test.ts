@@ -54,6 +54,31 @@ describe("computeVoronoiPaths", () => {
     const cells = computeVoronoiPaths(points, BOUNDS);
     expect(cells).toHaveLength(11);
   });
+
+  it("assigns teamIndex correctly with default split", () => {
+    const points = Array.from({ length: 22 }, (_, i) => ({
+      x: 5 + (i % 11) * 8.5,
+      y: i < 11 ? 20 + (i % 4) * 30 : 90 + (i % 4) * 15,
+    }));
+    const cells = computeVoronoiPaths(points, BOUNDS);
+    cells.forEach((cell) => {
+      if (cell.cellIndex < 11) {
+        expect(cell.teamIndex).toBe(0);
+      } else {
+        expect(cell.teamIndex).toBe(1);
+      }
+    });
+  });
+
+  it("respects custom teamSplit", () => {
+    const points = Array.from({ length: 22 }, (_, i) => ({
+      x: 5 + (i % 11) * 8.5,
+      y: i < 11 ? 20 + (i % 4) * 30 : 90 + (i % 4) * 15,
+    }));
+    const cells = computeVoronoiPaths(points, BOUNDS, 11);
+    expect(cells[0].teamIndex).toBe(0);
+    expect(cells[11].teamIndex).toBe(1);
+  });
 });
 
 describe("computeCellCentroids", () => {

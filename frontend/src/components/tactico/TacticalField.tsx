@@ -209,12 +209,12 @@ export default function TacticalField({
                   key={cell.cellIndex}
                   d={cell.d}
                   fill={
-                    cell.cellIndex < 11
+                    cell.teamIndex === 0
                       ? "rgba(204, 0, 28, 0.20)"
                       : "rgba(0, 97, 158, 0.20)"
                   }
                   stroke={
-                    cell.cellIndex < 11
+                    cell.teamIndex === 0
                       ? "rgba(204, 0, 28, 0.6)"
                       : "rgba(0, 97, 158, 0.6)"
                   }
@@ -224,7 +224,14 @@ export default function TacticalField({
             </g>
           </svg>
         )}
+
       </div>
+
+      {showVoronoi && (
+        <p className="text-xs text-texto-secundario italic text-center mt-3 px-4">
+          Distribución teórica según formación — no representa el movimiento real de un partido.
+        </p>
+      )}
 
       <div className="mt-4 flex flex-wrap gap-2 justify-center">
         {["POR", "DFC", "LD", "LI", "MC", "MCD", "MCO", "MD", "MI", "ED", "EI", "DC"].map((pos) => (
