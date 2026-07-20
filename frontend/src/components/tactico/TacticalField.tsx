@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
+import { initGSAP, gsap } from "@/lib/gsap";
 import { computeVoronoiPaths } from "@/lib/voronoi";
 import PlayerDot from "./PlayerDot";
 import FormationSelector from "./FormationSelector";
@@ -105,6 +106,7 @@ export default function TacticalField({
   const [formacion, setFormacion] = useState(formacionPrincipal);
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
   const [showVoronoi, setShowVoronoi] = useState(false);
+  const voronoiGroupRef = useRef<SVGGElement>(null);
 
   const posiciones = FORMACIONES_POSICIONES[formacion] || FORMACIONES_POSICIONES["4-3-3"];
 
@@ -123,6 +125,28 @@ export default function TacticalField({
       FIELD_BOUNDS
     );
   }, [showVoronoi, jugadoresConPosicion]);
+
+  useEffect(() => {
+    if (!showVoronoi || !voronoiGroupRef.current) return;
+    initGSAP();
+
+    const paths = voronoiGroupRef.current.querySelectorAll("path");
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    paths.forEach((path, i) => {
+      const targetD = voronoiPaths[i]?.d;
+      if (!targetD) return;
+      if (prefersReduced) {
+        gsap.set(path, { attr: { d: targetD } });
+      } else {
+        gsap.to(path, {
+          attr: { d: targetD },
+          duration: 0.4,
+          ease: "power2.out",
+        });
+      }
+    });
+  }, [voronoiPaths, showVoronoi]);
 
   return (
     <div className="w-full">
@@ -179,23 +203,25 @@ export default function TacticalField({
             className="absolute inset-0 w-full h-full pointer-events-none"
             preserveAspectRatio="none"
           >
-            {voronoiPaths.map((cell) => (
-              <path
-                key={cell.cellIndex}
-                d={cell.d}
-                fill={
-                  cell.cellIndex < 11
-                    ? "rgba(204, 0, 28, 0.20)"
-                    : "rgba(0, 97, 158, 0.20)"
-                }
-                stroke={
-                  cell.cellIndex < 11
-                    ? "rgba(204, 0, 28, 0.6)"
-                    : "rgba(0, 97, 158, 0.6)"
-                }
-                strokeWidth="0.3"
-              />
-            ))}
+            <g ref={voronoiGroupRef}>
+              {voronoiPaths.map((cell) => (
+                <path
+                  key={cell.cellIndex}
+                  d={cell.d}
+                  fill={
+                    cell.cellIndex < 11
+                      ? "rgba(204, 0, 28, 0.20)"
+                      : "rgba(0, 97, 158, 0.20)"
+                  }
+                  stroke={
+                    cell.cellIndex < 11
+                      ? "rgba(204, 0, 28, 0.6)"
+                      : "rgba(0, 97, 158, 0.6)"
+                  }
+                  strokeWidth="0.3"
+                />
+              ))}
+            </g>
           </svg>
         )}
       </div>
