@@ -33,3 +33,24 @@ class ClubTemporadaOut(BaseModel):
     posicion: int
     puntos: int
     dg: int
+
+
+class MetricaRadar(BaseModel):
+    ataque: float = 0.0
+    defensa: float = 0.0
+    rendimiento: float = 0.0
+    palmares: float = 0.0
+    gol_individual: float = 0.0
+    actividad_mercado: float = 0.0
+
+
+class ClubRadar(BaseModel):
+    club_id: str
+    nombre: str
+    escudo: str | None = None
+    metricas: MetricaRadar
+
+
+class ComparacionClubOut(BaseModel):
+    club_a: ClubRadar
+    club_b: ClubRadar
