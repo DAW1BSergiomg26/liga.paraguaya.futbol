@@ -107,7 +107,7 @@ class SimulatorService:
 
         # Goles esperados (λ) para cada equipo
         lambda_home = home_attack * away_defense * avg_gf
-        lambda_away = away_attack * home_defense * avg_gf
+        lambda_away = away_attack * home_defense * avg_gc
 
         # Limitar λ para evitar probabilidades extremas
         lambda_home = max(0.1, min(lambda_home, 5.0))
