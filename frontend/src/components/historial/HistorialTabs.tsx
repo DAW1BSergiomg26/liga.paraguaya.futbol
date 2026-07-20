@@ -5,6 +5,7 @@ const TABS = [
   { key: "tablas", label: "Tablas por año" },
   { key: "ranking", label: "Ranking agregado" },
   { key: "club", label: "Rendimiento por club" },
+  { key: "comparar", label: "Comparar Clubes" },
 ];
 
 export default function HistorialTabs({
