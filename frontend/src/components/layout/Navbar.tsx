@@ -5,6 +5,43 @@ import { useState, useSyncExternalStore } from "react";
 import { usePathname } from "next/navigation";
 import { getSavedToken, setAuthToken } from "@/lib/api";
 
+/* ─── Logo animado ─── */
+function AnimatedSoccerBall() {
+  return (
+    <div className="relative w-12 h-12 flex items-center justify-center">
+      <div className="absolute w-full h-full animate-logo-orbit">
+        <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-6 h-6 flex items-center justify-center">
+          <svg
+            viewBox="0 0 100 100"
+            className="w-full h-full animate-logo-spin origin-center drop-shadow-lg"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle cx="50" cy="50" r="48" fill="#FFFFFF" stroke="#000000" strokeWidth="2"/>
+            <path d="M50 2 L50 98 M2 50 L98 50" stroke="#000000" strokeWidth="2" fill="none"/>
+            <path d="M50 50 L30 80 L50 98 L70 80 Z" fill="#000000"/>
+            <path d="M50 50 L30 20 L50 2 L70 20 Z" fill="#000000"/>
+            <path d="M50 50 L80 70 L98 50 L80 30 Z" fill="#000000"/>
+            <path d="M50 50 L20 70 L2 50 L20 30 Z" fill="#000000"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AnimatedBrandLogo() {
+  return (
+    <Link href="/" className="flex items-center gap-4 group no-underline">
+      <div className="relative flex items-center justify-center h-16 w-32">
+        <AnimatedSoccerBall />
+        <span className="absolute text-3xl font-extrabold text-white z-10 group-hover:text-yellow-400 transition-colors duration-300">
+          <span className="text-blue-500">Liga</span> PY
+        </span>
+      </div>
+    </Link>
+  );
+}
+
 const AUTH_EVENT = "auth-changed";
 
 function authSubscribe(onChange: () => void): () => void {
@@ -114,11 +151,7 @@ export default function Navbar() {
   return (
     <nav className="navbar-blur sticky top-0 z-50" style={{ borderBottom: "2px solid", borderImage: "linear-gradient(90deg, #CC001C, #FFFFFF, #00619E) 1" }}>
       <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
-        <Link href="/" className="flex items-center gap-1.5 text-xl font-bold tracking-tight relative whitespace-nowrap">
-          <span aria-hidden>⚽</span>
-          <span>Liga PY</span>
-          <span className="absolute -bottom-2 left-0 right-0 h-0.5 rounded" style={{ background: "linear-gradient(90deg, #CC001C, #FFFFFF, #00619E)" }} />
-        </Link>
+        <AnimatedBrandLogo />
 
         {/* Desktop */}
         <div className="hidden md:flex items-center gap-6 text-sm font-medium">

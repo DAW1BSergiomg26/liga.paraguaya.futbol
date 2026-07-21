@@ -40,6 +40,10 @@
 
   /* Tipografía */
   --font-barlow: var(--font-barlow-condensed);
+
+  /* Animaciones logo */
+  --animate-logo-orbit: logo-orbit 6s linear infinite;
+  --animate-logo-spin: logo-spin 5s linear infinite;
 }
 
 body {
@@ -177,6 +181,17 @@ a, button, tr {
 
 .animate-row-enter {
   animation: row-enter 0.5s ease-out forwards;
+}
+
+/* Logo animado — keyframes para navbar */
+@keyframes logo-orbit {
+  0%   { transform: rotate(0deg)   translateX(28px) rotate(0deg); }
+  100% { transform: rotate(360deg) translateX(28px) rotate(-360deg); }
+}
+
+@keyframes logo-spin {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* Navbar glassmorphism */
