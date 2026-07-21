@@ -6,8 +6,7 @@ import ChatBubble from "./ChatBubble";
 import TypingIndicator from "./TypingIndicator";
 import RichCardRouter from "@/components/cerezo/RichCardRouter";
 import { StructuredData } from "@/types";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
+import { apiFetch } from "@/lib/api";
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -29,13 +28,14 @@ export default function CerezoPage() {
 
   const mutation = useMutation({
     mutationFn: async (message: string) => {
-      const res = await fetch(`${API_URL}/api/v1/cerezo/ask`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message }),
-      });
-      if (!res.ok) throw new Error("Error al contactar a Cerezo");
-      return res.json();
+      return apiFetch<{ message: string; intent: string; structured_data?: StructuredData }>(
+        "/api/v1/cerezo/ask",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message }),
+        }
+      );
     },
     onSuccess: (data) => {
       setMessages((prev) => [
@@ -43,7 +43,8 @@ export default function CerezoPage() {
         { role: "assistant", content: data.message, intent: data.intent, structured_data: data.structured_data },
       ]);
     },
-    onError: () => {
+    onError: (err) => {
+      console.error("[Cerezo] Error:", err);
       setMessages((prev) => [
         ...prev,
         { role: "assistant", content: "Ups, ocurrió un error. Probá de nuevo." },
