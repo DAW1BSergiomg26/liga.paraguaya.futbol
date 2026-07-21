@@ -1,69 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useSyncExternalStore, useId } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { usePathname } from "next/navigation";
 import { getSavedToken, setAuthToken } from "@/lib/api";
-
-/* ─── Logo animado 3D ─── */
-function MagicSoccerLogo() {
-  const uid = useId();
-
-  return (
-    <Link
-      href="/"
-      className="relative flex items-center gap-3 group no-underline py-2 px-3 rounded-xl transition-all duration-300 hover:bg-white/5"
-    >
-      {/* Balón 3D interactivo */}
-      <div className="relative w-11 h-11 flex items-center justify-center">
-        {/* Aura mágica */}
-        <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500 via-yellow-400 to-emerald-400 opacity-40 blur-md group-hover:opacity-90 group-hover:scale-125 transition-all duration-500 animate-pulse" />
-
-        <div className="relative w-10 h-10 rounded-full flex items-center justify-center shadow-2xl transition-transform duration-500 group-hover:rotate-180 group-hover:scale-110">
-          <svg
-            viewBox="0 0 100 100"
-            className="w-full h-full drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)] animate-spin-3d"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <defs>
-              <radialGradient id={`${uid}-ball`} cx="35%" cy="35%" r="65%">
-                <stop offset="0%" stopColor="#FFFFFF" />
-                <stop offset="50%" stopColor="#E2E8F0" />
-                <stop offset="100%" stopColor="#64748B" />
-              </radialGradient>
-            </defs>
-
-            {/* Esfera base */}
-            <circle cx="50" cy="50" r="48" fill={`url(#${uid}-ball)`} stroke="#0F172A" strokeWidth="3"/>
-
-            {/* Pentágono central */}
-            <polygon points="50,28 66,38 60,56 40,56 34,38" fill="#0F172A" stroke="#334155" strokeWidth="1"/>
-
-            {/* Costuras */}
-            <path d="M50,28 L50,6 M66,38 L88,30 M60,56 L82,76 M40,56 L18,76 M34,38 L12,30" stroke="#0F172A" strokeWidth="3" strokeLinecap="round"/>
-
-            {/* Paneles laterales */}
-            <polygon points="50,6 63,14 50,24 37,14" fill="#0F172A" opacity="0.9"/>
-            <polygon points="88,30 94,48 80,56 80,36" fill="#0F172A" opacity="0.9"/>
-            <polygon points="82,76 64,84 60,56 80,56" fill="#0F172A" opacity="0.9"/>
-            <polygon points="18,76 36,84 40,56 20,56" fill="#0F172A" opacity="0.9"/>
-            <polygon points="12,30 6,48 20,56 20,36" fill="#0F172A" opacity="0.9"/>
-
-            {/* Brillo especular */}
-            <ellipse cx="38" cy="28" rx="12" ry="6" fill="#FFFFFF" opacity="0.6" transform="rotate(-20 38 28)"/>
-          </svg>
-        </div>
-      </div>
-
-      {/* Texto marca */}
-      <div className="flex flex-col">
-        <span className="text-2xl font-black tracking-wider text-white group-hover:text-yellow-400 transition-colors duration-300 drop-shadow-md">
-          <span className="text-blue-500 group-hover:text-emerald-400 transition-colors">Liga</span> PY
-        </span>
-      </div>
-    </Link>
-  );
-}
+import Logo from "@/components/branding/Logo";
 
 const AUTH_EVENT = "auth-changed";
 
@@ -174,7 +115,9 @@ export default function Navbar() {
   return (
     <nav className="navbar-blur sticky top-0 z-50" style={{ borderBottom: "2px solid", borderImage: "linear-gradient(90deg, #CC001C, #FFFFFF, #00619E) 1" }}>
       <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
-        <MagicSoccerLogo />
+        <Link href="/" className="no-underline shrink-0">
+          <Logo variant="horizontal" size={40} />
+        </Link>
 
         {/* Desktop */}
         <div className="hidden md:flex items-center gap-6 text-sm font-medium">

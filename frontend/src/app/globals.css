@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./branding.css";
 
 @theme {
   /* Colores primarios - Bandera y camiseta */
