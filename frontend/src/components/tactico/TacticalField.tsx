@@ -110,20 +110,23 @@ export default function TacticalField({
 
   const posiciones = FORMACIONES_POSICIONES[formacion] || FORMACIONES_POSICIONES["4-3-3"];
 
-  const jugadoresConPosicion = jugadores.map((j, i) => ({
-    ...j,
-    x: posiciones[i]?.x ?? j.x,
-    y: posiciones[i]?.y ?? j.y,
-  }));
+  const jugadoresConPosicion = (jugadores || [])
+    .filter((j) => j && typeof j.x === "number" && typeof j.y === "number" && isFinite(j.x) && isFinite(j.y))
+    .map((j, i) => ({
+      ...j,
+      x: posiciones[i]?.x ?? j.x,
+      y: posiciones[i]?.y ?? j.y,
+    }));
 
   const FIELD_BOUNDS = { xmin: 0, ymin: 0, xmax: 100, ymax: 150 };
 
   const voronoiPaths = useMemo(() => {
     if (!showVoronoi || jugadoresConPosicion.length < 2) return [];
-    return computeVoronoiPaths(
-      jugadoresConPosicion.map((j) => ({ x: j.x * 100, y: j.y * 150 })),
-      FIELD_BOUNDS
-    );
+    const validPoints = jugadoresConPosicion
+      .map((j) => ({ x: j.x * 100, y: j.y * 150 }))
+      .filter((p) => isFinite(p.x) && isFinite(p.y));
+    if (validPoints.length < 2) return [];
+    return computeVoronoiPaths(validPoints, FIELD_BOUNDS);
   }, [showVoronoi, jugadoresConPosicion]);
 
   const voronoiFill = colorEquipo === "#D52B1E" || colorEquipo === "#CC001C"
@@ -157,6 +160,17 @@ export default function TacticalField({
 
   return (
     <div className="w-full">
+      {jugadoresConPosicion.length === 0 ? (
+        <>
+          {titulo && <h3 className="text-lg font-bold text-white mb-4">{titulo}</h3>}
+          <div className="relative w-full aspect-[2/3] bg-[#2d5a27] rounded-xl border-4 border-white/20 flex items-center justify-center">
+            <p className="text-white/60 text-sm text-center px-4">
+              No hay datos de jugadores disponibles para mostrar la formación táctica.
+            </p>
+          </div>
+        </>
+      ) : (
+        <>
       <div className="flex items-center justify-between mb-4">
         {titulo && <h3 className="text-lg font-bold text-white">{titulo}</h3>}
         <div className="flex items-center gap-3">
@@ -239,6 +253,8 @@ export default function TacticalField({
           </span>
         ))}
       </div>
+        </>
+      )}
     </div>
   );
 }

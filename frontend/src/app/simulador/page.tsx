@@ -21,7 +21,11 @@ export default function SimuladorPage() {
   const modalRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  const { data: clubes } = useQuery<Club[]>({
+  const {
+    data: clubes,
+    isLoading: clubesLoading,
+    isError: clubesError,
+  } = useQuery<Club[]>({
     queryKey: ["clubes"],
     queryFn: () => getClubes(),
   });
@@ -122,7 +126,37 @@ export default function SimuladorPage() {
         subtitulo="Elegí dos clubes y conocé la probabilidad de cada resultado"
       />
 
+      {/* Loading clubes */}
+      {clubesLoading && (
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-4 md:gap-6 items-stretch mb-10">
+          {[0, 1].map((i) => (
+            <div
+              key={i}
+              className="animate-pulse flex flex-col items-center justify-center gap-4 p-8 rounded-2xl border border-borde-sutil bg-bg-secundario/30 min-h-[260px]"
+            >
+              <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-bg-terciario" />
+              <div className="h-4 w-32 bg-bg-terciario rounded" />
+            </div>
+          ))}
+          <div className="hidden md:flex items-center justify-center">
+            <div className="w-16 h-16 rounded-full bg-bg-terciario animate-pulse" />
+          </div>
+        </div>
+      )}
+
+      {/* Error clubes */}
+      {clubesError && (
+        <div
+          role="alert"
+          className="max-w-xl mx-auto mb-8 p-4 rounded-xl border border-derrota/30 bg-derrota/10 text-derrota text-center text-sm"
+        >
+          No se pudieron cargar los clubes. Verificá tu conexión e intentá
+          nuevamente.
+        </div>
+      )}
+
       {/* === VS Layout === */}
+      {!clubesLoading && !clubesError && (
       <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-4 md:gap-6 items-stretch mb-10">
         {/* Panel Local */}
         <button
@@ -267,6 +301,7 @@ export default function SimuladorPage() {
           )}
         </button>
       </div>
+      )}
 
       {/* Botón Simular */}
       <div className="flex justify-center mb-10">
