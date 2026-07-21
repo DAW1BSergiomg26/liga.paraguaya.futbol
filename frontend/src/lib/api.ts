@@ -2,13 +2,15 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://liga-paraguaya-futbo
 
 export async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
   const url = `${API_URL}${path}`;
+  const method = options?.method?.toUpperCase() || "GET";
   const res = await fetch(url, options);
   if (!res.ok) {
-    const detail = await res.text().catch(() => "");
-    throw new Error(
-      `API error: ${res.status} ${res.statusText} — GET ${url}` +
-      (detail ? ` — body: ${detail.slice(0, 200)}` : "")
-    );
+    if (res.status === 401) {
+      localStorage.removeItem("user_token");
+      authToken = null;
+    }
+    const err = await res.json().catch(() => ({ detail: `${res.status} ${res.statusText}` }));
+    throw new Error(err.detail || `Error ${res.status}`);
   }
   return res.json();
 }
