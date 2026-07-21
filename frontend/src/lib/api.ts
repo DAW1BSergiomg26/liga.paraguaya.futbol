@@ -1,4 +1,18 @@
-export const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://liga-paraguaya-futbol.onrender.com";
+const _rawUrl = process.env.NEXT_PUBLIC_API_URL;
+const _isProd = process.env.NODE_ENV === "production" || process.env.VERCEL_ENV === "production";
+const _isLocalhost = !!_rawUrl && /localhost|127\.0\.0\.1/.test(_rawUrl);
+
+if (_isProd && _isLocalhost) {
+  console.warn(
+    `[api.ts] NEXT_PUBLIC_API_URL="${_rawUrl}" apunta a localhost en producción. ` +
+    `Forzando fallback a https://liga-paraguaya-futbol.onrender.com`
+  );
+}
+
+export const API_URL =
+  !_rawUrl || (_isProd && _isLocalhost)
+    ? "https://liga-paraguaya-futbol.onrender.com"
+    : _rawUrl;
 
 export async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
   const url = `${API_URL}${path}`;
