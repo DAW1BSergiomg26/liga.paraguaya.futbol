@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://liga-paraguaya-futbol.onrender.com";
+export const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://liga-paraguaya-futbol.onrender.com";
 
 export async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
   const url = `${API_URL}${path}`;

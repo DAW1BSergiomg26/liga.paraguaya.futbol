@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { apiFetch } from "@/lib/api";
 
 interface LiveScore {
   goles_local: number | null;
@@ -7,10 +8,9 @@ interface LiveScore {
 }
 
 export function useLiveScores(): Record<string, LiveScore> {
-  const base = process.env.NEXT_PUBLIC_API_URL || "";
   const { data } = useQuery<Record<string, LiveScore>>({
     queryKey: ["liveScores"],
-    queryFn: () => fetch(`${base}/api/v1/partidos/marcadores`).then(r => r.json()),
+    queryFn: () => apiFetch<Record<string, LiveScore>>("/api/v1/partidos/marcadores"),
     refetchInterval: 30_000,
   });
   return data ?? {};

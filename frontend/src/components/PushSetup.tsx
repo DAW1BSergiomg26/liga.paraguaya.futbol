@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { apiFetch } from "@/lib/api";
 
 export default function PushSetup() {
   useEffect(() => {
@@ -11,13 +12,11 @@ export default function PushSetup() {
 
     // Set up push subscription if PushManager is available
     if (!("PushManager" in window)) return;
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
 
     async function setup() {
       try {
         const registration = await navigator.serviceWorker.ready;
-        const vapidResponse = await fetch(`${apiUrl}/api/v1/notificaciones/vapid-public-key`);
-        const { publicKey } = await vapidResponse.json();
+        const { publicKey } = await apiFetch<{ publicKey: string }>("/api/v1/notificaciones/vapid-public-key");
         const keyBytes = Uint8Array.from(atob(publicKey.replace(/-/g, "+").replace(/_/g, "/")), c => c.charCodeAt(0));
         const subscription = await registration.pushManager.subscribe({
           userVisibleOnly: true,
@@ -25,7 +24,7 @@ export default function PushSetup() {
         });
         const token = localStorage.getItem("user_token");
         if (!token) return;
-        await fetch(`${apiUrl}/api/v1/notificaciones/suscribir`, {
+        await apiFetch("/api/v1/notificaciones/suscribir", {
           method: "POST",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
           body: JSON.stringify(subscription.toJSON()),

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import ChatMessage from "./ChatMessage";
+import { apiFetch, API_URL } from "@/lib/api";
 
 interface ChatWidgetProps {
   partidoId: string;
@@ -35,9 +36,7 @@ export default function ChatWidget({ partidoId }: ChatWidgetProps) {
   }, [token]);
 
   useEffect(() => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
-    fetch(`${apiUrl}/api/v1/partidos/${partidoId}/chat?limit=50`)
-      .then((r) => r.json())
+    apiFetch<Mensaje[]>(`/api/v1/partidos/${partidoId}/chat?limit=50`)
       .then((data) => {
         setMessages(data.reverse());
         setLoading(false);
@@ -47,8 +46,7 @@ export default function ChatWidget({ partidoId }: ChatWidgetProps) {
 
   useEffect(() => {
     if (!token) return;
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
-    const wsUrl = apiUrl.replace(/^http/, "ws");
+    const wsUrl = API_URL.replace(/^http/, "ws");
     const ws = new WebSocket(`${wsUrl}/api/v1/ws/partidos/${partidoId}?token=${token}`);
 
     ws.onopen = () => setConnected(true);
