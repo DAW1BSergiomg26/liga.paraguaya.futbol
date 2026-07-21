@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import Image from "next/image";
 import { getClubes, getPartidos, getTabla, getTorneos, getGlobalStats } from "@/lib/api";
 import type { PartidoPage } from "@/types";
