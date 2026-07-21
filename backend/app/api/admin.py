@@ -2,20 +2,20 @@ from fastapi import APIRouter, Depends, Header, HTTPException, status
 from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.core.config import settings
-from backend.app.core.dependencies import get_db
-from backend.app.models.api_key import APIKey
-from backend.app.models.partido import Partido
-from backend.app.schemas.api_key import APIKeyCreate, APIKeyOut
-from backend.app.schemas.partido import PartidoDetailOut, PartidoUpdate
-from backend.app.services.partido_service import PartidoService
+from app.core.config import settings
+from app.core.dependencies import get_db
+from app.models.api_key import APIKey
+from app.models.partido import Partido
+from app.schemas.api_key import APIKeyCreate, APIKeyOut
+from app.schemas.partido import PartidoDetailOut, PartidoUpdate
+from app.services.partido_service import PartidoService
 
 router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
 
 
 async def verify_admin_key(x_api_key: str = Header(None)):
     if x_api_key != settings.admin_api_key:
-        raise HTTPException(status_code=403, detail="API Key inválida")
+        raise HTTPException(status_code=403, detail="API Key invÃ¡lida")
     return True
 
 
@@ -41,11 +41,11 @@ async def actualizar_partido(
     was_finalized = partido.estado == "finalizado"
 
     if data.estado == "en_vivo" and data.goles_local is not None and data.goles_visitante is not None:
-        from backend.app.services.push_service import PushService
+        from app.services.push_service import PushService
         await PushService.enviar_a_partido(
             db,
             partido_id,
-            "⚽ Gol!",
+            "âš½ Gol!",
             f"{partido.local.nombre} {partido.goles_local}-{partido.goles_visitante} {partido.visitante.nombre}",
             f"/partidos/{partido_id}",
         )
@@ -53,24 +53,24 @@ async def actualizar_partido(
     await db.commit()
 
     if was_finalized:
-        from backend.app.services.prediction_service import PredictionService
+        from app.services.prediction_service import PredictionService
         await PredictionService.calcular_puntos(db, partido_id)
-        from backend.app.models.prediction import Prediction
+        from app.models.prediction import Prediction
         result = await db.execute(
             select(Prediction.user_id).where(Prediction.partido_id == partido_id).distinct()
         )
         user_ids = [r[0] for r in result.all()]
         for uid in user_ids:
             await PredictionService.recalcular_totales_usuario(db, uid)
-        from backend.app.services.push_service import PushService
+        from app.services.push_service import PushService
         result = await db.execute(select(Prediction).where(Prediction.partido_id == partido_id))
         preds = result.scalars().all()
         for pred in preds:
             await PushService.enviar_a_usuario(
                 db,
                 pred.user_id,
-                "✅ Resultado de tu predicción",
-                f"{partido.local.nombre} {partido.goles_local}-{partido.goles_visitante} {partido.visitante.nombre} — Obtuviste {pred.puntos} pts",
+                "âœ… Resultado de tu predicciÃ³n",
+                f"{partido.local.nombre} {partido.goles_local}-{partido.goles_visitante} {partido.visitante.nombre} â€” Obtuviste {pred.puntos} pts",
                 f"/predicciones",
             )
         await db.commit()

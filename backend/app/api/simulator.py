@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.core.dependencies import get_db
-from backend.app.schemas.simulator import SimulationInput, SimulationResultOut
-from backend.app.services.simulator_service import SimulatorService
+from app.core.dependencies import get_db
+from app.schemas.simulator import SimulationInput, SimulationResultOut
+from app.services.simulator_service import SimulatorService
 
 router = APIRouter(prefix="/api/v1/simulador", tags=["simulador"])
 
@@ -14,7 +14,7 @@ async def predecir_partido(
     db: AsyncSession = Depends(get_db),
 ):
     """Simula un partido y retorna probabilidades de victoria/empate/derrota
-    junto con los 3 resultados exactos más probables."""
+    junto con los 3 resultados exactos mÃ¡s probables."""
 
     if body.home_club_id == body.away_club_id:
         raise HTTPException(

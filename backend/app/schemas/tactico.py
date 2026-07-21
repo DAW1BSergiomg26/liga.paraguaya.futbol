@@ -7,8 +7,8 @@ class JugadorTactico(BaseModel):
     posicion: str
     numero: int
     rating: float
-    x: float  # Posición en el campo (0-1)
-    y: float  # Posición en el campo (0-1)
+    x: float  # PosiciÃ³n en el campo (0-1)
+    y: float  # PosiciÃ³n en el campo (0-1)
 
 
 class EstadisticasEquipo(BaseModel):

@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 from typing import Optional
 from sqlalchemy import DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
-from backend.app.core.database import Base
+from app.core.database import Base
 
 class Goleador(Base):
     __tablename__ = "goleadores"

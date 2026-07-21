@@ -3,10 +3,10 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.core.dependencies import get_db, get_current_admin
-from backend.app.schemas.noticia import NoticiaCreate, NoticiaUpdate, NoticiaOut, NoticiasPaginatedResponse
-from backend.app.services.noticia_service import NoticiaService
-from backend.app.services.rss_sync import RssSyncService
+from app.core.dependencies import get_db, get_current_admin
+from app.schemas.noticia import NoticiaCreate, NoticiaUpdate, NoticiaOut, NoticiasPaginatedResponse
+from app.services.noticia_service import NoticiaService
+from app.services.rss_sync import RssSyncService
 
 router = APIRouter(prefix="/api/v1/noticias", tags=["noticias"])
 

@@ -4,11 +4,11 @@ import time
 from sqlalchemy import and_, case, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.models.club import Club
-from backend.app.models.goleador import Goleador
-from backend.app.models.tabla import TablaPosicion
-from backend.app.models.transferencia import Transferencia
-from backend.app.schemas.historial import (
+from app.models.club import Club
+from app.models.goleador import Goleador
+from app.models.tabla import TablaPosicion
+from app.models.transferencia import Transferencia
+from app.schemas.historial import (
     CampeonOut,
     ClubRadar,
     ClubTemporadaOut,

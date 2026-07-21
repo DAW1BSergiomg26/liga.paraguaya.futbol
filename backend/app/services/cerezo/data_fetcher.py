@@ -1,8 +1,8 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.services.club_service import ClubService
-from backend.app.services.partido_service import PartidoService
-from backend.app.services.tabla_service import TablaService
+from app.services.club_service import ClubService
+from app.services.partido_service import PartidoService
+from app.services.tabla_service import TablaService
 
 
 class CerezoDataFetcher:

@@ -1,14 +1,14 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.core.dependencies import get_db
-from backend.app.schemas.historial import (
+from app.core.dependencies import get_db
+from app.schemas.historial import (
     CampeonOut,
     ClubTemporadaOut,
     ComparacionClubOut,
     RankingClubOut,
 )
-from backend.app.services.historial_service import HistorialService
+from app.services.historial_service import HistorialService
 
 router = APIRouter(prefix="/api/v1/historial", tags=["historial"])
 

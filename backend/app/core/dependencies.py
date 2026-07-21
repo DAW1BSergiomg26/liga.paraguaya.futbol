@@ -4,10 +4,10 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.core.database import async_session
-from backend.app.core.security import decode_access_token
-from backend.app.models.user import User
-from backend.app.services.user_service import UserService
+from app.core.database import async_session
+from app.core.security import decode_access_token
+from app.models.user import User
+from app.services.user_service import UserService
 
 
 async def get_db() -> AsyncIterator[AsyncSession]:
@@ -37,11 +37,11 @@ async def get_current_user(
         user = await svc.get_by_token(token)
         if user:
             return user
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token inválido o expirado")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token invÃ¡lido o expirado")
 
     user_id = payload.get("sub")
     if not user_id:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token inválido")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token invÃ¡lido")
 
     svc = UserService(db)
     user = await svc.get_by_id(user_id)

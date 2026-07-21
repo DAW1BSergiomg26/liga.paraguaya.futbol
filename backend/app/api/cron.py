@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.core.dependencies import get_db
-from backend.app.services.push_service import PushService
+from app.core.dependencies import get_db
+from app.services.push_service import PushService
 
 router = APIRouter(prefix="/api/v1/cron", tags=["cron"])
 
@@ -17,7 +17,7 @@ async def enviar_recordatorios(
         await PushService.enviar_a_partido(
             db,
             partido.id,
-            "🔔 Recordatorio de predicción",
+            "ðŸ”” Recordatorio de predicciÃ³n",
             f"{partido.local.nombre} vs {partido.visitante.nombre} comienza en 30 min!",
             f"/partidos/{partido.id}",
         )

@@ -4,9 +4,9 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from backend.app.models.club import Club
-from backend.app.models.partido import Partido
-from backend.app.schemas.partido import (
+from app.models.club import Club
+from app.models.partido import Partido
+from app.schemas.partido import (
     ClubResumen,
     H2HOut,
     H2HPartidoItem,
@@ -170,7 +170,7 @@ class PartidoService:
         if mayor_b_goles > 0:
             mayor_goleada_b = MayorGoleada(goles=mayor_b_goles, fecha=mayor_b_fecha, goles_recibidos=mayor_b_recibidos)
 
-        from backend.app.schemas.partido import ResumenOut
+        from app.schemas.partido import ResumenOut
 
         resumen = ResumenOut(
             pj=victorias_a + empates + victorias_b,

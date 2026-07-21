@@ -7,9 +7,9 @@ import httpx
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.models.transferencia import Transferencia
-from backend.app.services.transferencia_service import TransferenciaService
-from backend.app.schemas.transferencia import TransferenciaCreate
+from app.models.transferencia import Transferencia
+from app.services.transferencia_service import TransferenciaService
+from app.schemas.transferencia import TransferenciaCreate
 
 logger = logging.getLogger(__name__)
 
@@ -22,24 +22,24 @@ _RSS_FEEDS = [
 ]
 
 _TRANSFER_KEYWORDS = [
-    "fichaje", "firma", "refuerzo", "refuerza", "reforzó",
+    "fichaje", "firma", "refuerzo", "refuerza", "reforzÃ³",
     "se desvincula", "desvinculado", "se va", "abandona",
-    "préstamo", "prestado", "cesión", "cesido",
+    "prÃ©stamo", "prestado", "cesiÃ³n", "cesido",
     "transferencia", "traspaso", "compra", "adquiere",
-    "regresa", "vuelve", "retorna", "regresó", "volvió",
+    "regresa", "vuelve", "retorna", "regresÃ³", "volviÃ³",
 ]
 
 _CLUB_ALIASES = {
     "olimpia": "olimpia", "decano": "olimpia",
-    "cerro": "cerro-porteno", "cerro porteño": "cerro-porteno", "ciclón": "cerro-porteno",
+    "cerro": "cerro-porteno", "cerro porteÃ±o": "cerro-porteno", "ciclÃ³n": "cerro-porteno",
     "libertad": "libertad", "gumarelo": "libertad",
     "nacional": "nacional", "tricolor": "nacional",
-    "guaraní": "guarani", "guarani": "guarani", "aborigen": "guarani",
-    "sol de américa": "sol-de-america", "sol": "sol-de-america",
-    "luqueño": "sportivo-luqueno", "luqueno": "sportivo-luqueno",
+    "guaranÃ­": "guarani", "guarani": "guarani", "aborigen": "guarani",
+    "sol de amÃ©rica": "sol-de-america", "sol": "sol-de-america",
+    "luqueÃ±o": "sportivo-luqueno", "luqueno": "sportivo-luqueno",
     "tacuary": "tacuary",
     "2 de mayo": "2-de-mayo",
-    "general díaz": "general-diaz", "general diaz": "general-diaz",
+    "general dÃ­az": "general-diaz", "general diaz": "general-diaz",
     "deportivo capiata": "deportivo-capiata",
     "3 de febrero": "3-de-febrero",
 }
@@ -106,7 +106,7 @@ class TransferenciaRssSync:
             return "skipped"
 
         tipo = "confirmada"
-        if any(w in item["text"] for w in ["préstamo", "prestado", "cesión"]):
+        if any(w in item["text"] for w in ["prÃ©stamo", "prestado", "cesiÃ³n"]):
             tipo = "prestamo"
         elif any(w in item["text"] for w in ["libre", "agente libre"]):
             tipo = "libre"

@@ -1,70 +1,35 @@
-"""
-Seed script: crear o promover usuario administrador.
-
-Uso:
-    python -m backend.app.scripts.seed_admin
-
-Idempotente: si el usuario ya existe, actualiza is_admin y hashed_password.
-"""
 import asyncio
-import uuid
-
-from sqlalchemy import select
-
-from backend.app.core.database import async_session, init_db
-from backend.app.core.security import hash_password, verify_password
-from backend.app.models.user import User
-
-ADMIN_EMAIL = "menu2informatico@gmail.com"
-ADMIN_NAME = "Danny"
-ADMIN_PASSWORD = "Rufi14"
-
+from datetime import datetime
+from sqlalchemy.future import select
+from app.core.database import AsyncSession, engine
+from app.models.user import User
+from app.core.security import hash_password
+from sqlalchemy.ext.asyncio import AsyncSession as SessionClass
 
 async def seed_admin():
-    await init_db()
+    async with SessionClass(engine) as db:
+        email = "menu2informatico@gmail.com"
+        
+        result = await db.execute(select(User).where(User.email == email))
+        user = result.scalars().first()
+        
+        if user:
+            print("El usuario administrador ya existe.")
+            return
 
-    async with async_session() as db:
-        result = await db.execute(
-            select(User).where(User.email == ADMIN_EMAIL)
+        admin_user = User(
+            id="fbeb2a60-2d6d-4169-adca-b487c87f13c9",
+            email=email,
+            name="Danny",
+            username="menu2informatico",
+            hashed_password=hash_password("admin123"),
+            is_admin=True,
+            puntos=0,
+            created_at=datetime.utcnow()
         )
-        existing = result.scalar_one_or_none()
-
-        if existing:
-            existing.is_admin = True
-            existing.hashed_password = hash_password(ADMIN_PASSWORD)
-            existing.name = ADMIN_NAME
-            await db.commit()
-            print(f"  Usuario existente actualizado: {ADMIN_EMAIL} (is_admin=True)")
-            user = existing
-        else:
-            user = User(
-                id=str(uuid.uuid4()),
-                email=ADMIN_EMAIL,
-                name=ADMIN_NAME,
-                username=ADMIN_EMAIL.split("@")[0],
-                hashed_password=hash_password(ADMIN_PASSWORD),
-                is_admin=True,
-                provider="local",
-                provider_id="",
-                puntos=0,
-            )
-            db.add(user)
-            await db.commit()
-            print(f"  Usuario admin creado: {ADMIN_EMAIL} (id={user.id})")
-
-        # Verificar login
-        assert verify_password(ADMIN_PASSWORD, user.hashed_password), \
-            "Error: la verificación de password falló después de hashear"
-        print(f"  Verificación de password: OK")
-        print(f"  is_admin: {user.is_admin}")
-        print(f"  username: {user.username}")
-        print()
-        print("  Credenciales de login:")
-        print(f"    Email:    {ADMIN_EMAIL}")
-        print(f"    Password: {ADMIN_PASSWORD}")
-        print()
-        print("  Endpoint de login: POST /api/v1/auth/login")
-
+        db.add(admin_user)
+        await db.commit()
+        print("Administrador creado exitosamente.")
 
 if __name__ == "__main__":
     asyncio.run(seed_admin())

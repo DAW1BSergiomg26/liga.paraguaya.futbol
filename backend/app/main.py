@@ -7,21 +7,21 @@ from fastapi.responses import JSONResponse
 from starlette.responses import Response
 from sqlalchemy import select
 
-from backend.app.api import admin, auth, clubes, goleadores, health, leaderboard, partidos, predicciones, simulator, tabla
-from backend.app.api.cerezo import router as cerezo_router
-from backend.app.api.chat import router as chat_router
-from backend.app.api.notificaciones import router as notificaciones_router
-from backend.app.api.cron import router as cron_router
-from backend.app.api.noticias import router as noticias_router
-from backend.app.api.tactico import router as tactico_router
-from backend.app.api.transferencias import router as transferencias_router
-from backend.app.api.historial import router as historial_router
-from backend.app.api.stats import router as stats_router
-from backend.app.core.api_key import RATE_LIMIT_MAX, rate_limit_info
-from backend.app.core.config import settings
-from backend.app.core.database import async_session, run_alembic_upgrade
-from backend.app.models.club import Club
-from backend.app.scripts.seed import seed_clubes, seed_partidos, seed_tabla, seed_tabla_historico
+from app.api import admin, auth, clubes, goleadores, health, leaderboard, partidos, predicciones, simulator, tabla
+from app.api.cerezo import router as cerezo_router
+from app.api.chat import router as chat_router
+from app.api.notificaciones import router as notificaciones_router
+from app.api.cron import router as cron_router
+from app.api.noticias import router as noticias_router
+from app.api.tactico import router as tactico_router
+from app.api.transferencias import router as transferencias_router
+from app.api.historial import router as historial_router
+from app.api.stats import router as stats_router
+from app.core.api_key import RATE_LIMIT_MAX, rate_limit_info
+from app.core.config import settings
+from app.core.database import async_session, run_alembic_upgrade
+from app.models.club import Club
+from app.scripts.seed import seed_clubes, seed_partidos, seed_tabla, seed_tabla_historico
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +32,7 @@ async def sync_loop():
         return
     while True:
         try:
-            from backend.app.services.football_data_service import FootballDataService
+            from app.services.football_data_service import FootballDataService
             result = FootballDataService.sync_all()
             logger.info(f"Sync result: {result}")
         except Exception as e:
@@ -56,7 +56,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title=settings.app_name,
-    description="API para clubes, partidos, tabla y datos base de la Liga Paraguaya de Fútbol.",
+    description="API para clubes, partidos, tabla y datos base de la Liga Paraguaya de FÃºtbol.",
     version=settings.app_version,
     lifespan=lifespan,
 )

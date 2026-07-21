@@ -7,7 +7,7 @@ from sqlalchemy import text as sa_text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 
-from backend.app.core.config import settings
+from app.core.config import settings
 
 
 def _async_url(url: str) -> str:
@@ -71,7 +71,7 @@ async def run_alembic_upgrade():
             sys.stderr.flush()
         # Verify columns exist
         if not await _check_column_exists("clubes", "sitio_web"):
-            sys.stderr.write("Alembic upgrade succeeded but columns missing — attempting stamp+upgrade\n")
+            sys.stderr.write("Alembic upgrade succeeded but columns missing â€” attempting stamp+upgrade\n")
         else:
             return
 
@@ -147,7 +147,7 @@ async def _ensure_columns_exist():
 async def init_db():
     # Registra todos los modelos antes de crear el esquema.
     from backend.app import models  # noqa: F401  (importa models/__init__ y goleador)
-    import backend.app.models.goleador  # noqa: F401  (no exportado en __init__)
+    import app.models.goleador  # noqa: F401  (no exportado en __init__)
 
     async with engine.begin() as conn:
         if _is_postgres():
@@ -155,6 +155,7 @@ async def init_db():
             # El esquema ya fue poblado (import_data.py / seed).
             await conn.run_sync(Base.metadata.create_all)
         else:
-            from backend.app.models import club, partido, prediction, tabla, user
+            from app.models import club, partido, prediction, tabla, user
             await conn.run_sync(Base.metadata.drop_all)
             await conn.run_sync(Base.metadata.create_all)
+

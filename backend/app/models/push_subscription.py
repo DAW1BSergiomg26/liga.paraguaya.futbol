@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 
 from sqlalchemy import Column, DateTime, ForeignKey, String, Text
 
-from backend.app.core.database import Base
+from app.core.database import Base
 
 
 class PushSubscription(Base):

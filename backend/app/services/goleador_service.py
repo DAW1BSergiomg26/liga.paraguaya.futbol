@@ -3,9 +3,9 @@ from typing import Optional
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.models.club import Club
-from backend.app.models.goleador import Goleador
-from backend.app.schemas.goleador import GoleadorOut, GoleadoresListOut
+from app.models.club import Club
+from app.models.goleador import Goleador
+from app.schemas.goleador import GoleadorOut, GoleadoresListOut
 
 
 class GoleadorService:
@@ -72,7 +72,7 @@ class GoleadorService:
                 goles=int(r.goles or 0),
                 asistencias=int(r.asistencias or 0),
                 torneo=f"{int(r.torneos)} torneo(s)",
-                temporada="Histórico",
+                temporada="HistÃ³rico",
             )
             for r in result.all()
         ]
