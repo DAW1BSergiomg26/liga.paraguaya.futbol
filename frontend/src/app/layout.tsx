@@ -7,12 +7,9 @@ import StripesBackground from "@/components/layout/StripesBackground";
 import Providers from "./providers";
 import PushSetup from "@/components/PushSetup";
 
-// URL de producción del sitio (se hornea en build). Destruye el alias viejo
-// front-end-ten-swart-85.vercel.app. Usa NEXT_PUBLIC_SITE_URL en Vercel;
-// fallback al dominio de deploy actual si la var no estuviera seteada.
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ||
-  "https://ligaparaguayafutbol-ebbsksgys-daw1bsergiomg26s-projects.vercel.app";
+  "https://frontend-ten-swart-85.vercel.app";
 
 const inter = Inter({ subsets: ["latin"] });
 const barlowCondensed = Barlow_Condensed({

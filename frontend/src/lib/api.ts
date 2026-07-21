@@ -16,11 +16,10 @@ export const API_URL =
 
 export async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
   const url = `${API_URL}${path}`;
-  const method = options?.method?.toUpperCase() || "GET";
   const res = await fetch(url, options);
   if (!res.ok) {
     if (res.status === 401) {
-      localStorage.removeItem("user_token");
+      if (typeof window !== "undefined") localStorage.removeItem("user_token");
       authToken = null;
     }
     const err = await res.json().catch(() => ({ detail: `${res.status} ${res.statusText}` }));
@@ -84,6 +83,7 @@ let authToken: string | null = null;
 
 export function setAuthToken(token: string | null) {
   authToken = token;
+  if (typeof window === "undefined") return;
   if (token) localStorage.setItem("user_token", token);
   else localStorage.removeItem("user_token");
 }
@@ -102,7 +102,7 @@ async function authFetchJSON<T>(path: string, options?: RequestInit): Promise<T>
   const res = await fetch(`${API_URL}${path}`, { ...options, headers });
   if (!res.ok) {
     if (res.status === 401) {
-      localStorage.removeItem("user_token");
+      if (typeof window !== "undefined") localStorage.removeItem("user_token");
       authToken = null;
     }
     const err = await res.json().catch(() => ({ detail: "Error desconocido" }));
