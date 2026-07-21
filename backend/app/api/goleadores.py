@@ -15,7 +15,7 @@ async def get_goleadores_torneos(db: AsyncSession = Depends(get_db)):
 
 @router.get("/goleadores")
 async def get_goleadores(
-    torneo: str = Query(None),
+    torneo: str = Query(..., min_length=1, description="Nombre del torneo (obligatorio)"),
     limit: int = Query(20, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
 ):

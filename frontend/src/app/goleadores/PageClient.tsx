@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getTorneos } from "@/lib/api";
+import { getGoleadoresTorneos } from "@/lib/api";
 import PageHeader from "@/components/ui/PageHeader";
 import GoleadoresList from "@/components/GoleadoresList";
 import GoleadoresHistorial from "@/components/GoleadoresHistorial";
@@ -14,14 +14,16 @@ export default function GoleadoresPage() {
   const [tab, setTab] = useState<Tab>("torneo");
   const [torneo, setTorneo] = useState("");
 
-  const { data: torneos } = useQuery<string[]>({
-    queryKey: ["torneos"],
-    queryFn: () => getTorneos(),
+  const { data: torneosData } = useQuery<{ torneos: string[] }>({
+    queryKey: ["goleadores-torneos"],
+    queryFn: () => getGoleadoresTorneos(),
     staleTime: 300_000,
   });
 
+  const torneos = torneosData?.torneos ?? [];
+
   useEffect(() => {
-    if (torneos && torneos.length > 0 && !torneo) {
+    if (torneos.length > 0 && !torneo) {
       setTorneo(torneos[0]);
     }
   }, [torneos, torneo]);
@@ -32,17 +34,23 @@ export default function GoleadoresPage() {
         titulo="Goleadores"
         subtitulo="Máximos goleadores del fútbol paraguayo"
         accion={
-          <select
-            value={torneo}
-            onChange={(e) => setTorneo(e.target.value)}
-            className="px-4 py-2 rounded-lg bg-bg-terciario border border-borde-sutil text-white text-sm focus:outline-none focus:border-apf-rojo transition"
-          >
-            {torneos?.map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
-          </select>
+          torneos.length > 0 ? (
+            <select
+              value={torneo}
+              onChange={(e) => setTorneo(e.target.value)}
+              className="px-4 py-2 rounded-lg bg-bg-terciario border border-borde-sutil text-white text-sm focus:outline-none focus:border-apf-rojo transition"
+            >
+              {torneos.map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <span className="px-4 py-2 rounded-lg bg-bg-terciario/50 border border-borde-sutil/50 text-texto-terciario text-sm">
+              Sin torneos disponibles
+            </span>
+          )
         }
       />
 

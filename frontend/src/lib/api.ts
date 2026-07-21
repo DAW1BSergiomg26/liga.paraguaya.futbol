@@ -250,9 +250,13 @@ export async function getTacticoPartido(partidoId: string): Promise<AnalisisPart
   return apiFetch<AnalisisPartido>(`/api/v1/tactico/partido/${partidoId}`);
 }
 
-export async function getGoleadores(torneo?: string): Promise<{ goleadores: Goleador[]; total: number }> {
-  const params = torneo ? `?torneo=${encodeURIComponent(torneo)}` : "";
+export async function getGoleadores(torneo: string): Promise<{ goleadores: Goleador[]; total: number }> {
+  const params = `?torneo=${encodeURIComponent(torneo)}`;
   return apiFetch(`/api/v1/goleadores${params}`);
+}
+
+export async function getGoleadoresTorneos(): Promise<{ torneos: string[] }> {
+  return apiFetch("/api/v1/goleadores/torneos");
 }
 
 export async function getGoleadoresHistorial(): Promise<{ goleadores: Goleador[]; total: number }> {

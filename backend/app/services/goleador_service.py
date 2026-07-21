@@ -1,5 +1,3 @@
-from typing import Optional
-
 from sqlalchemy import select, func, distinct
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -23,16 +21,16 @@ class GoleadorService:
     @staticmethod
     async def get_all(
         db: AsyncSession,
-        torneo: Optional[str] = None,
+        torneo: str,
         limit: int = 20,
     ) -> GoleadoresListOut:
         stmt = (
             select(Goleador, Club.nombre.label("club_nombre"))
             .join(Club, Goleador.club_id == Club.id)
+            .where(Goleador.torneo == torneo)
+            .order_by(Goleador.goles.desc())
+            .limit(limit)
         )
-        if torneo:
-            stmt = stmt.where(Goleador.torneo == torneo)
-        stmt = stmt.order_by(Goleador.goles.desc()).limit(limit)
         result = await db.execute(stmt)
         goleadores = [
             GoleadorOut(
