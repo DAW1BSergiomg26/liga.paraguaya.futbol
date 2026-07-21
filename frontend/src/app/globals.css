@@ -42,8 +42,7 @@
   --font-barlow: var(--font-barlow-condensed);
 
   /* Animaciones logo */
-  --animate-logo-orbit: logo-orbit 6s linear infinite;
-  --animate-logo-spin: logo-spin 5s linear infinite;
+  --animate-spin-3d: spin3d 8s linear infinite;
 }
 
 body {
@@ -183,15 +182,11 @@ a, button, tr {
   animation: row-enter 0.5s ease-out forwards;
 }
 
-/* Logo animado — keyframes para navbar */
-@keyframes logo-orbit {
-  0%   { transform: rotate(0deg)   translateX(28px) rotate(0deg); }
-  100% { transform: rotate(360deg) translateX(28px) rotate(-360deg); }
-}
-
-@keyframes logo-spin {
-  0%   { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+/* Logo animado 3D — keyframes */
+@keyframes spin3d {
+  0%   { transform: rotate(0deg) scale(1); }
+  50%  { transform: rotate(180deg) scale(1.08); filter: drop-shadow(0 0 12px rgba(56,189,248,0.8)); }
+  100% { transform: rotate(360deg) scale(1); }
 }
 
 /* Navbar glassmorphism */
