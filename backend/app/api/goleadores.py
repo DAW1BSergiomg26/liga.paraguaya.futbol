@@ -7,6 +7,12 @@ from app.services.goleador_service import GoleadorService
 router = APIRouter(prefix="/api/v1", tags=["goleadores"])
 
 
+@router.get("/goleadores/torneos")
+async def get_goleadores_torneos(db: AsyncSession = Depends(get_db)):
+    torneos = await GoleadorService.get_torneos_con_goleadores(db)
+    return {"torneos": torneos}
+
+
 @router.get("/goleadores")
 async def get_goleadores(
     torneo: str = Query(None),

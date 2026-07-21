@@ -1,6 +1,6 @@
 from typing import Optional
 
-from sqlalchemy import select, func
+from sqlalchemy import select, func, distinct
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.club import Club
@@ -9,6 +9,16 @@ from app.schemas.goleador import GoleadorOut, GoleadoresListOut
 
 
 class GoleadorService:
+
+    @staticmethod
+    async def get_torneos_con_goleadores(db: AsyncSession) -> list[str]:
+        """Retorna solo los torneos que contienen al menos un goleador registrado."""
+        stmt = (
+            select(distinct(Goleador.torneo))
+            .order_by(Goleador.torneo.desc())
+        )
+        result = await db.execute(stmt)
+        return [row[0] for row in result.all()]
 
     @staticmethod
     async def get_all(

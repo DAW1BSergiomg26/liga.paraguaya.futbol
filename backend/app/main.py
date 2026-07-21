@@ -177,6 +177,7 @@ async def root():
             "/api/v1/predicciones/mis",
             "/api/v1/leaderboard",
             "/api/v1/goleadores",
+            "/api/v1/goleadores/torneos",
             "/api/v1/goleadores/historial",
             "/api/v1/historial/campeones",
             "/api/v1/historial/ranking-clubes",
