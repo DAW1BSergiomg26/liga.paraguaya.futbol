@@ -1,15 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
-
-if (!API_URL) {
-  if (typeof window !== "undefined") {
-    console.error(
-      "[api.ts] ❌ NEXT_PUBLIC_API_URL VACÍA — el frontend NO puede conectar al backend.\n" +
-      "  Causa probable: variable no definida en Vercel (Settings → Environment Variables) o build sin redeploy.\n" +
-      "  Valor actual: '" + API_URL + "'\n" +
-      "  Acción: Vercel Dashboard → Settings → Environment Variables → NEXT_PUBLIC_API_URL=https://liga-paraguaya-futbol.onrender.com → Redeploy."
-    );
-  }
-}
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://liga-paraguaya-futbol.onrender.com";
 
 export async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
   const url = `${API_URL}${path}`;
