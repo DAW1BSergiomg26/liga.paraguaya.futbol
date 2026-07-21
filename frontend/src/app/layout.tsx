@@ -6,10 +6,7 @@ import Footer from "@/components/layout/Footer";
 import StripesBackground from "@/components/layout/StripesBackground";
 import Providers from "./providers";
 import PushSetup from "@/components/PushSetup";
-
-const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ||
-  "https://frontend-ten-swart-85.vercel.app";
+import { SITE_URL, SITE_NAME, SITE_SHORT } from "@/lib/config";
 
 const inter = Inter({ subsets: ["latin"] });
 const barlowCondensed = Barlow_Condensed({
@@ -20,8 +17,8 @@ const barlowCondensed = Barlow_Condensed({
 
 export const metadata: Metadata = {
   title: {
-    default: "Liga Paraguaya de Fútbol | Datos y Estadísticas",
-    template: "%s | Liga PY",
+    default: `${SITE_NAME} | Datos y Estadísticas`,
+    template: `%s | ${SITE_SHORT}`,
   },
   description:
     "Clubes, partidos, tabla de posiciones, goleadores, transferencias y datos del fútbol paraguayo en tiempo real.",
@@ -39,9 +36,9 @@ export const metadata: Metadata = {
     "Olimpia",
     "Libertad",
   ],
-  authors: [{ name: "Liga Paraguaya de Fútbol" }],
-  creator: "Liga PY",
-  publisher: "Liga PY",
+  authors: [{ name: SITE_NAME }],
+  creator: SITE_SHORT,
+  publisher: SITE_SHORT,
   formatDetection: { telephone: false },
   icons: {
     icon: "/favicon.svg",
@@ -54,11 +51,11 @@ export const metadata: Metadata = {
     canonical: SITE_URL,
   },
   openGraph: {
-    title: "Liga Paraguaya de Fútbol | Datos y Estadísticas",
+    title: `${SITE_NAME} | Datos y Estadísticas`,
     description:
       "Clubes, partidos, tabla de posiciones, goleadores, transferencias y datos del fútbol paraguayo en tiempo real.",
     url: SITE_URL,
-    siteName: "Liga PY",
+    siteName: SITE_SHORT,
     locale: "es_PY",
     type: "website",
     images: [
@@ -66,13 +63,13 @@ export const metadata: Metadata = {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Liga Paraguaya de Fútbol",
+        alt: SITE_NAME,
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Liga Paraguaya de Fútbol | Datos y Estadísticas",
+    title: `${SITE_NAME} | Datos y Estadísticas`,
     description:
       "Clubes, partidos, tabla de posiciones, goleadores, transferencias y datos del fútbol paraguayo en tiempo real.",
     images: ["/og-image.png"],

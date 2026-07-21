@@ -6,6 +6,20 @@ import type { PartidoPage } from "@/types";
 import Link from "next/link";
 import HeroStats from "@/components/HeroStats";
 import CinematicHero from "@/components/hero/CinematicHero";
+import { SITE_NAME, SITE_SHORT } from "@/lib/config";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: `${SITE_SHORT} — Fútbol Paraguayo en Tiempo Real`,
+  description:
+    `Portal oficial de datos y estadísticas del fútbol paraguayo. Clubes, partidos en vivo, tabla de posiciones, goleadores, transferencias y análisis táctico de la Primera División. ${SITE_NAME}.`,
+  openGraph: {
+    title: `${SITE_SHORT} — Fútbol Paraguayo en Tiempo Real`,
+    description:
+      `Datos, estadísticas y partidos en vivo del fútbol paraguayo. ${SITE_NAME}.`,
+    type: "website",
+  },
+};
 
 async function safeFetch<T>(fn: () => Promise<T>, fallback: T): Promise<[T, string | null]> {
   try {

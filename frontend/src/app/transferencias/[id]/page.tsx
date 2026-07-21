@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import TransferenciaDetailPageClient from "./PageClient";
 import { apiFetch } from "@/lib/api";
+import { SITE_NAME } from "@/lib/config";
 import type { Transferencia } from "@/types";
 
 type Props = { params: Promise<{ id: string }> };
@@ -12,8 +13,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const origen = t.club_origen_nombre || "Libre";
     const destino = t.club_destino_nombre || "Libre";
     return {
-      title: `${t.jugador_nombre}: ${origen} → ${destino}`,
-      description: `${t.jugador_nombre} (${t.jugador_posicion || "Jugador"}) — ${origen} a ${destino}. Estado: ${t.estado}.`,
+      title: `${t.jugador_nombre}: ${origen} → ${destino} — ${SITE_NAME}`,
+      description: `${t.jugador_nombre} (${t.jugador_posicion || "Jugador"}) — ${origen} a ${destino}. Estado: ${t.estado}. Transferencia del fútbol paraguayo. ${SITE_NAME}.`,
       openGraph: {
         title: `${t.jugador_nombre}: ${origen} → ${destino} | Liga PY`,
         description: `Transferencia: ${origen} → ${destino}. ${t.estado}.`,

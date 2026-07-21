@@ -1,8 +1,6 @@
 import type { MetadataRoute } from "next";
 import { API_URL } from "@/lib/api";
-
-const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://frontend-ten-swart-85.vercel.app";
+import { SITE_URL } from "@/lib/config";
 
 async function safeFetch<T>(path: string): Promise<T | null> {
   try {
