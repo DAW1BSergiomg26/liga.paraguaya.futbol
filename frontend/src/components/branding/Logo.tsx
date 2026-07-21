@@ -1,6 +1,21 @@
 'use client';
 
-import BallLogo3D from './BallLogo3D';
+import dynamic from 'next/dynamic';
+
+const BallLogo3D = dynamic(() => import('./BallLogo3D'), {
+  ssr: false,
+  loading: () => (
+    <div
+      style={{
+        width: '100%',
+        height: '100%',
+        borderRadius: '50%',
+        background: 'radial-gradient(circle at 35% 30%, #F5F0E8 0%, #D0C8B8 50%, #8A8070 100%)',
+        boxShadow: '0 2px 12px rgba(0,0,0,0.3)',
+      }}
+    />
+  ),
+});
 
 interface LogoProps {
   variant?: 'horizontal' | 'vertical' | 'icon';
