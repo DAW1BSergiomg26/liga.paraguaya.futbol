@@ -171,6 +171,169 @@
   }
 }
 
+/* === 3D BALL COMPONENT === */
+
+/* Container — provides perspective */
+.ball3d-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  contain: layout style;
+}
+
+/* Perspective origin — viewer position */
+.ball3d-perspective {
+  width: 100%;
+  height: 100%;
+  perspective: 600px;
+  perspective-origin: 50% 40%;
+}
+
+/* Sphere — 3D rotation container */
+.ball3d-sphere {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  animation: ball3d-spin 8s linear infinite;
+  will-change: transform;
+  transition: animation-duration 0.5s ease;
+}
+
+.ball3d-sphere--fast {
+  animation-duration: 2.5s;
+  animation-direction: reverse;
+}
+
+/* Individual face — base leather texture */
+.ball3d-face {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  backface-visibility: visible;
+  /* Leather texture via layered gradients */
+  background:
+    /* Dimple texture — small repeating dots */
+    radial-gradient(circle at 20% 30%, rgba(255,255,255,0.07) 1px, transparent 2px),
+    radial-gradient(circle at 60% 70%, rgba(255,255,255,0.05) 1px, transparent 2px),
+    radial-gradient(circle at 80% 20%, rgba(255,255,255,0.06) 1px, transparent 2px),
+    radial-gradient(circle at 40% 80%, rgba(255,255,255,0.04) 1px, transparent 2px),
+    /* Panel gradient — simulates spherical lighting */
+    radial-gradient(circle at 35% 30%, #FFFFFF 0%, #F0F2F5 25%, #D0D5DC 50%, #A8B0BC 75%, #8A94A2 100%);
+}
+
+/* Face transforms — arranged in a sphere (R ≈ 46% of face size) */
+.ball3d-face--front  { transform: translateZ(46%); }
+.ball3d-face--back   { transform: rotateY(180deg) translateZ(46%); }
+.ball3d-face--right  { transform: rotateY(90deg) translateZ(46%); }
+.ball3d-face--left   { transform: rotateY(-90deg) translateZ(46%); }
+.ball3d-face--top    { transform: rotateX(90deg) translateZ(46%); }
+.ball3d-face--bottom { transform: rotateX(-90deg) translateZ(46%); }
+.ball3d-face--extra  { transform: rotateX(35deg) rotateY(45deg) translateZ(42%); }
+
+/* Seam lines — subtle dark lines radiating from center */
+.ball3d-seam {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform-origin: 0 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.12) 40%, rgba(0,0,0,0.18) 50%, rgba(0,0,0,0.12) 60%, transparent 100%);
+  border-radius: 1px;
+}
+.ball3d-seam--v {
+  width: 100%;
+  height: 1.5%;
+  transform: translate(-50%, -50%) rotate(0deg);
+}
+.ball3d-seam--h {
+  width: 100%;
+  height: 1.5%;
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+.ball3d-seam--d1 {
+  width: 100%;
+  height: 1.5%;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+.ball3d-seam--d2 {
+  width: 100%;
+  height: 1.5%;
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+/* Central pentagon — dark leather patch */
+.ball3d-pentagon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 30%;
+  height: 30%;
+  transform: translate(-50%, -50%);
+  clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+  background: radial-gradient(circle at 40% 35%, #1A2A3A 0%, #0F172A 60%, #080E18 100%);
+}
+
+/* Specular highlight — glossy reflection */
+.ball3d-specular {
+  position: absolute;
+  top: 15%;
+  left: 18%;
+  width: 35%;
+  height: 25%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 40% 40%, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.3) 30%, transparent 70%);
+  transform: rotate(-20deg);
+  pointer-events: none;
+}
+
+/* Dynamic shadow — cast below the sphere */
+.ball3d-shadow {
+  position: absolute;
+  bottom: -6%;
+  left: 15%;
+  width: 70%;
+  height: 18%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.15) 50%, transparent 75%);
+  filter: blur(3px);
+  transition: all 0.5s ease;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Hover glow — intensifies on hover */
+.ball3d-glow {
+  position: absolute;
+  inset: -12%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,87,184,0.2) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+.ball3d-glow--active {
+  opacity: 1;
+  background: radial-gradient(circle, rgba(0,87,184,0.35) 0%, rgba(213,43,30,0.1) 50%, transparent 75%);
+}
+
+/* Hover — shadow lifts and grows */
+.ball3d-wrap:hover .ball3d-shadow {
+  bottom: -10%;
+  left: 10%;
+  width: 80%;
+  height: 22%;
+  background: radial-gradient(ellipse, rgba(0,87,184,0.3) 0%, rgba(0,0,0,0.15) 50%, transparent 75%);
+  filter: blur(5px);
+}
+
+/* === 3D BALL KEYFRAMES === */
+@keyframes ball3d-spin {
+  0%   { rotate: 0 1 0.3 0deg; }
+  100% { rotate: 0 1 0.3 360deg; }
+}
+
 /* === REDUCED MOTION === */
 @media (prefers-reduced-motion: reduce) {
   .brand-float,
@@ -182,5 +345,9 @@
   }
   .brand-logo:hover {
     transform: none;
+  }
+  .ball3d-sphere,
+  .ball3d-sphere--fast {
+    animation: none;
   }
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import BallLogo from './BallLogo';
+import BallLogo3D from './BallLogo3D';
 
 interface LogoProps {
   variant?: 'horizontal' | 'vertical' | 'icon';
@@ -11,13 +11,13 @@ interface LogoProps {
 
 export default function Logo({ variant = 'horizontal', size = 48, className = '', onClick }: LogoProps) {
   if (variant === 'icon') {
-    return <BallLogo size={size} animated className={className} onClick={onClick} />;
+    return <BallLogo3D size={size} className={className} onClick={onClick} />;
   }
 
   if (variant === 'vertical') {
     return (
       <div className={`flex flex-col items-center gap-2 ${className}`} onClick={onClick} role={onClick ? 'button' : undefined} style={onClick ? { cursor: 'pointer' } : undefined}>
-        <BallLogo size={size} animated />
+        <BallLogo3D size={size} />
         <div className="text-center">
           <p className="font-display text-lg font-bold text-white leading-tight tracking-tight">
             Liga Paraguaya
@@ -38,7 +38,7 @@ export default function Logo({ variant = 'horizontal', size = 48, className = ''
   // horizontal (default)
   return (
     <div className={`flex items-center gap-3 ${className}`} onClick={onClick} role={onClick ? 'button' : undefined} style={onClick ? { cursor: 'pointer' } : undefined}>
-      <BallLogo size={size} animated />
+      <BallLogo3D size={size} />
       <div>
         <p className="font-display text-xl font-bold text-white leading-tight tracking-tight">
           Liga Paraguaya
