@@ -60,7 +60,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/og-image.png",
+        url: `${SITE_URL}/api/og/home`,
         width: 1200,
         height: 630,
         alt: SITE_NAME,
@@ -72,7 +72,7 @@ export const metadata: Metadata = {
     title: `${SITE_NAME} | Datos y Estadísticas`,
     description:
       "Clubes, partidos, tabla de posiciones, goleadores, transferencias y datos del fútbol paraguayo en tiempo real.",
-    images: ["/og-image.png"],
+    images: [`${SITE_URL}/api/og/home`],
   },
   robots: {
     index: true,

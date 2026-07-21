@@ -6,8 +6,10 @@ import type { PartidoPage } from "@/types";
 import Link from "next/link";
 import HeroStats from "@/components/HeroStats";
 import CinematicHero from "@/components/hero/CinematicHero";
-import { SITE_NAME, SITE_SHORT } from "@/lib/config";
+import { SITE_NAME, SITE_SHORT, SITE_URL } from "@/lib/config";
 import type { Metadata } from "next";
+import JsonLd from "@/components/JsonLd";
+import { buildWebSiteSchema } from "@/lib/jsonLd";
 
 export const metadata: Metadata = {
   title: `${SITE_SHORT} — Fútbol Paraguayo en Tiempo Real`,
@@ -18,6 +20,13 @@ export const metadata: Metadata = {
     description:
       `Datos, estadísticas y partidos en vivo del fútbol paraguayo. ${SITE_NAME}.`,
     type: "website",
+    images: [{ url: `${SITE_URL}/api/og/home`, width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${SITE_SHORT} — Fútbol Paraguayo en Tiempo Real`,
+    description: `Datos, estadísticas y partidos en vivo del fútbol paraguayo. ${SITE_NAME}.`,
+    images: [`${SITE_URL}/api/og/home`],
   },
 };
 
@@ -63,6 +72,7 @@ export default async function HomePage() {
 
   return (
     <>
+      <JsonLd data={buildWebSiteSchema({ description: "Portal oficial de datos y estadísticas del fútbol paraguayo." })} />
       <CinematicHero
         stats={{
           partidos: stats?.total_partidos ?? 348,

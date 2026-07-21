@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import ClubDetailPageClient from "./PageClient";
 import { getClub, getTabla, getPartidos } from "@/lib/api";
-import { SITE_NAME } from "@/lib/config";
+import { SITE_NAME, SITE_URL } from "@/lib/config";
 import type { TablaRow, Partido } from "@/types";
+import JsonLd from "@/components/JsonLd";
+import { buildSportsClub } from "@/lib/jsonLd";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -50,6 +52,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
     const description = `${club.nombre} (${club.apodo}) — ${club.ciudad}, Estadio ${club.estadio}. ${club.titulos_liga} títulos de liga.${posicionInfo}${ultimosResultados} Datos, partidos y estadísticas en ${SITE_NAME}.`;
 
+    const ogImageUrl = `${SITE_URL}/api/og/club?id=${id}`;
+
     return {
       title: `${club.nombre} — ${SITE_NAME}`,
       description,
@@ -57,7 +61,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         title: `${club.nombre} | Liga PY`,
         description,
         type: "profile",
-        images: club.escudo ? [{ url: club.escudo }] : [],
+        images: [{ url: ogImageUrl, width: 1200, height: 630 }],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: `${club.nombre} | Liga PY`,
+        description,
+        images: [ogImageUrl],
       },
     };
   } catch {
@@ -65,6 +75,29 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export default function ClubDetailPage({ params }: Props) {
-  return <ClubDetailPageClient />;
+export default async function ClubDetailPage({ params }: Props) {
+  const { id } = await params;
+
+  let jsonLdData: object | null = null;
+  try {
+    const club = await getClub(id);
+    jsonLdData = buildSportsClub({
+      nombre: club.nombre,
+      descripcion: club.descripcion,
+      escudo: club.escudo,
+      fundacion: club.fundacion,
+      estadio: club.estadio,
+      ciudad: club.ciudad,
+      sitio_web: club.sitio_web,
+    });
+  } catch {
+    // Si falla, renderizamos sin JSON-LD
+  }
+
+  return (
+    <>
+      {jsonLdData && <JsonLd data={jsonLdData} />}
+      <ClubDetailPageClient />
+    </>
+  );
 }
