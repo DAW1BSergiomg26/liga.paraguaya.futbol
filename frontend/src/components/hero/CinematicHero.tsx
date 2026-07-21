@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import SplitType from "split-type";
 import { initGSAP, gsap, ScrollTrigger } from "@/lib/gsap";
 import CountUp from "@/components/ui/CountUp";
+import Logo from "@/components/branding/Logo";
 
 const DEFAULT_STATS = [
   { label: "PARTIDOS", value: 348 },
@@ -19,6 +20,7 @@ export default function CinematicHero({
   const heroRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const statsRef = useRef<HTMLDivElement>(null);
+  const ballRef = useRef<HTMLDivElement>(null);
 
   const statValues = [
     stats?.partidos ?? DEFAULT_STATS[0].value,
@@ -36,7 +38,8 @@ export default function CinematicHero({
     const hero = heroRef.current;
     const title = titleRef.current;
     const stats = statsRef.current;
-    if (!hero || !title || !stats) return;
+    const ball = ballRef.current;
+    if (!hero || !title || !stats || !ball) return;
 
     const prefersReduced = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
@@ -49,27 +52,40 @@ export default function CinematicHero({
     // Initial state
     gsap.set(split.chars, { opacity: 0, y: 20 });
     gsap.set(stats.children, { opacity: 0, y: 30 });
+    gsap.set(ball, { opacity: 0, scale: 0.6, y: 10 });
 
     // Timeline
     const tl = gsap.timeline({ delay: 0.3 });
 
-    tl.to(split.chars, {
+    tl.to(ball, {
       opacity: 1,
+      scale: 1,
       y: 0,
-      duration: 0.5,
-      stagger: 0.02,
-      ease: "power2.out",
-    }).to(
-      stats.children,
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.6,
-        stagger: 0.15,
-        ease: "power2.out",
-      },
-      "-=0.3"
-    );
+      duration: 0.8,
+      ease: "back.out(1.7)",
+    })
+      .to(
+        split.chars,
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.5,
+          stagger: 0.02,
+          ease: "power2.out",
+        },
+        "-=0.4"
+      )
+      .to(
+        stats.children,
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.6,
+          stagger: 0.15,
+          ease: "power2.out",
+        },
+        "-=0.3"
+      );
 
     // Scroll-triggered fade out
     gsap.to(hero, {
@@ -114,6 +130,13 @@ export default function CinematicHero({
 
       {/* Content */}
       <div className="relative z-10 text-center px-4">
+        {/* Animated Ball Logo */}
+        <div ref={ballRef} className="mb-6 flex justify-center">
+          <div className="brand-float brand-glow">
+            <Logo variant="icon" size={100} />
+          </div>
+        </div>
+
         <h1
           ref={titleRef}
           className="hero-title-glow font-barlow text-[2.6rem] md:text-[4.3rem] lg:text-[5.2rem] font-bold uppercase tracking-wider"

@@ -36,6 +36,7 @@
     "react-dom": "19.2.4",
     "react-hook-form": "^7.81.0",
     "recharts": "^3.9.2",
+    "sonner": "^2.0.7",
     "sparticles": "^2.2.0",
     "split-type": "^0.3.4",
     "swr": "^2.4.2",

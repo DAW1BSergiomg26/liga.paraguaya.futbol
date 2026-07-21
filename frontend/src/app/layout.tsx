@@ -7,6 +7,7 @@ import StripesBackground from "@/components/layout/StripesBackground";
 import Providers from "./providers";
 import PushSetup from "@/components/PushSetup";
 import { SITE_URL, SITE_NAME, SITE_SHORT } from "@/lib/config";
+import { Toaster } from "sonner";
 
 const inter = Inter({ subsets: ["latin"] });
 const barlowCondensed = Barlow_Condensed({
@@ -105,6 +106,7 @@ export default function RootLayout({
           <main className="flex-1">{children}</main>
           <Footer />
           <PushSetup />
+          <Toaster position="top-right" theme="dark" richColors closeButton />
         </Providers>
       </body>
     </html>
