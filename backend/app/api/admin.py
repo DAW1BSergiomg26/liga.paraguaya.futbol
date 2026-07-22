@@ -2,13 +2,13 @@ from fastapi import APIRouter, Depends, Header, HTTPException, status
 from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.config import settings
-from app.core.dependencies import get_db
-from app.models.api_key import APIKey
-from app.models.partido import Partido
-from app.schemas.api_key import APIKeyCreate, APIKeyOut
-from app.schemas.partido import PartidoDetailOut, PartidoUpdate
-from app.services.partido_service import PartidoService
+from ..core.config import settings
+from ..core.dependencies import get_db
+from ..models.api_key import APIKey
+from ..models.partido import Partido
+from ..schemas.api_key import APIKeyCreate, APIKeyOut
+from ..schemas.partido import PartidoDetailOut, PartidoUpdate
+from ..services.partido_service import PartidoService
 
 router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
 
@@ -41,7 +41,7 @@ async def actualizar_partido(
     was_finalized = partido.estado == "finalizado"
 
     if data.estado == "en_vivo" and data.goles_local is not None and data.goles_visitante is not None:
-        from app.services.push_service import PushService
+        from ..services.push_service import PushService
         await PushService.enviar_a_partido(
             db,
             partido_id,
@@ -53,16 +53,16 @@ async def actualizar_partido(
     await db.commit()
 
     if was_finalized:
-        from app.services.prediction_service import PredictionService
+        from ..services.prediction_service import PredictionService
         await PredictionService.calcular_puntos(db, partido_id)
-        from app.models.prediction import Prediction
+        from ..models.prediction import Prediction
         result = await db.execute(
             select(Prediction.user_id).where(Prediction.partido_id == partido_id).distinct()
         )
         user_ids = [r[0] for r in result.all()]
         for uid in user_ids:
             await PredictionService.recalcular_totales_usuario(db, uid)
-        from app.services.push_service import PushService
+        from ..services.push_service import PushService
         result = await db.execute(select(Prediction).where(Prediction.partido_id == partido_id))
         preds = result.scalars().all()
         for pred in preds:

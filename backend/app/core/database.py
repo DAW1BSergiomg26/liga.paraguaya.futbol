@@ -7,7 +7,7 @@ from sqlalchemy import text as sa_text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 
-from app.core.config import settings
+from ..core.config import settings
 
 
 def _async_url(url: str) -> str:
@@ -155,7 +155,7 @@ async def init_db():
             # El esquema ya fue poblado (import_data.py / seed).
             await conn.run_sync(Base.metadata.create_all)
         else:
-            from app.models import club, partido, prediction, tabla, user
+            from ..models import club, partido, prediction, tabla, user
             await conn.run_sync(Base.metadata.drop_all)
             await conn.run_sync(Base.metadata.create_all)
 

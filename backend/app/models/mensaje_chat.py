@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from sqlalchemy import Column, DateTime, ForeignKey, String, Text
 from sqlalchemy.orm import relationship
 
-from app.core.database import Base
+from ..core.database import Base
 
 
 class MensajeChat(Base):

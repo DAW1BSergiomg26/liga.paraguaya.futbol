@@ -4,8 +4,8 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.models.tabla import TablaPosicion
-from app.schemas.tabla import TablaRowOut
+from ..models.tabla import TablaPosicion
+from ..schemas.tabla import TablaRowOut
 
 
 class TablaService:

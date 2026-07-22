@@ -5,9 +5,9 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.dependencies import get_db
-from app.schemas.partido import H2HOut, PartidoDetailOut, PartidoOut, PartidoPage
-from app.services.partido_service import PartidoService
+from ..core.dependencies import get_db
+from ..schemas.partido import H2HOut, PartidoDetailOut, PartidoOut, PartidoPage
+from ..services.partido_service import PartidoService
 
 router = APIRouter(prefix="/api/v1/partidos", tags=["partidos"])
 
@@ -46,7 +46,7 @@ async def h2h_partidos(
     if club_a == club_b:
         raise HTTPException(status_code=400, detail="club_a and club_b must be different")
 
-    from app.models.club import Club
+    from ..models.club import Club
 
     club_a_obj = await db.get(Club, club_a)
     club_b_obj = await db.get(Club, club_b)

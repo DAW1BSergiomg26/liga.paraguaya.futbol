@@ -4,10 +4,10 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.database import async_session
-from app.core.security import decode_access_token
-from app.models.user import User
-from app.services.user_service import UserService
+from ..core.database import async_session
+from ..core.security import decode_access_token
+from ..models.user import User
+from ..services.user_service import UserService
 
 
 async def get_db() -> AsyncIterator[AsyncSession]:

@@ -5,8 +5,8 @@ from datetime import datetime, timezone
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.database import async_session
-from app.models.api_key import APIKey
+from ..core.database import async_session
+from ..models.api_key import APIKey
 
 RATE_LIMIT_WINDOW = 60
 RATE_LIMIT_MAX = 100

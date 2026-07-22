@@ -5,8 +5,8 @@ from datetime import datetime, timezone
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.noticia import Noticia
-from app.schemas.noticia import NoticiaCreate, NoticiaUpdate
+from ..models.noticia import Noticia
+from ..schemas.noticia import NoticiaCreate, NoticiaUpdate
 
 
 class NoticiaService:

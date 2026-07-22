@@ -1,9 +1,9 @@
 import asyncio
 from datetime import datetime
 from sqlalchemy.future import select
-from app.core.database import AsyncSession, engine
-from app.models.user import User
-from app.core.security import hash_password
+from ..core.database import AsyncSession, engine
+from ..models.user import User
+from ..core.security import hash_password
 from sqlalchemy.ext.asyncio import AsyncSession as SessionClass
 
 async def seed_admin():

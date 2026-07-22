@@ -2,12 +2,12 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.dependencies import get_db
-from app.services.cerezo.classifier import CerezoIntentClassifier
-from app.services.cerezo.entity_extractor import CerezoEntityExtractor
-from app.services.cerezo.data_fetcher import CerezoDataFetcher
-from app.services.cerezo.prediction_engine import CerezoPredictionEngine
-from app.services.cerezo.response_generator import CerezoResponseGenerator
+from ..core.dependencies import get_db
+from ..services.cerezo.classifier import CerezoIntentClassifier
+from ..services.cerezo.entity_extractor import CerezoEntityExtractor
+from ..services.cerezo.data_fetcher import CerezoDataFetcher
+from ..services.cerezo.prediction_engine import CerezoPredictionEngine
+from ..services.cerezo.response_generator import CerezoResponseGenerator
 
 _cerezo_sessions: dict[str, dict] = {}
 

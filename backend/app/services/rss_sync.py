@@ -9,7 +9,7 @@ import httpx
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.noticia import Noticia
+from ..models.noticia import Noticia
 
 logger = logging.getLogger(__name__)
 

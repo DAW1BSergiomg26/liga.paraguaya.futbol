@@ -7,9 +7,9 @@ import httpx
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.transferencia import Transferencia
-from app.services.transferencia_service import TransferenciaService
-from app.schemas.transferencia import TransferenciaCreate
+from ..models.transferencia import Transferencia
+from ..services.transferencia_service import TransferenciaService
+from ..schemas.transferencia import TransferenciaCreate
 
 logger = logging.getLogger(__name__)
 

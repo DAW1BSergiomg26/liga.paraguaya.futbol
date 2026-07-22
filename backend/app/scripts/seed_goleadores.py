@@ -5,8 +5,8 @@ Ejecutar:  python -m app.scripts.seed_goleadores
 """
 import asyncio
 from sqlalchemy import select
-from app.core.database import async_session, init_db
-from app.models.goleador import Goleador
+from ..core.database import async_session, init_db
+from ..models.goleador import Goleador
 
 TORNEOS_DATA = [
     # ── Apertura 2026 ──────────────────────────────────────────────

@@ -5,12 +5,12 @@ from pathlib import Path
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.database import async_session, init_db
-from app.models.club import Club
-from app.models.goleador import Goleador
-from app.models.partido import Partido
-from app.models.tabla import TablaPosicion
-from app.models.transferencia import Transferencia
+from ..core.database import async_session, init_db
+from ..models.club import Club
+from ..models.goleador import Goleador
+from ..models.partido import Partido
+from ..models.tabla import TablaPosicion
+from ..models.transferencia import Transferencia
 
 DATA_DIR = Path(__file__).resolve().parent.parent.parent.parent / "data"
 
@@ -234,7 +234,7 @@ async def seed_tabla_historico(db: AsyncSession):
 
 async def main():
     print("Creando tablas (sin borrar datos existentes)...")
-    from app.core.database import engine, Base
+    from ..core.database import engine, Base
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     print("Ejecutando seed...")

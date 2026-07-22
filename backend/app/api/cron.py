@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.dependencies import get_db
-from app.services.push_service import PushService
+from ..core.dependencies import get_db
+from ..services.push_service import PushService
 
 router = APIRouter(prefix="/api/v1/cron", tags=["cron"])
 

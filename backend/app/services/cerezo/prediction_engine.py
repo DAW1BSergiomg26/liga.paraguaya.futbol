@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.partido import Partido
+from ...models.partido import Partido
 
 
 class CerezoPredictionEngine:

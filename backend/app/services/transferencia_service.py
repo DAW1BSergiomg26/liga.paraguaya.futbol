@@ -6,9 +6,9 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.models.club import Club
-from app.models.transferencia import Transferencia
-from app.schemas.transferencia import (
+from ..models.club import Club
+from ..models.transferencia import Transferencia
+from ..schemas.transferencia import (
     EstadisticasTransferencias,
     GastoPorClub,
     TransferenciaCreate,

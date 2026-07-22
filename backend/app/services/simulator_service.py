@@ -4,9 +4,9 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.models.club import Club
-from app.models.tabla import TablaPosicion
-from app.schemas.simulator import ExactScore, SimulationResultOut
+from ..models.club import Club
+from ..models.tabla import TablaPosicion
+from ..schemas.simulator import ExactScore, SimulationResultOut
 
 
 class SimulatorService:

@@ -3,9 +3,9 @@ from typing import Optional
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.dependencies import get_db
-from app.schemas.tabla import TablaRowOut
-from app.services.tabla_service import TablaService
+from ..core.dependencies import get_db
+from ..schemas.tabla import TablaRowOut
+from ..services.tabla_service import TablaService
 
 router = APIRouter(prefix="/api/v1/tabla", tags=["tabla"])
 

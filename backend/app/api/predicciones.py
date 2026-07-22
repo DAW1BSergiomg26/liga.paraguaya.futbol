@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.dependencies import get_current_user, get_db
-from app.models.user import User
-from app.schemas.prediction import PredictionCreate, PredictionDetail, PredictionOut
-from app.services.prediction_service import PredictionService
+from ..core.dependencies import get_current_user, get_db
+from ..models.user import User
+from ..schemas.prediction import PredictionCreate, PredictionDetail, PredictionOut
+from ..services.prediction_service import PredictionService
 
 router = APIRouter(prefix="/api/v1/predicciones", tags=["predicciones"])
 

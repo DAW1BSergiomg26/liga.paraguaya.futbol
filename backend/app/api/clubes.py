@@ -3,9 +3,9 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.dependencies import get_db
-from app.schemas.club import ClubDetailOut, ClubOut
-from app.services.club_service import ClubService
+from ..core.dependencies import get_db
+from ..schemas.club import ClubDetailOut, ClubOut
+from ..services.club_service import ClubService
 
 router = APIRouter(prefix="/api/v1/clubes", tags=["clubes"])
 

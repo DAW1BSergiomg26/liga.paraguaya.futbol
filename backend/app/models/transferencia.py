@@ -4,7 +4,7 @@ from datetime import date, datetime, timezone
 from sqlalchemy import Boolean, Date, DateTime, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.core.database import Base
+from ..core.database import Base
 
 
 class Transferencia(Base):

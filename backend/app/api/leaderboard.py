@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.dependencies import get_db
-from app.schemas.prediction import LeaderboardEntry
-from app.services.prediction_service import PredictionService
+from ..core.dependencies import get_db
+from ..schemas.prediction import LeaderboardEntry
+from ..services.prediction_service import PredictionService
 
 router = APIRouter(prefix="/api/v1/leaderboard", tags=["leaderboard"])
 

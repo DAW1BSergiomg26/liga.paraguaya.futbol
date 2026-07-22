@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 
-from app.schemas.tactico import AnalisisPartido, EquipoTactico
-from app.services.tactico_service import TacticoService
+from ..schemas.tactico import AnalisisPartido, EquipoTactico
+from ..services.tactico_service import TacticoService
 
 
 router = APIRouter(prefix="/api/v1/tactico", tags=["tactico"])

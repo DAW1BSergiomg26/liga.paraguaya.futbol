@@ -3,8 +3,8 @@ from typing import Optional
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.club import Club
-from app.schemas.club import ClubDetailOut, ClubOut
+from ..models.club import Club
+from ..schemas.club import ClubDetailOut, ClubOut
 
 
 class ClubService:

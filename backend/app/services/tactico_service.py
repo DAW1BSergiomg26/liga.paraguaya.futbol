@@ -1,4 +1,4 @@
-from app.schemas.tactico import (
+from ..schemas.tactico import (
     AnalisisPartido,
     EquipoPartidoTactico,
     EquipoTactico,

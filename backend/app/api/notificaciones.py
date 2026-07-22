@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.config import settings
-from app.core.dependencies import get_current_user, get_db
-from app.models.user import User
-from app.schemas.push_subscription import PushSubscriptionCreate
-from app.services.push_service import PushService
+from ..core.config import settings
+from ..core.dependencies import get_current_user, get_db
+from ..models.user import User
+from ..schemas.push_subscription import PushSubscriptionCreate
+from ..services.push_service import PushService
 
 router = APIRouter(prefix="/api/v1/notificaciones", tags=["notificaciones"])
 

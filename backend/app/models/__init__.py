@@ -1,13 +1,13 @@
-from app.models.api_key import APIKey
-from app.models.club import Club
-from app.models.mensaje_chat import MensajeChat
-from app.models.partido import Partido
-from app.models.prediction import Prediction
-from app.models.push_subscription import PushSubscription
-from app.models.tabla import TablaPosicion
-from app.models.user import User
-from app.models.noticia import Noticia
-from app.models.transferencia import Transferencia
+from ..models.api_key import APIKey
+from ..models.club import Club
+from ..models.mensaje_chat import MensajeChat
+from ..models.partido import Partido
+from ..models.prediction import Prediction
+from ..models.push_subscription import PushSubscription
+from ..models.tabla import TablaPosicion
+from ..models.user import User
+from ..models.noticia import Noticia
+from ..models.transferencia import Transferencia
 
 __all__ = ["APIKey", "Club", "MensajeChat", "Partido", "Prediction", "PushSubscription", "TablaPosicion", "User", "Noticia", "Transferencia"]
 

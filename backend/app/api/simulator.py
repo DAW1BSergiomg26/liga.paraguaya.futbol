@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.dependencies import get_db
-from app.schemas.simulator import SimulationInput, SimulationResultOut
-from app.services.simulator_service import SimulatorService
+from ..core.dependencies import get_db
+from ..schemas.simulator import SimulationInput, SimulationResultOut
+from ..services.simulator_service import SimulatorService
 
 router = APIRouter(prefix="/api/v1/simulador", tags=["simulador"])
 

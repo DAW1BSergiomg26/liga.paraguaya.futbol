@@ -2,10 +2,10 @@ from fastapi import APIRouter, Depends
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.dependencies import get_db
-from app.models.club import Club
-from app.models.partido import Partido
-from app.models.tabla import TablaPosicion
+from ..core.dependencies import get_db
+from ..models.club import Club
+from ..models.partido import Partido
+from ..models.tabla import TablaPosicion
 
 router = APIRouter()
 

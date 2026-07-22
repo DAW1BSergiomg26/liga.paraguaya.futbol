@@ -1,4 +1,4 @@
-from app.services.football_config import TEAM_MAP
+from ..services.football_config import TEAM_MAP
 
 class FootballMapper:
 

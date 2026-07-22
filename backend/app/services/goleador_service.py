@@ -1,9 +1,9 @@
 from sqlalchemy import select, func, distinct
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.club import Club
-from app.models.goleador import Goleador
-from app.schemas.goleador import GoleadorOut, GoleadoresListOut
+from ..models.club import Club
+from ..models.goleador import Goleador
+from ..schemas.goleador import GoleadorOut, GoleadoresListOut
 
 
 class GoleadorService:

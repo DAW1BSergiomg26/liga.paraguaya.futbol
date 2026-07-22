@@ -25,3 +25,6 @@ soccerdata-base/
 prompts/
 docs/
 .superpowers/
+frontend/
+Dockerfile.frontend
+Dockerfile.backend

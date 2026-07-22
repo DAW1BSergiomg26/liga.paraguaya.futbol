@@ -7,21 +7,21 @@ from fastapi.responses import JSONResponse
 from starlette.responses import Response
 from sqlalchemy import select
 
-from app.api import admin, auth, clubes, goleadores, health, leaderboard, partidos, predicciones, simulator, tabla
-from app.api.cerezo import router as cerezo_router
-from app.api.chat import router as chat_router
-from app.api.notificaciones import router as notificaciones_router
-from app.api.cron import router as cron_router
-from app.api.noticias import router as noticias_router
-from app.api.tactico import router as tactico_router
-from app.api.transferencias import router as transferencias_router
-from app.api.historial import router as historial_router
-from app.api.stats import router as stats_router
-from app.core.api_key import RATE_LIMIT_MAX, rate_limit_info
-from app.core.config import settings
-from app.core.database import async_session, run_alembic_upgrade
-from app.models.club import Club
-from app.scripts.seed import seed_clubes, seed_partidos, seed_tabla, seed_tabla_historico
+from .api import admin, auth, clubes, goleadores, health, leaderboard, partidos, predicciones, simulator, tabla
+from .api.cerezo import router as cerezo_router
+from .api.chat import router as chat_router
+from .api.notificaciones import router as notificaciones_router
+from .api.cron import router as cron_router
+from .api.noticias import router as noticias_router
+from .api.tactico import router as tactico_router
+from .api.transferencias import router as transferencias_router
+from .api.historial import router as historial_router
+from .api.stats import router as stats_router
+from .core.api_key import RATE_LIMIT_MAX, rate_limit_info
+from .core.config import settings
+from .core.database import async_session, run_alembic_upgrade
+from .models.club import Club
+from .scripts.seed import seed_clubes, seed_partidos, seed_tabla, seed_tabla_historico
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +32,7 @@ async def sync_loop():
         return
     while True:
         try:
-            from app.services.football_data_service import FootballDataService
+            from .services.football_data_service import FootballDataService
             result = FootballDataService.sync_all()
             logger.info(f"Sync result: {result}")
         except Exception as e:
