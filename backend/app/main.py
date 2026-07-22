@@ -22,7 +22,7 @@ from .core.api_key import RATE_LIMIT_MAX, rate_limit_info
 from .core.config import settings
 from .core.database import async_session, init_db, run_alembic_upgrade
 from .models.club import Club
-from .scripts.seed import seed_clubes, seed_goleadores, seed_partidos, seed_tabla, seed_tabla_historico, seed_transferencias
+from .scripts.seed import seed_clubes, seed_goleadores, seed_noticias, seed_partidos, seed_tabla, seed_tabla_historico, seed_transferencias
 
 logger = logging.getLogger(__name__)
 
@@ -56,6 +56,7 @@ async def lifespan(app: FastAPI):
             await seed_goleadores(db)
             await seed_transferencias(db)
             await seed_tabla_historico(db)
+            await seed_noticias(db)
             await db.commit()
     except Exception as e:
         logger.error(f"Seed falló (no crítico): {e}")
