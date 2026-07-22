@@ -1,15 +1,21 @@
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.core.dependencies import get_db
-from backend.app.services.goleador_service import GoleadorService
+from ..core.dependencies import get_db
+from ..services.goleador_service import GoleadorService
 
 router = APIRouter(prefix="/api/v1", tags=["goleadores"])
 
 
+@router.get("/goleadores/torneos")
+async def get_goleadores_torneos(db: AsyncSession = Depends(get_db)):
+    torneos = await GoleadorService.get_torneos_con_goleadores(db)
+    return {"torneos": torneos}
+
+
 @router.get("/goleadores")
 async def get_goleadores(
-    torneo: str = Query(None),
+    torneo: str = Query(..., min_length=1, description="Nombre del torneo (obligatorio)"),
     limit: int = Query(20, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
 ):

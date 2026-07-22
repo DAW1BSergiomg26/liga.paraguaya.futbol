@@ -39,6 +39,8 @@ desktop.ini
 
 # Base de datos generada
 *.db
+# Exportaciones locales (scripts/export_data.py) - datos volcados, no fuente.
+data/export/
 .vercel
 .env*
 # Excepcion: el template de variables SI se versiona (no contiene secretos).

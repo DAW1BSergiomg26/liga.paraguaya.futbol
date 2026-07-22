@@ -412,3 +412,50 @@ export interface ClubTemporadaHistorica {
   puntos: number;
   dg: number;
 }
+
+// === Comparación de Clubes (Radar) ===
+export interface MetricaRadar {
+  ataque: number;
+  defensa: number;
+  rendimiento: number;
+  palmares: number;
+  gol_individual: number;
+  actividad_mercado: number;
+}
+
+export interface ClubRadar {
+  club_id: string;
+  nombre: string;
+  escudo: string | null;
+  metricas: MetricaRadar;
+}
+
+export interface ComparacionClubesResponse {
+  club_a: ClubRadar;
+  club_b: ClubRadar;
+}
+
+// === Simulador de Partidos (Poisson) ===
+export interface ExactScore {
+  goles_local: number;
+  goles_visitante: number;
+  probabilidad: number;
+}
+
+export interface SimulationResultOut {
+  home_club_id: string;
+  home_club_name: string;
+  away_club_id: string;
+  away_club_name: string;
+  probabilidad_local: number;
+  probabilidad_empate: number;
+  probabilidad_visitante: number;
+  lambda_local: number;
+  lambda_visitante: number;
+  resultados_mas_probables: ExactScore[];
+}
+
+export interface SimulationInput {
+  home_club_id: string;
+  away_club_id: string;
+}

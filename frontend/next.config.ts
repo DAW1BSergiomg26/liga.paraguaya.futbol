@@ -46,6 +46,9 @@ const nextConfig: NextConfig = {
       { protocol: "http", hostname: "1000noticias.com.py" },
       { protocol: "https", hostname: "www.1000noticias.com.py" },
       { protocol: "http", hostname: "www.1000noticias.com.py" },
+      { protocol: "https", hostname: "ui-avatars.com" },
+      { protocol: "https", hostname: "liga-paraguaya-futbol.onrender.com" },
+      { protocol: "http", hostname: "liga-paraguaya-futbol.onrender.com" },
     ],
   },
 };

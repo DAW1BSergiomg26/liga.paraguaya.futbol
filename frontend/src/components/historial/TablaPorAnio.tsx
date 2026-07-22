@@ -2,6 +2,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
 import { getTabla, getTorneos } from "@/lib/api";
 import type { TablaRow } from "@/types";
@@ -102,7 +103,7 @@ export default function TablaPorAnio() {
                     <td className="px-3 py-2">{f.posicion}</td>
                     <td className="px-3 py-2 font-medium flex items-center gap-2">
                       {f.escudo ? (
-                        <img src={f.escudo} alt="" className="w-5 h-5 object-contain" />
+                        <Image src={f.escudo} alt="" width={20} height={20} loading="lazy" className="w-5 h-5 object-contain" />
                       ) : null}
                       {f.club}
                     </td>

@@ -5,49 +5,49 @@ logger = logging.getLogger(__name__)
 
 _TEMPLATES: dict[str, list[str]] = {
     "greeting": [
-        "¡Hola! Soy Cerezo Digital. Preguntame sobre clubes, partidos, la tabla, o pedime predicciones.",
-        "¡Hola, hincha! Estoy acá para responder todo sobre la liga paraguaya. ¿Qué querés saber?",
+        "Â¡Hola! Soy Cerezo Digital. Preguntame sobre clubes, partidos, la tabla, o pedime predicciones.",
+        "Â¡Hola, hincha! Estoy acÃ¡ para responder todo sobre la liga paraguaya. Â¿QuÃ© querÃ©s saber?",
     ],
     "club_info": [
-        "{club[nombre]} fue fundado en {club[fundacion]}. Tiene {club[titulos_liga]} títulos de liga y {total_intl} títulos internacionales.",
+        "{club[nombre]} fue fundado en {club[fundacion]}. Tiene {club[titulos_liga]} tÃ­tulos de liga y {total_intl} tÃ­tulos internacionales.",
         "{club[nombre]} juega en {club[estadio]}, fundado en {club[fundacion]}. {titulos_resumen}",
     ],
     "table_position": [
-        "{club_nombre} está en el puesto {posicion}° con {puntos} puntos en {partidos} partidos.",
-        "En la tabla, {club_nombre} va {posicion}° con {puntos} puntos.",
-        "Acá va la tabla. Consultame por algún club en particular para más detalles.",
-        "Mirá la tabla general. Decime un club para saber su posición exacta.",
+        "{club_nombre} estÃ¡ en el puesto {posicion}Â° con {puntos} puntos en {partidos} partidos.",
+        "En la tabla, {club_nombre} va {posicion}Â° con {puntos} puntos.",
+        "AcÃ¡ va la tabla. Consultame por algÃºn club en particular para mÃ¡s detalles.",
+        "MirÃ¡ la tabla general. Decime un club para saber su posiciÃ³n exacta.",
     ],
     "prediction": [
-        "Según los datos, {local} tiene {local_pct}% de ganar, {draw_pct}% empate, {visitante_pct}% {visitante}. Confianza: {confidence}.",
-        "Cerezo dice: {local} {local_pct}% — {draw_pct}% empate — {visitante} {visitante_pct}%. Basado en {total_h2h} partidos históricos.",
+        "SegÃºn los datos, {local} tiene {local_pct}% de ganar, {draw_pct}% empate, {visitante_pct}% {visitante}. Confianza: {confidence}.",
+        "Cerezo dice: {local} {local_pct}% â€” {draw_pct}% empate â€” {visitante} {visitante_pct}%. Basado en {total_h2h} partidos histÃ³ricos.",
     ],
     "head_to_head": [
-        "En los últimos {total} partidos: {local_nombre} ganó {local_wins}, {visitante_nombre} ganó {vis_wins}, {draws} empates.",
+        "En los Ãºltimos {total} partidos: {local_nombre} ganÃ³ {local_wins}, {visitante_nombre} ganÃ³ {vis_wins}, {draws} empates.",
     ],
     "club_comparison": [
-        "{a_nombre} tiene {a_ligas} ligas y {a_intl} títulos internacionales. {b_nombre} tiene {b_ligas} ligas y {b_intl} títulos internacionales. {ventaja}",
-        "{a_nombre} fue fundado en {a_fundacion} ({a_edad} años) y {b_nombre} en {b_fundacion} ({b_edad} años). {ventaja_edad}",
+        "{a_nombre} tiene {a_ligas} ligas y {a_intl} tÃ­tulos internacionales. {b_nombre} tiene {b_ligas} ligas y {b_intl} tÃ­tulos internacionales. {ventaja}",
+        "{a_nombre} fue fundado en {a_fundacion} ({a_edad} aÃ±os) y {b_nombre} en {b_fundacion} ({b_edad} aÃ±os). {ventaja_edad}",
     ],
     "next_match": [
-        "El próximo partido es el {fecha} contra {rival} por el {torneo}.",
+        "El prÃ³ximo partido es el {fecha} contra {rival} por el {torneo}.",
         "Juega el {fecha} vs {rival} en el {torneo}.",
-        "Próximos partidos: {lista_partidos}",
+        "PrÃ³ximos partidos: {lista_partidos}",
     ],
     "match_result": [
-        "Los últimos partidos: revisá la tabla de partidos para más detalles.",
-        "En los últimos {forma_total} partidos: {wins} ganados, {draws} empatados, {losses} perdidos.",
+        "Los Ãºltimos partidos: revisÃ¡ la tabla de partidos para mÃ¡s detalles.",
+        "En los Ãºltimos {forma_total} partidos: {wins} ganados, {draws} empatados, {losses} perdidos.",
     ],
     "top_scorer": [
-        "Todavía no tengo datos de goleadores actualizados al instante. Preguntame sobre clubes o partidos.",
+        "TodavÃ­a no tengo datos de goleadores actualizados al instante. Preguntame sobre clubes o partidos.",
     ],
     "general_question": [
-        "Buena pregunta. Lamentablemente no tengo acceso a esa información en este momento. Preguntame sobre clubes, partidos, la tabla, o pedime predicciones.",
+        "Buena pregunta. Lamentablemente no tengo acceso a esa informaciÃ³n en este momento. Preguntame sobre clubes, partidos, la tabla, o pedime predicciones.",
         "Eso no lo tengo registrado. Soy experto en la liga paraguaya: preguntame por clubes, posiciones, resultados, o predicciones.",
     ],
     "unknown": [
-        "No entendí bien. Probá preguntar: datos de un club, quién ganó un partido, cómo viene la tabla, o quién va a ganar.",
-        "No estoy seguro de lo que preguntás. Decime algo como: 'Datos de Olimpia', 'Quién ganó el clásico', o 'Quién lidera la tabla'.",
+        "No entendÃ­ bien. ProbÃ¡ preguntar: datos de un club, quiÃ©n ganÃ³ un partido, cÃ³mo viene la tabla, o quiÃ©n va a ganar.",
+        "No estoy seguro de lo que preguntÃ¡s. Decime algo como: 'Datos de Olimpia', 'QuiÃ©n ganÃ³ el clÃ¡sico', o 'QuiÃ©n lidera la tabla'.",
     ],
 }
 
@@ -95,7 +95,7 @@ def _render_template(intent: str, data: dict, prediction: dict | None) -> str:
         ctx["club"].setdefault("estadio", "su estadio")
         total_intl = sum(t["cantidad"] for t in club.get("titulos_internacionales", []))
         ctx["total_intl"] = total_intl
-        ctx["titulos_resumen"] = f"Tiene {club['titulos_liga']} ligas y {total_intl} títulos internacionales." if total_intl else f"Tiene {club['titulos_liga']} títulos de liga."
+        ctx["titulos_resumen"] = f"Tiene {club['titulos_liga']} ligas y {total_intl} tÃ­tulos internacionales." if total_intl else f"Tiene {club['titulos_liga']} tÃ­tulos de liga."
 
     if intent == "prediction" and prediction:
         ctx["local_pct"] = prediction["local_win_pct"]
@@ -134,12 +134,12 @@ def _render_template(intent: str, data: dict, prediction: dict | None) -> str:
         partes = []
         if vl != 0:
             quien = a["nombre"] if vl > 0 else b["nombre"]
-            partes.append(f"{quien} lidera por {abs(vl)} título(s) de liga")
+            partes.append(f"{quien} lidera por {abs(vl)} tÃ­tulo(s) de liga")
         if vi != 0:
             quien = a["nombre"] if vi > 0 else b["nombre"]
-            partes.append(f"{quien} lidera por {abs(vi)} título(s) internacional(es)")
-        ctx["ventaja"] = " | ".join(partes) if partes else "Están parejos en títulos"
-        ctx["ventaja_edad"] = f"{a['nombre']} es más antiguo" if cmp.get("a_mas_viejo") else f"{b['nombre']} es más antiguo"
+            partes.append(f"{quien} lidera por {abs(vi)} tÃ­tulo(s) internacional(es)")
+        ctx["ventaja"] = " | ".join(partes) if partes else "EstÃ¡n parejos en tÃ­tulos"
+        ctx["ventaja_edad"] = f"{a['nombre']} es mÃ¡s antiguo" if cmp.get("a_mas_viejo") else f"{b['nombre']} es mÃ¡s antiguo"
 
     if intent == "next_match" and data.get("proximos"):
         prox = data["proximos"]
@@ -196,7 +196,7 @@ class CerezoResponseGenerator:
                 prompt = f"""Contexto real:
 {context}
 
-Instrucción: Respondé como un hincha paraguayo de fútbol, natural, con vocabulario local. Máximo 2 oraciones. No inventes datos.
+InstrucciÃ³n: RespondÃ© como un hincha paraguayo de fÃºtbol, natural, con vocabulario local. MÃ¡ximo 2 oraciones. No inventes datos.
 
 Pregunta: {message}
 Respuesta:"""

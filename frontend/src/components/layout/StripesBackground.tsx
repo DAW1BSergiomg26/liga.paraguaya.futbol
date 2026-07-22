@@ -57,6 +57,7 @@ export default function StripesBackground() {
 
     return () => {
       tweens.forEach((t) => t.kill());
+      ScrollTrigger.getAll().forEach((t) => t.kill());
     };
   }, []);
 

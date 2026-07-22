@@ -2,12 +2,12 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.core.dependencies import get_db
-from backend.app.services.cerezo.classifier import CerezoIntentClassifier
-from backend.app.services.cerezo.entity_extractor import CerezoEntityExtractor
-from backend.app.services.cerezo.data_fetcher import CerezoDataFetcher
-from backend.app.services.cerezo.prediction_engine import CerezoPredictionEngine
-from backend.app.services.cerezo.response_generator import CerezoResponseGenerator
+from ..core.dependencies import get_db
+from ..services.cerezo.classifier import CerezoIntentClassifier
+from ..services.cerezo.entity_extractor import CerezoEntityExtractor
+from ..services.cerezo.data_fetcher import CerezoDataFetcher
+from ..services.cerezo.prediction_engine import CerezoPredictionEngine
+from ..services.cerezo.response_generator import CerezoResponseGenerator
 
 _cerezo_sessions: dict[str, dict] = {}
 
@@ -59,7 +59,7 @@ async def ask_cerezo(body: CerezoRequest, db: AsyncSession = Depends(get_db)):
 
     if intent == "unknown":
         text_lower = message.lower()
-        followup_words = ["y", "él", "ella", "cuándo juega", "cuando juega", "próximo partido", "proximo partido", "próximo", "proximo", "horario", "fecha", "día juega", "dia juega", "se enfrenta", "partido de"]
+        followup_words = ["y", "Ã©l", "ella", "cuÃ¡ndo juega", "cuando juega", "prÃ³ximo partido", "proximo partido", "prÃ³ximo", "proximo", "horario", "fecha", "dÃ­a juega", "dia juega", "se enfrenta", "partido de"]
         if ctx.get("last_club_id") and any(w in text_lower for w in followup_words):
             intent = "next_match"
             classifier_result["intent"] = "next_match"

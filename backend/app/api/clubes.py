@@ -3,9 +3,9 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.core.dependencies import get_db
-from backend.app.schemas.club import ClubDetailOut, ClubOut
-from backend.app.services.club_service import ClubService
+from ..core.dependencies import get_db
+from ..schemas.club import ClubDetailOut, ClubOut
+from ..services.club_service import ClubService
 
 router = APIRouter(prefix="/api/v1/clubes", tags=["clubes"])
 
@@ -27,6 +27,6 @@ async def detalle_club(
     if not club:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"No se encontró el club con id: {club_id}",
+            detail=f"No se encontrÃ³ el club con id: {club_id}",
         )
     return club

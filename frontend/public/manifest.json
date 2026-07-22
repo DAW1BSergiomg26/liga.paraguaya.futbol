@@ -1,0 +1,27 @@
+{
+  "name": "Liga Paraguaya de Fútbol",
+  "short_name": "Liga PY",
+  "description": "Clubes, partidos, tabla de posiciones y datos del fútbol paraguayo en tiempo real.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0f1a",
+  "theme_color": "#CC001C",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/app-icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["sports", "entertainment"],
+  "lang": "es",
+  "dir": "ltr"
+}

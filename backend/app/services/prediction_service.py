@@ -5,10 +5,10 @@ from sqlalchemy import case, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from backend.app.models.partido import Partido
-from backend.app.models.prediction import Prediction
-from backend.app.models.user import User
-from backend.app.schemas.prediction import (
+from ..models.partido import Partido
+from ..models.prediction import Prediction
+from ..models.user import User
+from ..schemas.prediction import (
     LeaderboardEntry,
     PredictionCreate,
     PredictionDetail,
@@ -103,7 +103,7 @@ class PredictionService:
 
         for pred in preds:
             if pred.puntos >= 2:
-                from backend.app.services.push_service import PushService
+                from ..services.push_service import PushService
                 streak_result = await db.execute(
                     select(func.count(Prediction.id)).where(
                         Prediction.user_id == pred.user_id,
@@ -115,7 +115,7 @@ class PredictionService:
                     await PushService.enviar_a_usuario(
                         db,
                         pred.user_id,
-                        "🏆 Logro desbloqueado!",
+                        "ðŸ† Logro desbloqueado!",
                         f"Acertaste {streak_count} predicciones seguidas!",
                         f"/predicciones",
                     )

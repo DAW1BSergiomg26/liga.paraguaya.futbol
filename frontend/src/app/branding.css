@@ -1,0 +1,186 @@
+/* ============================================
+   BRANDING IDENTITY SYSTEM — CSS
+   Liga Paraguaya de Fútbol
+   ============================================ */
+
+/* === BRAND TOKENS === */
+:root {
+  /* Primary palette */
+  --brand-white: #FFFFFF;
+  --brand-blue: #0057B8;
+  --brand-blue-deep: #0B1D3A;
+  --brand-red: #D52B1E;
+  --brand-gold: #F4C542;
+  --brand-silver: #AEB8C5;
+  --brand-gray: #6F7A88;
+
+  /* Semantic */
+  --brand-bg: var(--brand-blue-deep);
+  --brand-accent: var(--brand-blue);
+  --brand-highlight: var(--brand-gold);
+  --brand-danger: var(--brand-red);
+
+  /* Glow presets */
+  --glow-blue: 0 0 20px rgba(0, 87, 184, 0.4), 0 0 40px rgba(0, 87, 184, 0.15);
+  --glow-red: 0 0 20px rgba(213, 43, 30, 0.4), 0 0 40px rgba(213, 43, 30, 0.15);
+  --glow-gold: 0 0 20px rgba(244, 197, 66, 0.4), 0 0 40px rgba(244, 197, 66, 0.15);
+  --glow-white: 0 0 15px rgba(255, 255, 255, 0.3), 0 0 30px rgba(255, 255, 255, 0.1);
+
+  /* Shadow presets */
+  --shadow-ball: 0 4px 20px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2);
+  --shadow-ball-hover: 0 8px 32px rgba(0, 87, 184, 0.35), 0 4px 16px rgba(0, 0, 0, 0.25);
+  --shadow-shield: 0 6px 24px rgba(0, 0, 0, 0.35), 0 3px 12px rgba(0, 0, 0, 0.2);
+  --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.25);
+
+  /* Transitions */
+  --transition-logo: 350ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  --transition-smooth: 300ms ease;
+}
+
+/* === KEYFRAME ANIMATIONS === */
+
+/* Float — gentle vertical bob */
+@keyframes brand-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+/* Breathe — subtle scale pulse */
+@keyframes brand-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.015); }
+}
+
+/* Glow pulse — shadow intensity cycle */
+@keyframes brand-glow-pulse {
+  0%, 100% { filter: drop-shadow(0 0 8px rgba(0, 87, 184, 0.3)); }
+  50% { filter: drop-shadow(0 0 18px rgba(0, 87, 184, 0.6)); }
+}
+
+/* Red glow pulse */
+@keyframes brand-glow-red {
+  0%, 100% { filter: drop-shadow(0 0 8px rgba(213, 43, 30, 0.3)); }
+  50% { filter: drop-shadow(0 0 18px rgba(213, 43, 30, 0.6)); }
+}
+
+/* Gold shimmer — sweep highlight */
+@keyframes brand-gold-shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+/* Loader arc spin */
+@keyframes brand-loader-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* === UTILITY CLASSES === */
+
+/* Logo container with hover effects */
+.brand-logo {
+  transition: transform var(--transition-logo), filter var(--transition-smooth);
+}
+.brand-logo:hover {
+  transform: scale(1.08) rotate(15deg);
+  filter: drop-shadow(0 0 16px rgba(0, 87, 184, 0.6));
+}
+
+/* Logo gentle animations */
+.brand-float {
+  animation: brand-float 3s ease-in-out infinite;
+}
+.brand-breathe {
+  animation: brand-breathe 4s ease-in-out infinite;
+}
+.brand-glow {
+  animation: brand-glow-pulse 3s ease-in-out infinite;
+}
+.brand-glow-red {
+  animation: brand-glow-red 3s ease-in-out infinite;
+}
+
+/* Gold shimmer text */
+.brand-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--brand-gold) 0%,
+    #FFF8DC 25%,
+    var(--brand-gold) 50%,
+    #FFF8DC 75%,
+    var(--brand-gold) 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: brand-gold-shimmer 3s linear infinite;
+}
+
+/* Ball shadow */
+.brand-shadow-ball {
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
+}
+.brand-shadow-ball:hover {
+  filter: drop-shadow(0 6px 20px rgba(0, 87, 184, 0.35));
+}
+
+/* Shield shadow */
+.brand-shadow-shield {
+  filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.3));
+}
+
+/* Accent line (tricolor bar) */
+.brand-accent-line {
+  display: flex;
+  gap: 4px;
+}
+.brand-accent-line > div:nth-child(1) {
+  width: 24px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--brand-red);
+}
+.brand-accent-line > div:nth-child(2) {
+  width: 16px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--brand-blue);
+}
+.brand-accent-line > div:nth-child(3) {
+  width: 10px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--brand-gold);
+}
+
+/* Card with brand border accent */
+.brand-card {
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: border-color var(--transition-smooth), box-shadow var(--transition-smooth);
+}
+.brand-card:hover {
+  border-color: rgba(0, 87, 184, 0.3);
+  box-shadow: var(--shadow-card), 0 0 20px rgba(0, 87, 184, 0.1);
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 640px) {
+  .brand-logo:hover {
+    transform: scale(1.04) rotate(8deg);
+  }
+}
+
+/* === REDUCED MOTION === */
+@media (prefers-reduced-motion: reduce) {
+  .brand-float,
+  .brand-breathe,
+  .brand-glow,
+  .brand-glow-red,
+  .brand-shimmer {
+    animation: none;
+  }
+  .brand-logo:hover {
+    transform: none;
+  }
+}

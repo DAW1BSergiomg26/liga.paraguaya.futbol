@@ -1,27 +1,13 @@
-// frontend/src/app/historial/page.tsx
-"use client";
+import type { Metadata } from "next";
+import HistorialPageClient from "./PageClient";
+import { SITE_NAME } from "@/lib/config";
 
-import { useState } from "react";
-import HistorialTabs from "@/components/historial/HistorialTabs";
-import TablaPorAnio from "@/components/historial/TablaPorAnio";
-import RankingAgregado from "@/components/historial/RankingAgregado";
-import RendimientoClub from "@/components/historial/RendimientoClub";
+export const metadata: Metadata = {
+  title: "Historial",
+  description:
+    `Historial completo del fútbol paraguayo: campeones por temporada, ranking histórico de clubes y rendimiento por año. ${SITE_NAME}.`,
+};
 
 export default function HistorialPage() {
-  const [tab, setTab] = useState("tablas");
-
-  return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-texto-principal">Estadísticas Históricas</h1>
-        <p className="text-texto-secundario mt-1">Temporadas 2020–2026 de la Primera División paraguaya</p>
-      </div>
-
-      <HistorialTabs active={tab} onChange={setTab} />
-
-      {tab === "tablas" && <TablaPorAnio />}
-      {tab === "ranking" && <RankingAgregado />}
-      {tab === "club" && <RendimientoClub />}
-    </div>
-  );
+  return <HistorialPageClient />;
 }

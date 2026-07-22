@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" fill="none">
+  <defs>
+    <radialGradient id="vBallMetal" cx="40%" cy="35%" r="60%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="50%" stop-color="#F0F2F5"/>
+      <stop offset="100%" stop-color="#C8CDD5"/>
+    </radialGradient>
+    <linearGradient id="vPanelBlue" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0057B8" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#003D82" stop-opacity="0.9"/>
+    </linearGradient>
+    <clipPath id="vBallClip">
+      <circle cx="100" cy="90" r="70"/>
+    </clipPath>
+  </defs>
+
+  <!-- Ball icon (larger, centered) -->
+  <g>
+    <circle cx="100" cy="90" r="70" fill="url(#vBallMetal)" stroke="#AEB8C5" stroke-width="1.5"/>
+    <g clip-path="url(#vBallClip)">
+      <polygon points="100,48 119,63 115,87 85,87 81,63" fill="url(#vPanelBlue)" opacity="0.9"/>
+      <path d="M100,48 L100,8" stroke="#AEB8C5" stroke-width="1.2"/>
+      <path d="M119,63 L152,36" stroke="#AEB8C5" stroke-width="1.2"/>
+      <path d="M115,87 L148,117" stroke="#AEB8C5" stroke-width="1.2"/>
+      <path d="M85,87 L52,117" stroke="#AEB8C5" stroke-width="1.2"/>
+      <path d="M81,63 L48,36" stroke="#AEB8C5" stroke-width="1.2"/>
+      <path d="M100,48 Q120,33 119,63" fill="#D52B1E" opacity="0.2"/>
+      <path d="M119,63 Q148,78 115,87" fill="#0057B8" opacity="0.15"/>
+      <path d="M115,87 Q100,120 85,87" fill="#D52B1E" opacity="0.2"/>
+      <path d="M85,87 Q52,78 81,63" fill="#0057B8" opacity="0.15"/>
+      <path d="M81,63 Q76,33 100,48" fill="#D52B1E" opacity="0.2"/>
+      <ellipse cx="85" cy="56" rx="22" ry="14" fill="#FFF" opacity="0.35" transform="rotate(-20,85,56)"/>
+    </g>
+    <circle cx="100" cy="90" r="70" fill="none" stroke="#AEB8C5" stroke-width="1.5"/>
+  </g>
+
+  <!-- Wordmark (centered below ball) -->
+  <text x="100" y="195" text-anchor="middle" font-family="'Space Grotesk','Inter',sans-serif" font-size="32" font-weight="700" fill="#FFFFFF" letter-spacing="1">Liga Paraguaya</text>
+  <text x="100" y="220" text-anchor="middle" font-family="'Inter',sans-serif" font-size="15" font-weight="400" fill="#AEB8C5" letter-spacing="5">DE FÚTBOL</text>
+
+  <!-- Accent line (centered) -->
+  <rect x="55" y="232" width="30" height="2.5" rx="1" fill="#D52B1E"/>
+  <rect x="90" y="232" width="20" height="2.5" rx="1" fill="#0057B8"/>
+  <rect x="115" y="232" width="30" height="2.5" rx="1" fill="#F4C542"/>
+
+  <!-- APF small text -->
+  <text x="100" y="260" text-anchor="middle" font-family="'Space Grotesk','Inter',sans-serif" font-size="18" font-weight="700" fill="#F4C542" letter-spacing="8">APF</text>
+</svg>

@@ -1,7 +1,7 @@
 from sqlalchemy import JSON, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
-from backend.app.core.database import Base
+from ..core.database import Base
 
 
 class Club(Base):

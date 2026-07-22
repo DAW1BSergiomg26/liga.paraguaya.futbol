@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, useSyncExternalStore } from "react";
 import { usePathname } from "next/navigation";
 import { getSavedToken, setAuthToken } from "@/lib/api";
+import Logo from "@/components/branding/Logo";
 
 const AUTH_EVENT = "auth-changed";
 
@@ -29,6 +30,7 @@ function NavLink({ href, children, active, onClick }: { href: string; children: 
     <Link
       href={href}
       onClick={onClick}
+      aria-current={active ? "page" : undefined}
       className={`relative whitespace-nowrap transition-colors duration-200 ${
         active ? "text-apf-rojo" : "text-texto-secundario hover:text-white"
       }`}
@@ -95,7 +97,7 @@ export default function Navbar() {
         </NavLink>
       )}
       {token ? (
-        <button onClick={handleLogout} className="text-texto-apagado hover:text-texto-secundario transition text-xs">
+        <button onClick={handleLogout} aria-label="Cerrar sesión" className="text-texto-apagado hover:text-texto-secundario transition text-xs">
           Salir
         </button>
       ) : (
@@ -113,10 +115,8 @@ export default function Navbar() {
   return (
     <nav className="navbar-blur sticky top-0 z-50" style={{ borderBottom: "2px solid", borderImage: "linear-gradient(90deg, #CC001C, #FFFFFF, #00619E) 1" }}>
       <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
-        <Link href="/" className="flex items-center gap-1.5 text-xl font-bold tracking-tight relative whitespace-nowrap">
-          <span aria-hidden>⚽</span>
-          <span>Liga PY</span>
-          <span className="absolute -bottom-2 left-0 right-0 h-0.5 rounded" style={{ background: "linear-gradient(90deg, #CC001C, #FFFFFF, #00619E)" }} />
+        <Link href="/" className="no-underline shrink-0">
+          <Logo variant="horizontal" size={40} />
         </Link>
 
         {/* Desktop */}
@@ -128,7 +128,9 @@ export default function Navbar() {
         <button
           onClick={() => setMenuOpen(!menuOpen)}
           className="md:hidden p-2 text-texto-secundario hover:text-white transition"
-          aria-label="Abrir menú"
+          aria-label={menuOpen ? "Cerrar menú" : "Abrir menú"}
+          aria-expanded={menuOpen}
+          aria-controls="mobile-menu"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             {menuOpen ? (
@@ -142,7 +144,7 @@ export default function Navbar() {
 
       {/* Mobile */}
       {menuOpen && (
-        <div className="md:hidden border-t border-borde-sutil px-4 py-4 flex flex-col gap-4 text-sm font-medium navbar-blur">
+        <div id="mobile-menu" role="menu" aria-label="Menú de navegación" className="md:hidden border-t border-borde-sutil px-4 py-4 flex flex-col gap-4 text-sm font-medium navbar-blur">
           {navLinks}
         </div>
       )}

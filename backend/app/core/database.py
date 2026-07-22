@@ -7,7 +7,7 @@ from sqlalchemy import text as sa_text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 
-from backend.app.core.config import settings
+from ..core.config import settings
 
 
 def _async_url(url: str) -> str:
@@ -18,7 +18,12 @@ def _async_url(url: str) -> str:
     return url
 
 
-engine = create_async_engine(_async_url(settings.database_url), echo=settings.debug)
+engine = create_async_engine(
+    _async_url(settings.database_url),
+    echo=settings.debug,
+    pool_pre_ping=True,
+    pool_recycle=300,
+)
 async_session = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 
@@ -31,7 +36,17 @@ async def get_connection():
         yield conn
 
 
+def _is_postgres() -> bool:
+    return _async_url(settings.database_url).startswith("postgresql+")
+
+
 async def run_alembic_upgrade():
+    if _is_postgres():
+        sys.stderr.write("Postgres detectado: sincronizando esquema...\n")
+        sys.stderr.flush()
+        await _ensure_schema_postgres()
+        return
+
     import os as _os
     backend_dir = Path(__file__).resolve().parent.parent.parent
     env = {k: v for k, v in _os.environ.items() if not k.startswith("PYTHON")}
@@ -54,7 +69,7 @@ async def run_alembic_upgrade():
             sys.stderr.flush()
         # Verify columns exist
         if not await _check_column_exists("clubes", "sitio_web"):
-            sys.stderr.write("Alembic upgrade succeeded but columns missing — attempting stamp+upgrade\n")
+            sys.stderr.write("Alembic upgrade succeeded but columns missing â€” attempting stamp+upgrade\n")
         else:
             return
 
@@ -87,6 +102,21 @@ async def _check_column_exists(table: str, column: str) -> bool:
             result = await conn.execute(sa_text(f"PRAGMA table_info({table})"))
             rows = result.fetchall()
             return any(row[1] == column for row in rows)
+    except Exception:
+        return False
+
+
+async def _check_column_exists_postgres(table: str, column: str) -> bool:
+    try:
+        async with engine.begin() as conn:
+            result = await conn.execute(
+                sa_text(
+                    "SELECT 1 FROM information_schema.columns "
+                    "WHERE table_name = :tbl AND column_name = :col"
+                ),
+                {"tbl": table, "col": column},
+            )
+            return result.fetchone() is not None
     except Exception:
         return False
 
@@ -127,8 +157,62 @@ async def _ensure_columns_exist():
     sys.stderr.flush()
 
 
-async def init_db():
+async def _ensure_schema_postgres():
+    """Add missing columns to existing tables for Postgres.
+
+    TODO (tarea de seguimiento): Reemplazar esta función con `alembic upgrade head`
+    real contra Postgres. Este parche existe porque las migraciones de Alembic
+    nunca se ejecutaron en Neon y `init_db()` fue removida del lifespan en un
+    commit anterior, dejando tablas con esquemas incompletos.
+
+    create_all() NO modifica columnas de tablas que ya existen — solo crea
+    tablas nuevas. Esta función se encarga de las columnas faltantes en tablas
+    viejas (clubes, partidos, users).
+    """
+    import time
+    t0 = time.monotonic()
+
+    missing_columns = {
+        "clubes": [
+            ("sitio_web", "VARCHAR(500) NOT NULL DEFAULT ''"),
+            ("descripcion", "VARCHAR(2000) NOT NULL DEFAULT ''"),
+            ("titulos_liga", "INTEGER NOT NULL DEFAULT 0"),
+            ("titulos_info", "JSON NOT NULL DEFAULT '[]'"),
+            ("titulos_internacionales", "JSON NOT NULL DEFAULT '[]'"),
+        ],
+        "partidos": [
+            ("temporada", "VARCHAR(20) NOT NULL DEFAULT ''"),
+        ],
+        "users": [
+            ("hashed_password", "VARCHAR(256)"),
+            ("is_admin", "BOOLEAN NOT NULL DEFAULT false"),
+        ],
+    }
     async with engine.begin() as conn:
-        from backend.app.models import club, partido, prediction, tabla, user
-        await conn.run_sync(Base.metadata.drop_all)
-        await conn.run_sync(Base.metadata.create_all)
+        for table, cols in missing_columns.items():
+            for col_name, col_type in cols:
+                if not await _check_column_exists_postgres(table, col_name):
+                    await conn.execute(
+                        sa_text(f"ALTER TABLE {table} ADD COLUMN {col_name} {col_type}")
+                    )
+                    sys.stderr.write(f"  Synced {table}.{col_name}\n")
+    elapsed = time.monotonic() - t0
+    sys.stderr.write(f"  _ensure_schema_postgres: {elapsed:.2f}s\n")
+    sys.stderr.flush()
+
+
+async def init_db():
+    # Registra todos los modelos antes de crear el esquema.
+    from backend.app import models  # noqa: F401  (importa models/__init__ y goleador)
+    from ..models import goleador  # noqa: F401  (no exportado en __init__)
+
+    async with engine.begin() as conn:
+        if _is_postgres():
+            # En Postgres NO borramos datos: solo creamos tablas faltantes.
+            # El esquema ya fue poblado (import_data.py / seed).
+            await conn.run_sync(Base.metadata.create_all)
+        else:
+            from ..models import club, partido, prediction, tabla, user
+            await conn.run_sync(Base.metadata.drop_all)
+            await conn.run_sync(Base.metadata.create_all)
+

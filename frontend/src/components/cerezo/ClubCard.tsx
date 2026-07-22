@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import { ClubDetailData } from "@/types";
 import { useState } from "react";
 
@@ -6,17 +7,21 @@ interface Props { data: ClubDetailData }
 
 export default function ClubCard({ data }: Props) {
   const [showTitulos, setShowTitulos] = useState(false);
+  const [escudoError, setEscudoError] = useState(false);
   const { club, titulos } = data;
 
   return (
     <div className="max-w-[80%] rounded-2xl p-4 bg-bg-secundario border border-borde-sutil text-sm space-y-3">
       <div className="flex items-center gap-3">
-        {club.escudo && (
-          <img
+        {club.escudo && !escudoError && (
+          <Image
             src={club.escudo}
             alt={club.nombre}
+            width={40}
+            height={40}
+            loading="lazy"
             className="w-10 h-10 object-contain rounded"
-            onError={(e) => { (e.target as HTMLImageElement).style.display = "none" }}
+            onError={() => setEscudoError(true)}
           />
         )}
         <div>

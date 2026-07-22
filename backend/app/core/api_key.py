@@ -5,8 +5,8 @@ from datetime import datetime, timezone
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.core.database import async_session
-from backend.app.models.api_key import APIKey
+from ..core.database import async_session
+from ..models.api_key import APIKey
 
 RATE_LIMIT_WINDOW = 60
 RATE_LIMIT_MAX = 100
@@ -43,13 +43,13 @@ async def _rate_limit_impl(db: AsyncSession, x_api_key: str) -> dict:
     result = await db.execute(select(APIKey).where(APIKey.key == x_api_key))
     api_key = result.scalar_one_or_none()
     if not api_key or not api_key.is_active:
-        return _err(401, "INVALID_API_KEY", "API Key inválida o desactivada")
+        return _err(401, "INVALID_API_KEY", "API Key invÃ¡lida o desactivada")
 
     ok, remaining, reset_in = rate_limiter.check(x_api_key)
     if not ok:
         return _err(
             429, "RATE_LIMIT_EXCEEDED",
-            f"Límite de requests excedido. Esperá {reset_in} segundos.",
+            f"LÃ­mite de requests excedido. EsperÃ¡ {reset_in} segundos.",
             reset_in,
         )
 

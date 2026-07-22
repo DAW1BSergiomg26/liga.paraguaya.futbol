@@ -474,7 +474,7 @@ EQUIPOS_MOCK = {
             JugadorTactico(id="trifeb_7", nombre="Hernán López", posicion="MC", numero=8, rating=7.0, x=0.65, y=0.55),
             JugadorTactico(id="trifeb_8", nombre="Matías Barreto", posicion="MC", numero=10, rating=7.1, x=0.35, y=0.55),
             JugadorTactico(id="trifeb_9", nombre="Santiago Salcedo", posicion="ED", numero=7, rating=7.3, x=0.85, y=0.35),
-            JugadorTactico(id="trifeb_10", nombre="Enrique劲ra", posicion="DC", numero=9, rating=7.0, x=0.5, y=0.25),
+            JugadorTactico(id="trifeb_10", nombre="Enrique Díaz", posicion="DC", numero=9, rating=7.0, x=0.5, y=0.25),
             JugadorTactico(id="trifeb_11", nombre="Bautista Merlini", posicion="EI", numero=11, rating=6.8, x=0.15, y=0.35),
         ],
         "stats": EstadisticasEquipo(xg=1.08, posesion=43.2, tiros_puerta=3.2, pases_completados=71.5, duelos_ganados=49.2, corners=3.5),

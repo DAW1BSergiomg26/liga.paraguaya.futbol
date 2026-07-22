@@ -37,19 +37,23 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-md bg-bg-secundario/80 border border-borde-sutil rounded-2xl p-8">
-        <h1 className="text-2xl font-bold text-texto-principal text-center mb-6 titulo-modulo">
+        <h1 id="login-title" className="text-2xl font-bold text-texto-principal text-center mb-6 titulo-modulo">
           {mode === "login" ? "Iniciar Sesión" : "Crear Cuenta"}
         </h1>
 
         {/* Toggle */}
-        <div className="flex mb-6 bg-bg-terciario rounded-lg p-1">
+        <div className="flex mb-6 bg-bg-terciario rounded-lg p-1" role="tablist" aria-label="Modo de autenticación">
           <button
+            role="tab"
+            aria-selected={mode === "login"}
             onClick={() => { setMode("login"); setError(""); }}
             className={`flex-1 py-2 rounded-md text-sm font-medium transition ${mode === "login" ? "bg-apf-rojo text-white" : "text-texto-secundario hover:text-white"}`}
           >
             Iniciar Sesión
           </button>
           <button
+            role="tab"
+            aria-selected={mode === "register"}
             onClick={() => { setMode("register"); setError(""); }}
             className={`flex-1 py-2 rounded-md text-sm font-medium transition ${mode === "register" ? "bg-apf-rojo text-white" : "text-texto-secundario hover:text-white"}`}
           >
@@ -58,16 +62,17 @@ export default function LoginPage() {
         </div>
 
         {error && (
-          <div className="mb-4 px-4 py-2 rounded-lg bg-derrota/20 border border-derrota/30 text-derrota text-sm">
+          <div role="alert" aria-live="assertive" className="mb-4 px-4 py-2 rounded-lg bg-derrota/20 border border-derrota/30 text-derrota text-sm">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4" aria-labelledby="login-title">
           {mode === "register" && (
             <div>
-              <label className="block text-texto-secundario text-sm mb-1">Nombre</label>
+              <label htmlFor="login-name" className="block text-texto-secundario text-sm mb-1">Nombre</label>
               <input
+                id="login-name"
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -77,8 +82,9 @@ export default function LoginPage() {
             </div>
           )}
           <div>
-            <label className="block text-texto-secundario text-sm mb-1">Email</label>
+            <label htmlFor="login-email" className="block text-texto-secundario text-sm mb-1">Email</label>
             <input
+              id="login-email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -87,8 +93,9 @@ export default function LoginPage() {
             />
           </div>
           <div>
-            <label className="block text-texto-secundario text-sm mb-1">Contraseña</label>
+            <label htmlFor="login-password" className="block text-texto-secundario text-sm mb-1">Contraseña</label>
             <input
+              id="login-password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}

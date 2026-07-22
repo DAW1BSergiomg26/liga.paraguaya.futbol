@@ -44,3 +44,20 @@ async def test_ask_cerezo_follow_up(client, db_session):
     resp2 = await client.post("/api/v1/cerezo/ask", json=payload2)
     body2 = resp2.json()
     assert body2["intent"] == "next_match"
+
+
+@pytest.mark.asyncio
+async def test_ask_cerezo_response_structure_matches_frontend(client, db_session):
+    """Verify response has all fields the frontend ChatMessage expects."""
+    response = await client.post("/api/v1/cerezo/ask", json={"message": "Hola"})
+    assert response.status_code == 200
+    data = response.json()
+    assert isinstance(data["message"], str) and len(data["message"]) > 0
+    assert isinstance(data["intent"], str)
+    assert "structured_data" in data
+
+
+@pytest.mark.asyncio
+async def test_ask_cerezo_empty_message_returns_422(client, db_session):
+    response = await client.post("/api/v1/cerezo/ask", json={})
+    assert response.status_code == 422

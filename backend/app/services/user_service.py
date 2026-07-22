@@ -2,8 +2,8 @@ import uuid
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from backend.app.models.user import User
-from backend.app.core.security import hash_password, verify_password, create_access_token
+from ..models.user import User
+from ..core.security import hash_password, verify_password, create_access_token
 
 
 class UserService:
@@ -13,7 +13,7 @@ class UserService:
     async def register(self, email: str, name: str, password: str) -> dict:
         existing = await self.db.execute(select(User).where(User.email == email))
         if existing.scalar_one_or_none():
-            raise ValueError("El email ya está registrado")
+            raise ValueError("El email ya estÃ¡ registrado")
 
         # Check if this is the first user (becomes admin)
         count_result = await self.db.execute(select(User))
@@ -38,9 +38,9 @@ class UserService:
         result = await self.db.execute(select(User).where(User.email == email))
         user = result.scalar_one_or_none()
         if not user or not user.hashed_password:
-            raise ValueError("Credenciales inválidas")
+            raise ValueError("Credenciales invÃ¡lidas")
         if not verify_password(password, user.hashed_password):
-            raise ValueError("Credenciales inválidas")
+            raise ValueError("Credenciales invÃ¡lidas")
 
         token = create_access_token({"sub": user.id, "email": user.email})
         return {"user": user, "token": token}

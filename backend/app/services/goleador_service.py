@@ -1,28 +1,36 @@
-from typing import Optional
-
-from sqlalchemy import select, func
+from sqlalchemy import select, func, distinct
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.models.club import Club
-from backend.app.models.goleador import Goleador
-from backend.app.schemas.goleador import GoleadorOut, GoleadoresListOut
+from ..models.club import Club
+from ..models.goleador import Goleador
+from ..schemas.goleador import GoleadorOut, GoleadoresListOut
 
 
 class GoleadorService:
 
     @staticmethod
+    async def get_torneos_con_goleadores(db: AsyncSession) -> list[str]:
+        """Retorna solo los torneos que contienen al menos un goleador registrado."""
+        stmt = (
+            select(distinct(Goleador.torneo))
+            .order_by(Goleador.torneo.desc())
+        )
+        result = await db.execute(stmt)
+        return [row[0] for row in result.all()]
+
+    @staticmethod
     async def get_all(
         db: AsyncSession,
-        torneo: Optional[str] = None,
+        torneo: str,
         limit: int = 20,
     ) -> GoleadoresListOut:
         stmt = (
             select(Goleador, Club.nombre.label("club_nombre"))
             .join(Club, Goleador.club_id == Club.id)
+            .where(Goleador.torneo == torneo)
+            .order_by(Goleador.goles.desc())
+            .limit(limit)
         )
-        if torneo:
-            stmt = stmt.where(Goleador.torneo == torneo)
-        stmt = stmt.order_by(Goleador.goles.desc()).limit(limit)
         result = await db.execute(stmt)
         goleadores = [
             GoleadorOut(
@@ -72,7 +80,7 @@ class GoleadorService:
                 goles=int(r.goles or 0),
                 asistencias=int(r.asistencias or 0),
                 torneo=f"{int(r.torneos)} torneo(s)",
-                temporada="Histórico",
+                temporada="HistÃ³rico",
             )
             for r in result.all()
         ]

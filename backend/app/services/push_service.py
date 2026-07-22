@@ -5,11 +5,11 @@ from datetime import datetime, timezone
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.core.config import settings
-from backend.app.models.prediction import Prediction
-from backend.app.models.partido import Partido
-from backend.app.models.push_subscription import PushSubscription as PushSubscriptionModel
-from backend.app.schemas.push_subscription import PushSubscriptionCreate
+from ..core.config import settings
+from ..models.prediction import Prediction
+from ..models.partido import Partido
+from ..models.push_subscription import PushSubscription as PushSubscriptionModel
+from ..schemas.push_subscription import PushSubscriptionCreate
 
 try:
     from pywebpush import webpush, WebPushException

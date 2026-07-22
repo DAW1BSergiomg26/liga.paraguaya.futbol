@@ -3,11 +3,11 @@ from fastapi import APIRouter, Depends, Query, WebSocket, WebSocketDisconnect
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.core.dependencies import get_db
-from backend.app.models.partido import Partido
-from backend.app.models.user import User
-from backend.app.schemas.chat import MensajeChatCreate, MensajeChatOut
-from backend.app.services.chat_service import ChatService
+from ..core.dependencies import get_db
+from ..models.partido import Partido
+from ..models.user import User
+from ..schemas.chat import MensajeChatCreate, MensajeChatOut
+from ..services.chat_service import ChatService
 
 router = APIRouter(prefix="/api/v1", tags=["chat"])
 

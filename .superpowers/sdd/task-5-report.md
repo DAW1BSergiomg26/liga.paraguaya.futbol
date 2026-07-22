@@ -1,36 +1,29 @@
-# Task 5: Backend Tests — Report
+# Task 5 — Disclaimer text + teamIndex for Voronoi overlay
 
-**Status: DONE**
+## Status: DONE
 
-## Commits
+## Changes
 
-- `7a986d2` — feat: add Transferencia API tests (11 tests)
+### `frontend/src/lib/voronoi.ts`
+- Added `teamIndex: number` to `VoronoiPath` interface
+- Added `teamSplit: number = 11` parameter to `computeVoronoiPaths`
+- Added `teamIndex: i < teamSplit ? 0 : 1` to return value
+- Added `_teamSplit: number = 11` parameter to `computeCellCentroids` for signature consistency
 
-## Test Results: 11/11 passing
+### `frontend/src/components/tactico/TacticalField.tsx`
+- Replaced hardcoded `cell.cellIndex < 11` checks with `cell.teamIndex === 0` for fill/stroke colors
+- Added honesty disclaimer `<p>` outside the field div, visible when Voronoi is active
 
-```
-test_list_transferencias_empty PASSED
-test_create_transferencia_as_admin PASSED
-test_create_transferencia_requires_admin PASSED
-test_create_transferencia_same_club_fails PASSED
-test_get_transferencia_by_id PASSED
-test_filter_by_tipo PASSED
-test_filter_by_jugador PASSED
-test_mercado_endpoint PASSED
-test_estadisticas_endpoint PASSED
-test_historial_endpoint PASSED
-test_delete_transferencia PASSED
-```
+### `frontend/src/lib/__tests__/voronoi.test.ts`
+- Added "assigns teamIndex correctly with default split" test
+- Added "respects custom teamSplit" test
 
-## Coverage
+## Test Results
+- **Voronoi tests:** 8/8 passed (including 2 new)
+- **Other tests:** 17/21 passed — 4 pre-existing failures unrelated to this task
 
-Tests exercise the full Transferencia API surface:
-- **CRUD**: list (empty + populated), create, read by ID, delete
-- **Auth**: admin-only creation (403 for non-admin)
-- **Validation**: same club origin/destino rejection (400)
-- **Filters**: by `tipo` and `jugador` query params
-- **Special endpoints**: `/mercado`, `/estadisticas`, `/historial/{club_id}`
+## TS Compile
+- Clean, no errors
 
-## Concerns
-
-- None. All tests pass cleanly against the existing API implementation.
+## Commit
+- SHA: pending

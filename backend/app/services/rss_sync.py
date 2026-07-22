@@ -9,7 +9,7 @@ import httpx
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.models.noticia import Noticia
+from ..models.noticia import Noticia
 
 logger = logging.getLogger(__name__)
 
@@ -20,19 +20,19 @@ def _html_to_plain(html_text: str, limit: int = 300) -> str:
     text = html.unescape(text)
     text = re.sub(r"\s+", " ", text).strip()
     if len(text) > limit:
-        text = text[:limit].rsplit(" ", 1)[0].rstrip() + "…"
+        text = text[:limit].rsplit(" ", 1)[0].rstrip() + "â€¦"
     return text
 
 
 def _clean_html(html_text: str) -> str | None:
-    """Decodifica entidades del HTML (&#8230; -> …, &ntilde; -> ñ) sin perder tags."""
+    """Decodifica entidades del HTML (&#8230; -> â€¦, &ntilde; -> Ã±) sin perder tags."""
     if not html_text:
         return None
     return html.unescape(html_text)
 
 FUENTES_RSS = [
     {"nombre": "ABC Color Deportes", "url": "https://www.abc.com.py/arc/outboundfeeds/rss/deportes/"},
-    {"nombre": "ABC Color Fútbol", "url": "https://www.abc.com.py/arc/outboundfeeds/rss/deportes/futbol/"},
+    {"nombre": "ABC Color FÃºtbol", "url": "https://www.abc.com.py/arc/outboundfeeds/rss/deportes/futbol/"},
     {"nombre": "APF", "url": "https://apf.org.py/rss/"},
     {"nombre": "Noticias CDE", "url": "https://noticiascde.com.py/feed/"},
     {"nombre": "ESPN Paraguay", "url": "https://www.espn.com.py/rss/"},

@@ -63,7 +63,7 @@ Football-Data.org free tier (10 req/min):
 - `GET /v4/competitions/PA1/standings` → Tabla de posiciones
 - `GET /v4/competitions/PA1/scorers` → Goleadores
 
-**Nota:** El competition code `PA1` es el de la liga paraguaya. Verificar que existe en el tier免费.
+**Nota:** El competition code `PA1` es el de la liga paraguaya. Verificar que existe en el tier gratuito.
 
 ## Mapeo de IDs
 

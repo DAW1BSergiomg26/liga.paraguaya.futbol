@@ -3,20 +3,22 @@ import { ImageResponse } from "next/og";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-export default function OGImage() {
+export default function Image() {
   return new ImageResponse(
     (
       <div
         style={{
-          width: 1200,
-          height: 630,
-          background: "#0A0E1A",
+          width: "1200px",
+          height: "630px",
           display: "flex",
           flexDirection: "column",
-          alignItems: "center",
           justifyContent: "center",
-          fontFamily: "sans-serif",
+          alignItems: "center",
+          background: "linear-gradient(135deg, #0A0A0A 0%, #1a1a2e 50%, #0A0A0A 100%)",
+          color: "white",
+          fontFamily: "system-ui, sans-serif",
           position: "relative",
+          overflow: "hidden",
         }}
       >
         <div
@@ -24,57 +26,44 @@ export default function OGImage() {
             position: "absolute",
             top: 0,
             left: 0,
-            width: "100%",
-            height: 120,
-            display: "flex",
+            right: 0,
+            height: "6px",
+            background: "linear-gradient(90deg, #CC001C 0%, #CC001C 33%, #00619E 33%, #00619E 66%, #FFCC00 66%, #FFCC00 100%)",
+          }}
+        />
+        <div
+          style={{
+            fontSize: "72px",
+            fontWeight: "bold",
+            letterSpacing: "-2px",
+            marginBottom: "16px",
+            textAlign: "center",
           }}
         >
-          <div style={{ flex: "1 1 0%", background: "#CC001C" }} />
-          <div style={{ flex: "1 1 0%", background: "#FFFFFF" }} />
-          <div style={{ flex: "1 1 0%", background: "#00619E" }} />
+          Liga PY
         </div>
-
-        <span
+        <div
           style={{
-            fontSize: 120,
-            fontWeight: 700,
-            color: "#FFFFFF",
-            letterSpacing: "8px",
-            textTransform: "uppercase",
+            fontSize: "28px",
+            color: "#a0a0a0",
+            textAlign: "center",
+            maxWidth: "800px",
           }}
         >
-          LIGA PY
-        </span>
-
-        <span
-          style={{
-            fontSize: 36,
-            color: "#A0AEC0",
-            marginTop: 16,
-            letterSpacing: "3px",
-          }}
-        >
-          Liga Paraguaya de Fútbol
-        </span>
-
+          Fútbol Paraguayo en Tiempo Real
+        </div>
         <div
           style={{
             position: "absolute",
-            bottom: 0,
-            left: 0,
-            width: "100%",
-            height: 10,
-            display: "flex",
+            bottom: "40px",
+            fontSize: "18px",
+            color: "#666",
           }}
         >
-          <div style={{ flex: "1 1 0%", background: "#CC001C" }} />
-          <div style={{ flex: "1 1 0%", background: "#FFFFFF" }} />
-          <div style={{ flex: "1 1 0%", background: "#00619E" }} />
+          Datos · Estadísticas · Resultados
         </div>
       </div>
     ),
-    {
-      ...size,
-    },
+    { ...size }
   );
 }
