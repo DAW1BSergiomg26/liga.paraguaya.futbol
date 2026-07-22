@@ -66,7 +66,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title=settings.app_name,
-    description="API para clubes, partidos, tabla y datos base de la Liga Paraguaya de FÃºtbol.",
+    description="API para clubes, partidos, tabla y datos base de la Liga Paraguaya de Fútbol.",
     version=settings.app_version,
     lifespan=lifespan,
 )

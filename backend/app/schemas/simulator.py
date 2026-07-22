@@ -2,7 +2,7 @@ from pydantic import BaseModel
 
 
 class SimulationInput(BaseModel):
-    """ValidaciÃ³n de entrada para la simulaciÃ³n de un partido."""
+    """Validación de entrada para la simulación de un partido."""
     home_club_id: str
     away_club_id: str
 
@@ -15,7 +15,7 @@ class ExactScore(BaseModel):
 
 
 class SimulationResultOut(BaseModel):
-    """Resultado completo de la simulaciÃ³n probabilÃ­stica."""
+    """Resultado completo de la simulación probabilística."""
     home_club_id: str
     home_club_name: str
     away_club_id: str
