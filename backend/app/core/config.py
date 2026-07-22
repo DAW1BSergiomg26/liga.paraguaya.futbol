@@ -5,7 +5,9 @@ from pathlib import Path
 from pydantic_settings import BaseSettings
 from pydantic import Field
 
-_DEFAULT_DB_PATH = Path(__file__).resolve().parent.parent.parent / "data" / "liga.db"
+_DEFAULT_DB_DIR = Path(__file__).resolve().parent.parent.parent / "data"
+_DEFAULT_DB_DIR.mkdir(parents=True, exist_ok=True)
+_DEFAULT_DB_PATH = _DEFAULT_DB_DIR / "liga.db"
 
 
 class Settings(BaseSettings):

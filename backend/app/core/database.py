@@ -147,7 +147,7 @@ async def _ensure_columns_exist():
 async def init_db():
     # Registra todos los modelos antes de crear el esquema.
     from backend.app import models  # noqa: F401  (importa models/__init__ y goleador)
-    import app.models.goleador  # noqa: F401  (no exportado en __init__)
+    from ..models import goleador  # noqa: F401  (no exportado en __init__)
 
     async with engine.begin() as conn:
         if _is_postgres():
