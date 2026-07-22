@@ -42,11 +42,9 @@ def _is_postgres() -> bool:
 
 async def run_alembic_upgrade():
     if _is_postgres():
-        # En Postgres el esquema ya se crea con create_all (ver init_db).
-        # No corremos Alembic en runtime: sus migraciones usan PRAGMA/ALTER
-        # incompatibles con Postgres y rompen el arranque del contenedor.
-        sys.stderr.write("Postgres detectado: se omite Alembic en runtime (create_all gestiona el esquema)\n")
+        sys.stderr.write("Postgres detectado: sincronizando esquema...\n")
         sys.stderr.flush()
+        await _ensure_schema_postgres()
         return
 
     import os as _os
@@ -108,6 +106,21 @@ async def _check_column_exists(table: str, column: str) -> bool:
         return False
 
 
+async def _check_column_exists_postgres(table: str, column: str) -> bool:
+    try:
+        async with engine.begin() as conn:
+            result = await conn.execute(
+                sa_text(
+                    "SELECT 1 FROM information_schema.columns "
+                    "WHERE table_name = :tbl AND column_name = :col"
+                ),
+                {"tbl": table, "col": column},
+            )
+            return result.fetchone() is not None
+    except Exception:
+        return False
+
+
 async def _ensure_columns_exist():
     club_columns = [
         ("sitio_web", "VARCHAR(500) NOT NULL DEFAULT ''"),
@@ -141,6 +154,50 @@ async def _ensure_columns_exist():
             if not any(row[1] == col for row in rows):
                 await conn.execute(sa_text(f"ALTER TABLE users ADD COLUMN {col} {dtype}"))
                 sys.stderr.write(f"Added missing column users.{col}\n")
+    sys.stderr.flush()
+
+
+async def _ensure_schema_postgres():
+    """Add missing columns to existing tables for Postgres.
+
+    TODO (tarea de seguimiento): Reemplazar esta función con `alembic upgrade head`
+    real contra Postgres. Este parche existe porque las migraciones de Alembic
+    nunca se ejecutaron en Neon y `init_db()` fue removida del lifespan en un
+    commit anterior, dejando tablas con esquemas incompletos.
+
+    create_all() NO modifica columnas de tablas que ya existen — solo crea
+    tablas nuevas. Esta función se encarga de las columnas faltantes en tablas
+    viejas (clubes, partidos, users).
+    """
+    import time
+    t0 = time.monotonic()
+
+    missing_columns = {
+        "clubes": [
+            ("sitio_web", "VARCHAR(500) NOT NULL DEFAULT ''"),
+            ("descripcion", "VARCHAR(2000) NOT NULL DEFAULT ''"),
+            ("titulos_liga", "INTEGER NOT NULL DEFAULT 0"),
+            ("titulos_info", "JSON NOT NULL DEFAULT '[]'"),
+            ("titulos_internacionales", "JSON NOT NULL DEFAULT '[]'"),
+        ],
+        "partidos": [
+            ("temporada", "VARCHAR(20) NOT NULL DEFAULT ''"),
+        ],
+        "users": [
+            ("hashed_password", "VARCHAR(256)"),
+            ("is_admin", "BOOLEAN NOT NULL DEFAULT false"),
+        ],
+    }
+    async with engine.begin() as conn:
+        for table, cols in missing_columns.items():
+            for col_name, col_type in cols:
+                if not await _check_column_exists_postgres(table, col_name):
+                    await conn.execute(
+                        sa_text(f"ALTER TABLE {table} ADD COLUMN {col_name} {col_type}")
+                    )
+                    sys.stderr.write(f"  Synced {table}.{col_name}\n")
+    elapsed = time.monotonic() - t0
+    sys.stderr.write(f"  _ensure_schema_postgres: {elapsed:.2f}s\n")
     sys.stderr.flush()
 
 
