@@ -11,11 +11,11 @@ from ..schemas.simulator import ExactScore, SimulationResultOut
 
 class SimulatorService:
 
-    MAX_GOALS = 7  # Goles mÃ¡ximos a considerar en la matriz de Poisson
+    MAX_GOALS = 7  # Goles máximos a considerar en la matriz de Poisson
 
     @staticmethod
     def _poisson_pmf(k: int, lam: float) -> float:
-        """Calcula la funciÃ³n de masa de Poisson: P(X=k) = (Î»^k Ã— e^-Î») / k!"""
+        """Calcula la función de masa de Poisson: P(X=k) = (λ^k × e^-λ) / k!"""
         if lam <= 0:
             return 1.0 if k == 0 else 0.0
         return (lam ** k) * math.exp(-lam) / math.factorial(k)
@@ -24,7 +24,7 @@ class SimulatorService:
     async def _get_club_stats(
         db: AsyncSession, club_id: str
     ) -> tuple[TablaPosicion | None, str]:
-        """Recupera las estadÃ­sticas mÃ¡s recientes de un club en la tabla de posiciones.
+        """Recupera las estadísticas más recientes de un club en la tabla de posiciones.
         Retorna una tupla (stats, nombre_club)."""
         stmt = (
             select(TablaPosicion)
@@ -43,8 +43,8 @@ class SimulatorService:
     @staticmethod
     async def _get_league_averages(db: AsyncSession) -> tuple[float, float]:
         """Calcula los promedios de goles a favor y en contra de toda la liga.
-        Usa la Ãºltima jornada disponible de cada club."""
-        # Subquery: Ãºltima jornada por club
+        Usa la última jornada disponible de cada club."""
+        # Subquery: última jornada por club
         subq = (
             select(
                 TablaPosicion.club_id,
@@ -76,18 +76,18 @@ class SimulatorService:
         avg_gf = total_gf / total_pj
         avg_gc = total_gc / total_pj
 
-        # Evitar divisiÃ³n por cero
+        # Evitar división por cero
         return max(avg_gf, 0.1), max(avg_gc, 0.1)
 
     @classmethod
     async def simulate_match(
         cls, db: AsyncSession, home_club_id: str, away_club_id: str
     ) -> SimulationResultOut:
-        """Simula un partido usando distribuciÃ³n de Poisson.
+        """Simula un partido usando distribución de Poisson.
         Calcula probabilidades de victoria/empate/derrota y los 3
-        resultados exactos mÃ¡s probables."""
+        resultados exactos más probables."""
 
-        # Recuperar estadÃ­sticas de ambos clubes
+        # Recuperar estadísticas de ambos clubes
         home_stats, home_name = await cls._get_club_stats(db, home_club_id)
         away_stats, away_name = await cls._get_club_stats(db, away_club_id)
 
@@ -99,17 +99,17 @@ class SimulatorService:
         # Promedios de la liga
         avg_gf, avg_gc = await cls._get_league_averages(db)
 
-        # Ãndices de fuerza ofensiva y defensiva
+        # Índices de fuerza ofensiva y defensiva
         home_attack = (home_stats.gf / max(home_stats.pj, 1)) / avg_gf
         home_defense = (home_stats.gc / max(home_stats.pj, 1)) / avg_gc
         away_attack = (away_stats.gf / max(away_stats.pj, 1)) / avg_gf
         away_defense = (away_stats.gc / max(away_stats.pj, 1)) / avg_gc
 
-        # Goles esperados (Î») para cada equipo
+        # Goles esperados (λ) para cada equipo
         lambda_home = home_attack * away_defense * avg_gf
         lambda_away = away_attack * home_defense * avg_gc
 
-        # Limitar Î» para evitar probabilidades extremas
+        # Limitar λ para evitar probabilidades extremas
         lambda_home = max(0.1, min(lambda_home, 5.0))
         lambda_away = max(0.1, min(lambda_away, 5.0))
 
@@ -140,7 +140,7 @@ class SimulatorService:
             prob_draw /= total
             prob_away /= total
 
-        # Extraer los 3 resultados exactos mÃ¡s probables
+        # Extraer los 3 resultados exactos más probables
         all_scores: list[ExactScore] = []
         for i in range(cls.MAX_GOALS):
             for j in range(cls.MAX_GOALS):

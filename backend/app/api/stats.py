@@ -12,7 +12,7 @@ router = APIRouter()
 
 @router.get("/global")
 async def get_global_stats(db: AsyncSession = Depends(get_db)):
-    """Retorna estadÃ­sticas globales para el hero."""
+    """Retorna estadísticas globales para el hero."""
     clubes_result = await db.execute(select(func.count(Club.id)))
     total_clubes = clubes_result.scalar() or 0
 

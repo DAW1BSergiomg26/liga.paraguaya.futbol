@@ -14,7 +14,7 @@ async def predecir_partido(
     db: AsyncSession = Depends(get_db),
 ):
     """Simula un partido y retorna probabilidades de victoria/empate/derrota
-    junto con los 3 resultados exactos mÃ¡s probables."""
+    junto con los 3 resultados exactos más probables."""
 
     if body.home_club_id == body.away_club_id:
         raise HTTPException(
