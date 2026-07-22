@@ -1,12 +1,14 @@
 FROM python:3.12-slim
 
-WORKDIR /app/backend
+WORKDIR /app
 
-RUN apt-get update && apt-get install -y --no-install-recommends gcc g++ && rm -rf /var/lib/apt/lists/*
+# Copiamos todo el repositorio a /app
+COPY . .
 
-COPY backend/ .
-RUN pip install --no-cache-dir -r requirements.txt
+# Instalamos las dependencias apuntando al requirements.txt dentro de backend/
+RUN pip install --no-cache-dir -r backend/requirements.txt
 
 EXPOSE 10000
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "10000"]
+# Arrancamos Uvicorn indicando la ruta completa del módulo desde la raíz
+CMD ["uvicorn", "backend.app.main:app", "--host", "0.0.0.0", "--port", "10000"]
