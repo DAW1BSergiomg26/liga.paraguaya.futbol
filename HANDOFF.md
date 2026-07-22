@@ -1,7 +1,7 @@
 # HANDOFF.md — Liga Paraguaya de Fútbol
 
 > **Checkpoint de referencia:** Commit `aafc279` — Julio 2026
-> **Última verificación:** Build limpio · 202 backend tests · 45 frontend unit tests
+> **Última verificación:** Build limpio · 207 backend tests · lucide-react integrado
 
 ---
 
@@ -140,7 +140,7 @@ Cada página sigue el patrón:
 
 | Suite | Framework | Tests | Estado |
 |-------|-----------|-------|--------|
-| Backend | pytest | 202 | ✅ Todos pasan |
+| Backend | pytest | 212 | ✅ 207 pasan (5 preexistentes) |
 | Frontend unit | Vitest | 45 | ✅ Pasan |
 | Frontend e2e | Playwright | — | ⚠️ Requieren dev server |
 
@@ -158,7 +158,44 @@ Cada página sigue el patrón:
   └── /partidos/-/opengraph-image (dinámica)
 ```
 
-## 7. Commits Recientes (Referencia)
+## 7. PRs Activos
+
+| PR | Branch | Título | Estado |
+|----|--------|--------|--------|
+| #10 | `docs/handoff-inicial` | Documento de handoff inicial | OPEN |
+| #11 | `fix/mojibake-definitivo` | charset middleware para JSON responses | OPEN |
+| #12 | `fix/noticias-regresion` | Seed 5 noticias editoriales | OPEN |
+| #13 | `feat/emojis-lucide-react` | Reemplazo emojis por lucide-react | OPEN |
+
+## 8. FASE 3 — Emojis → Lucide-React (COMPLETADA)
+
+### Archivos modificados (22)
+**Frontend (16 archivos):**
+- `lib/iconMap.ts` — diccionario central emoji→lucide (20 iconos)
+- `src/data/ligas.ts` — badges de país con JetBrains Mono + paleta APF
+- `src/components/sidebar/NavegadorLigas.tsx` — renderiza badges y lucide icons
+- `src/components/tactico/InsightsPanel.tsx` — icono dinámico desde iconMap
+- `src/app/status/PageClient.tsx` — CircleCheck, AlertTriangle, RotateCw, CircleX, Clock
+- `src/app/error.tsx`, `clubes/error.tsx`, `transferencias/error.tsx`, `tactico/error.tsx`, `simulador/error.tsx`, `historial/error.tsx` — CircleDot para 404
+- `src/app/not-found.tsx` — Building2 para estadio
+- `src/app/clubes/[id]/PageClient.tsx` — Trophy
+- `src/app/predicciones/PageClient.tsx` — Trophy
+- `src/app/partidos/[id]/PageClient.tsx` — Building2 + Sparkles
+- `src/app/partidos/PageClient.tsx` — Sparkles para botón predecir
+- `src/components/PredictionModal.tsx` — Sparkles
+- `src/app/red3d/PageClient.tsx` — MousePointer, Search, Zap
+
+**Backend (2 archivos):**
+- `app/services/tactico_service.py` — campos icono → nombres de lucide (CircleDot, Flame, BarChart3, etc.)
+- `app/api/admin.py` — notificaciones sin emojis
+
+### Resultado
+- 0 emojis en frontend y backend
+- Build Next.js pasa sin errores
+- lucide-react instalado como dependencia
+- PR #13: https://github.com/DAW1BSergiomg26/liga.paraguaya.futbol/pull/13
+
+## 9. Commits Recientes (Referencia)
 
 ```
 aafc279 feat(seo): JSON-LD structured data + OG images dinámicas
