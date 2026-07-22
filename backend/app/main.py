@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import time
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
@@ -19,9 +20,9 @@ from .api.historial import router as historial_router
 from .api.stats import router as stats_router
 from .core.api_key import RATE_LIMIT_MAX, rate_limit_info
 from .core.config import settings
-from .core.database import async_session, run_alembic_upgrade
+from .core.database import async_session, init_db, run_alembic_upgrade
 from .models.club import Club
-from .scripts.seed import seed_clubes, seed_partidos, seed_tabla, seed_tabla_historico
+from .scripts.seed import seed_clubes, seed_goleadores, seed_partidos, seed_tabla, seed_tabla_historico, seed_transferencias
 
 logger = logging.getLogger(__name__)
 
@@ -42,12 +43,18 @@ async def sync_loop():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    t0 = time.monotonic()
     await run_alembic_upgrade()
+    await init_db()
+    elapsed = time.monotonic() - t0
+    logger.info(f"Schema sync: {elapsed:.2f}s")
     try:
         async with async_session() as db:
             await seed_clubes(db)
             await seed_partidos(db)
             await seed_tabla(db)
+            await seed_goleadores(db)
+            await seed_transferencias(db)
             await seed_tabla_historico(db)
             await db.commit()
     except Exception as e:
