@@ -19,7 +19,7 @@ from .api.historial import router as historial_router
 from .api.stats import router as stats_router
 from .core.api_key import RATE_LIMIT_MAX, rate_limit_info
 from .core.config import settings
-from .core.database import async_session, run_alembic_upgrade
+from .core.database import async_session, init_db, run_alembic_upgrade
 from .models.club import Club
 from .scripts.seed import seed_clubes, seed_partidos, seed_tabla, seed_tabla_historico
 
@@ -43,12 +43,16 @@ async def sync_loop():
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await run_alembic_upgrade()
-    async with async_session() as db:
-        await seed_clubes(db)
-        await seed_partidos(db)
-        await seed_tabla(db)
-        await seed_tabla_historico(db)
-        await db.commit()
+    await init_db()
+    try:
+        async with async_session() as db:
+            await seed_clubes(db)
+            await seed_partidos(db)
+            await seed_tabla(db)
+            await seed_tabla_historico(db)
+            await db.commit()
+    except Exception as e:
+        logger.error(f"Seed falló (no crítico): {e}")
     sync_task = asyncio.create_task(sync_loop())
     yield
     sync_task.cancel()

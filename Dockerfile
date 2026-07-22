@@ -8,7 +8,7 @@ COPY . .
 # Instalamos las dependencias apuntando al requirements.txt dentro de backend/
 RUN pip install --no-cache-dir -r backend/requirements.txt
 
-EXPOSE 10000
+ENV PORT=10000
+EXPOSE $PORT
 
-# Arrancamos Uvicorn indicando la ruta completa del módulo desde la raíz
-CMD ["uvicorn", "backend.app.main:app", "--host", "0.0.0.0", "--port", "10000"]
+CMD uvicorn backend.app.main:app --host 0.0.0.0 --port $PORT
