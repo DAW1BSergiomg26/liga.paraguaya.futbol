@@ -33,9 +33,9 @@ EQUIPOS_MOCK = {
         ],
         "stats": EstadisticasEquipo(xg=1.85, posesion=54.2, tiros_puerta=5.2, pases_completados=82.1, duelos_ganados=58.4, corners=6.1),
         "tendencias": [
-            InsightTactico(icono="⚽", texto="Marca el 68% de sus goles en el segundo tiempo", metrica="68%"),
-            InsightTactico(icono="🔥", texto="Invicto en 8 partidos como local", metrica="8 partidos"),
-            InsightTactico(icono="📊", texto="Mejor pressing alto de la liga: recupera en 4.2s", metrica="4.2s"),
+            InsightTactico(icono="CircleDot", texto="Marca el 68% de sus goles en el segundo tiempo", metrica="68%"),
+            InsightTactico(icono="Flame", texto="Invicto en 8 partidos como local", metrica="8 partidos"),
+            InsightTactico(icono="BarChart3", texto="Mejor pressing alto de la liga: recupera en 4.2s", metrica="4.2s"),
         ],
         "ultimos_partidos": [
             PartidoResumen(fecha="2026-07-10", rival="Olimpia", resultado="2-1", formacion="4-3-3"),
@@ -63,9 +63,9 @@ EQUIPOS_MOCK = {
         ],
         "stats": EstadisticasEquipo(xg=1.62, posesion=51.8, tiros_puerta=4.8, pases_completados=79.5, duelos_ganados=55.2, corners=5.4),
         "tendencias": [
-            InsightTactico(icono="📈", texto="Marca el 62% de sus goles en el primer tiempo", metrica="62%"),
-            InsightTactico(icono="🏟️", texto="No pierde en 5 visitas consecutivas", metrica="5 partidos"),
-            InsightTactico(icono="🎯", texto="Promedia 2.1 goles por partido en últimos 10", metrica="2.1 goles"),
+            InsightTactico(icono="TrendingUp", texto="Marca el 62% de sus goles en el primer tiempo", metrica="62%"),
+            InsightTactico(icono="Landmark", texto="No pierde en 5 visitas consecutivas", metrica="5 partidos"),
+            InsightTactico(icono="Target", texto="Promedia 2.1 goles por partido en últimos 10", metrica="2.1 goles"),
         ],
         "ultimos_partidos": [
             PartidoResumen(fecha="2026-07-10", rival="Cerro", resultado="1-2", formacion="4-4-2"),
@@ -93,9 +93,9 @@ EQUIPOS_MOCK = {
         ],
         "stats": EstadisticasEquipo(xg=1.92, posesion=56.3, tiros_puerta=5.8, pases_completados=84.2, duelos_ganados=60.1, corners=6.8),
         "tendencias": [
-            InsightTactico(icono="🏆", texto="Líder de la tabla con 35 puntos", metrica="1ro"),
-            InsightTactico(icono="🔥", texto="12 victorias en 15 partidos (80%)", metrica="80%"),
-            InsightTactico(icono="⚽", texto="Mejor ataque: 2.4 goles por partido", metrica="2.4 goles"),
+            InsightTactico(icono="Trophy", texto="Líder de la tabla con 35 puntos", metrica="1ro"),
+            InsightTactico(icono="Flame", texto="12 victorias en 15 partidos (80%)", metrica="80%"),
+            InsightTactico(icono="CircleDot", texto="Mejor ataque: 2.4 goles por partido", metrica="2.4 goles"),
         ],
         "ultimos_partidos": [
             PartidoResumen(fecha="2026-07-09", rival="Guaraní", resultado="2-0", formacion="4-2-3-1"),
@@ -123,9 +123,9 @@ EQUIPOS_MOCK = {
         ],
         "stats": EstadisticasEquipo(xg=1.45, posesion=48.5, tiros_puerta=4.2, pases_completados=76.8, duelos_ganados=52.3, corners=4.9),
         "tendencias": [
-            InsightTactico(icono="💪", texto="Gana el 70% de duelos aéreos", metrica="70%"),
-            InsightTactico(icono="🎯", texto="Cecilio Domínguez: goleador con 8 tantos", metrica="8 goles"),
-            InsightTactico(icono="📊", texto="Promedia 4.2 tiros a puerta por partido", metrica="4.2 tiros"),
+            InsightTactico(icono="Dumbbell", texto="Gana el 70% de duelos aéreos", metrica="70%"),
+            InsightTactico(icono="Target", texto="Cecilio Domínguez: goleador con 8 tantos", metrica="8 goles"),
+            InsightTactico(icono="BarChart3", texto="Promedia 4.2 tiros a puerta por partido", metrica="4.2 tiros"),
         ],
         "ultimos_partidos": [
             PartidoResumen(fecha="2026-07-09", rival="Libertad", resultado="0-2", formacion="4-3-3"),
@@ -153,9 +153,9 @@ EQUIPOS_MOCK = {
         ],
         "stats": EstadisticasEquipo(xg=1.38, posesion=47.2, tiros_puerta=4.0, pases_completados=75.3, duelos_ganados=54.8, corners=4.5),
         "tendencias": [
-            InsightTactico(icono="🛡️", texto="Defensa sólida: solo 0.8 goles recibidos por partido", metrica="0.8 goles"),
-            InsightTactico(icono="⚡", texto="Contragolpe letal: 45% de sus goles son de contra", metrica="45%"),
-            InsightTactico(icono="🏟️", texto="Invicto en 4 partidos en el Arsenio Erico", metrica="4 partidos"),
+            InsightTactico(icono="Shield", texto="Defensa sólida: solo 0.8 goles recibidos por partido", metrica="0.8 goles"),
+            InsightTactico(icono="Zap", texto="Contragolpe letal: 45% de sus goles son de contra", metrica="45%"),
+            InsightTactico(icono="Landmark", texto="Invicto en 4 partidos en el Arsenio Erico", metrica="4 partidos"),
         ],
         "ultimos_partidos": [
             PartidoResumen(fecha="2026-07-03", rival="Olimpia", resultado="0-3", formacion="4-4-2"),
@@ -183,9 +183,9 @@ EQUIPOS_MOCK = {
         ],
         "stats": EstadisticasEquipo(xg=1.32, posesion=46.8, tiros_puerta=3.9, pases_completados=74.2, duelos_ganados=51.5, corners=4.2),
         "tendencias": [
-            InsightTactico(icono="📈", texto="Mejoría notable: 4 victorias en últimos 6", metrica="4 victorias"),
-            InsightTactico(icono="🎯", texto="Nelson Haedo Parra: 6 goles en temporada", metrica="6 goles"),
-            InsightTactico(icono="🏟️", texto="Récord de asistencia: 12,000 vs Olimpia", metrica="12k"),
+            InsightTactico(icono="TrendingUp", texto="Mejoría notable: 4 victorias en últimos 6", metrica="4 victorias"),
+            InsightTactico(icono="Target", texto="Nelson Haedo Parra: 6 goles en temporada", metrica="6 goles"),
+            InsightTactico(icono="Landmark", texto="Récord de asistencia: 12,000 vs Olimpia", metrica="12k"),
         ],
         "ultimos_partidos": [
             PartidoResumen(fecha="2026-07-06", rival="General Díaz", resultado="2-0", formacion="4-3-3"),
@@ -213,9 +213,9 @@ EQUIPOS_MOCK = {
         ],
         "stats": EstadisticasEquipo(xg=1.15, posesion=44.5, tiros_puerta=3.5, pases_completados=72.8, duelos_ganados=53.2, corners=3.8),
         "tendencias": [
-            InsightTactico(icono="🛡️", texto="Defensa impenetrable: 0.6 goles recibidos por partido", metrica="0.6 goles"),
-            InsightTactico(icono="⚔️", texto="Duo letal: Franco Vera y Arnoldo Castillo suman 12 goles", metrica="12 goles"),
-            InsightTactico(icono="📊", texto="Promedia 5.2 duelos ganados por jugador", metrica="5.2"),
+            InsightTactico(icono="Shield", texto="Defensa impenetrable: 0.6 goles recibidos por partido", metrica="0.6 goles"),
+            InsightTactico(icono="Swords", texto="Duo letal: Franco Vera y Arnoldo Castillo suman 12 goles", metrica="12 goles"),
+            InsightTactico(icono="BarChart3", texto="Promedia 5.2 duelos ganados por jugador", metrica="5.2"),
         ],
         "ultimos_partidos": [
             PartidoResumen(fecha="2026-07-06", rival="Sportivo Luqueño", resultado="0-2", formacion="5-3-2"),
@@ -243,9 +243,9 @@ EQUIPOS_MOCK = {
         ],
         "stats": EstadisticasEquipo(xg=1.22, posesion=45.8, tiros_puerta=3.8, pases_completados=73.5, duelos_ganados=50.8, corners=4.0),
         "tendencias": [
-            InsightTactico(icono="⚡", texto="Rápida transición: promedia 3.2 segundos de contra", metrica="3.2s"),
-            InsightTactico(icono="🎯", texto="Richard Salcedo: 5 goles en últimos 8 partidos", metrica="5 goles"),
-            InsightTactico(icono="📊", texto="Mejor porcentaje de duelos aéreos: 62%", metrica="62%"),
+            InsightTactico(icono="Zap", texto="Rápida transición: promedia 3.2 segundos de contra", metrica="3.2s"),
+            InsightTactico(icono="Target", texto="Richard Salcedo: 5 goles en últimos 8 partidos", metrica="5 goles"),
+            InsightTactico(icono="BarChart3", texto="Mejor porcentaje de duelos aéreos: 62%", metrica="62%"),
         ],
         "ultimos_partidos": [
             PartidoResumen(fecha="2026-06-29", rival="General Díaz", resultado="1-1", formacion="4-4-2"),
@@ -274,8 +274,8 @@ EQUIPOS_MOCK = {
         "stats": EstadisticasEquipo(xg=1.08, posesion=43.2, tiros_puerta=3.2, pases_completados=71.5, duelos_ganados=49.2, corners=3.5),
         "tendencias": [
             InsightTactico(icono="🌟", texto="Santiago Salcedo: ídolo con 150+ goles en su carrera", metrica="150+ goles"),
-            InsightTactico(icono="📊", texto="Promedio más bajo de la liga: 1.08 xG", metrica="1.08 xG"),
-            InsightTactico(icono="💪", texto="Lucha por la permanencia: 3 victorias en últimos 10", metrica="3 victorias"),
+            InsightTactico(icono="BarChart3", texto="Promedio más bajo de la liga: 1.08 xG", metrica="1.08 xG"),
+            InsightTactico(icono="Dumbbell", texto="Lucha por la permanencia: 3 victorias en últimos 10", metrica="3 victorias"),
         ],
         "ultimos_partidos": [
             PartidoResumen(fecha="2026-06-22", rival="Sol de América", resultado="1-0", formacion="4-3-3"),
@@ -303,9 +303,9 @@ EQUIPOS_MOCK = {
         ],
         "stats": EstadisticasEquipo(xg=1.18, posesion=46.2, tiros_puerta=3.6, pases_completados=74.0, duelos_ganados=51.0, corners=4.1),
         "tendencias": [
-            InsightTactico(icono="🎯", texto="José Ortigoza: goleador histórico con 200+ tantos", metrica="200+ goles"),
-            InsightTactico(icono="📊", texto="Balanced: ni muy atacante ni muy defensivo", metrica="Balanceado"),
-            InsightTactico(icono="🏟️", texto="Buena racha en casa: 3 victorias en últimos 4", metrica="3 victorias"),
+            InsightTactico(icono="Target", texto="José Ortigoza: goleador histórico con 200+ tantos", metrica="200+ goles"),
+            InsightTactico(icono="BarChart3", texto="Balanced: ni muy atacante ni muy defensivo", metrica="Balanceado"),
+            InsightTactico(icono="Landmark", texto="Buena racha en casa: 3 victorias en últimos 4", metrica="3 victorias"),
         ],
         "ultimos_partidos": [
             PartidoResumen(fecha="2026-06-22", rival="3 de Febrero", resultado="0-1", formacion="4-4-2"),
@@ -334,8 +334,8 @@ EQUIPOS_MOCK = {
         "stats": EstadisticasEquipo(xg=1.25, posesion=47.5, tiros_puerta=4.0, pases_completados=75.2, duelos_ganados=52.8, corners=4.3),
         "tendencias": [
             InsightTactico(icono="🌟", texto="Juan Iturbe: ex-Paraguay con calidad sudamericana", metrica="7.2 rating"),
-            InsightTactico(icono="⚡", texto="Juego ofensivo: promedia 4.0 tiros a puerta", metrica="4.0 tiros"),
-            InsightTactico(icono="📊", texto="Mejor porcentaje de posesión vs rivales directos", metrica="48.5%"),
+            InsightTactico(icono="Zap", texto="Juego ofensivo: promedia 4.0 tiros a puerta", metrica="4.0 tiros"),
+            InsightTactico(icono="BarChart3", texto="Mejor porcentaje de posesión vs rivales directos", metrica="48.5%"),
         ],
         "ultimos_partidos": [
             PartidoResumen(fecha="2026-06-08", rival="3 de Febrero", resultado="1-0", formacion="4-3-3"),
@@ -363,9 +363,9 @@ EQUIPOS_MOCK = {
         ],
         "stats": EstadisticasEquipo(xg=1.05, posesion=42.8, tiros_puerta=3.1, pases_completados=70.5, duelos_ganados=48.7, corners=3.2),
         "tendencias": [
-            InsightTactico(icono="🛡️", texto="Juego defensivo: promedia 0.9 goles recibidos por partido", metrica="0.9 goles"),
-            InsightTactico(icono="📊", texto="Menor posesión de la liga: 42.8%", metrica="42.8%"),
-            InsightTactico(icono="⚡", texto="Contraataque efectivo: 35% de sus goles son de contra", metrica="35%"),
+            InsightTactico(icono="Shield", texto="Juego defensivo: promedia 0.9 goles recibidos por partido", metrica="0.9 goles"),
+            InsightTactico(icono="BarChart3", texto="Menor posesión de la liga: 42.8%", metrica="42.8%"),
+            InsightTactico(icono="Zap", texto="Contraataque efectivo: 35% de sus goles son de contra", metrica="35%"),
         ],
         "ultimos_partidos": [
             PartidoResumen(fecha="2026-06-22", rival="Nacional", resultado="0-1", formacion="4-4-2"),
@@ -393,9 +393,9 @@ EQUIPOS_MOCK = {
         ],
         "stats": EstadisticasEquipo(xg=1.10, posesion=44.0, tiros_puerta=3.3, pases_completados=71.2, duelos_ganados=50.1, corners=3.5),
         "tendencias": [
-            InsightTactico(icono="💪", texto="Nelson Candia: 7 goles en temporada, referente ofensivo", metrica="7 goles"),
-            InsightTactico(icono="🛡️", texto="Defensa ordenada: solo 1.1 goles recibidos por partido", metrica="1.1 goles"),
-            InsightTactico(icono="📊", texto="Equipo balanceado entre ataque y defensa", metrica="Balanceado"),
+            InsightTactico(icono="Dumbbell", texto="Nelson Candia: 7 goles en temporada, referente ofensivo", metrica="7 goles"),
+            InsightTactico(icono="Shield", texto="Defensa ordenada: solo 1.1 goles recibidos por partido", metrica="1.1 goles"),
+            InsightTactico(icono="BarChart3", texto="Equipo balanceado entre ataque y defensa", metrica="Balanceado"),
         ],
         "ultimos_partidos": [
             PartidoResumen(fecha="2026-06-29", rival="Sportivo Luqueño", resultado="1-1", formacion="4-3-3"),
@@ -423,9 +423,9 @@ EQUIPOS_MOCK = {
         ],
         "stats": EstadisticasEquipo(xg=1.12, posesion=43.5, tiros_puerta=3.4, pases_completados=71.0, duelos_ganados=49.5, corners=3.6),
         "tendencias": [
-            InsightTactico(icono="⚽", texto="Bautista Giordano: goleador del equipo con 6 tantos", metrica="6 goles"),
-            InsightTactico(icono="🏟️", texto="Buen rendimiento en casa: 4 victorias en últimos 6", metrica="4 victorias"),
-            InsightTactico(icono="📊", texto="Duo ofensivo efectivo: Giordano y Riveros suman 11 goles", metrica="11 goles"),
+            InsightTactico(icono="CircleDot", texto="Bautista Giordano: goleador del equipo con 6 tantos", metrica="6 goles"),
+            InsightTactico(icono="Landmark", texto="Buen rendimiento en casa: 4 victorias en últimos 6", metrica="4 victorias"),
+            InsightTactico(icono="BarChart3", texto="Duo ofensivo efectivo: Giordano y Riveros suman 11 goles", metrica="11 goles"),
         ],
         "ultimos_partidos": [
             PartidoResumen(fecha="2026-07-06", rival="Nacional", resultado="1-0", formacion="4-4-2"),
@@ -453,9 +453,9 @@ EQUIPOS_MOCK = {
         ],
         "stats": EstadisticasEquipo(xg=1.28, posesion=46.5, tiros_puerta=3.9, pases_completados=74.8, duelos_ganados=52.0, corners=4.3),
         "tendencias": [
-            InsightTactico(icono="⚡", texto="Nelson Segovia: 9 goles, máximo goleador del equipo", metrica="9 goles"),
-            InsightTactico(icono="🏟️", texto="Récord de asistencia: 20,000 en clásico del norte", metrica="20k"),
-            InsightTactico(icono="📊", texto="Buena defensa: solo 0.9 goles recibidos por partido", metrica="0.9 goles"),
+            InsightTactico(icono="Zap", texto="Nelson Segovia: 9 goles, máximo goleador del equipo", metrica="9 goles"),
+            InsightTactico(icono="Landmark", texto="Récord de asistencia: 20,000 en clásico del norte", metrica="20k"),
+            InsightTactico(icono="BarChart3", texto="Buena defensa: solo 0.9 goles recibidos por partido", metrica="0.9 goles"),
         ],
         "ultimos_partidos": [
             PartidoResumen(fecha="2026-07-10", rival="Guaraní", resultado="2-1", formacion="4-3-3"),
@@ -484,8 +484,8 @@ EQUIPOS_MOCK = {
         "stats": EstadisticasEquipo(xg=0.95, posesion=41.2, tiros_puerta=2.8, pases_completados=68.5, duelos_ganados=47.3, corners=2.9),
         "tendencias": [
             InsightTactico(icono="📉", texto="Último en la tabla: 15 puntos en 22 partidos", metrica="16to"),
-            InsightTactico(icono="🛡️", texto="Defensa débil: promedia 1.9 goles recibidos", metrica="1.9 goles"),
-            InsightTactico(icono="⚡", texto="Poca capacidad ofensiva: solo 0.95 xG promedio", metrica="0.95 xG"),
+            InsightTactico(icono="Shield", texto="Defensa débil: promedia 1.9 goles recibidos", metrica="1.9 goles"),
+            InsightTactico(icono="Zap", texto="Poca capacidad ofensiva: solo 0.95 xG promedio", metrica="0.95 xG"),
         ],
         "ultimos_partidos": [
             PartidoResumen(fecha="2026-06-22", rival="Cerro Porteño", resultado="0-2", formacion="4-4-2"),
@@ -513,9 +513,9 @@ EQUIPOS_MOCK = {
         ],
         "stats": EstadisticasEquipo(xg=1.35, posesion=47.0, tiros_puerta=4.1, pases_completados=75.5, duelos_ganados=53.0, corners=4.5),
         "tendencias": [
-            InsightTactico(icono="📈", texto="Mejoría notable: 4 victorias en últimos 6", metrica="4 victorias"),
-            InsightTactico(icono="⚽", texto="Brian Mendoza: 8 goles en temporada", metrica="8 goles"),
-            InsightTactico(icono="🏟️", texto="Invicto en 4 partidos en el Martín Torres", metrica="4 partidos"),
+            InsightTactico(icono="TrendingUp", texto="Mejoría notable: 4 victorias en últimos 6", metrica="4 victorias"),
+            InsightTactico(icono="CircleDot", texto="Brian Mendoza: 8 goles en temporada", metrica="8 goles"),
+            InsightTactico(icono="Landmark", texto="Invicto en 4 partidos en el Martín Torres", metrica="4 partidos"),
         ],
         "ultimos_partidos": [
             PartidoResumen(fecha="2026-07-10", rival="Olimpia", resultado="2-2", formacion="4-4-2"),
@@ -543,9 +543,9 @@ EQUIPOS_MOCK = {
         ],
         "stats": EstadisticasEquipo(xg=1.08, posesion=42.5, tiros_puerta=3.0, pases_completados=69.8, duelos_ganados=49.0, corners=3.1),
         "tendencias": [
-            InsightTactico(icono="🛡️", texto="Defensa compacta: 5 defensores en formación", metrica="5-3-2"),
-            InsightTactico(icono="📊", texto="Promedio más bajo de posesión: 42.5%", metrica="42.5%"),
-            InsightTactico(icono="⚡", texto="Juego directo: promedia 3.0 tiros a puerta por partido", metrica="3.0 tiros"),
+            InsightTactico(icono="Shield", texto="Defensa compacta: 5 defensores en formación", metrica="5-3-2"),
+            InsightTactico(icono="BarChart3", texto="Promedio más bajo de posesión: 42.5%", metrica="42.5%"),
+            InsightTactico(icono="Zap", texto="Juego directo: promedia 3.0 tiros a puerta por partido", metrica="3.0 tiros"),
         ],
         "ultimos_partidos": [
             PartidoResumen(fecha="2026-06-22", rival="3 de Febrero", resultado="1-0", formacion="5-3-2"),
@@ -573,9 +573,9 @@ EQUIPOS_MOCK = {
         ],
         "stats": EstadisticasEquipo(xg=1.42, posesion=48.2, tiros_puerta=4.3, pases_completados=76.0, duelos_ganados=51.5, corners=4.7),
         "tendencias": [
-            InsightTactico(icono="⚽", texto="Brian Mendoza Jr: 7 goles, referente ofensivo", metrica="7 goles"),
-            InsightTactico(icono="📈", texto="En ascenso: 5 victorias en últimos 8", metrica="5 victorias"),
-            InsightTactico(icono="🏟️", texto="Juego ofensivo: promedia 4.3 tiros a puerta", metrica="4.3 tiros"),
+            InsightTactico(icono="CircleDot", texto="Brian Mendoza Jr: 7 goles, referente ofensivo", metrica="7 goles"),
+            InsightTactico(icono="TrendingUp", texto="En ascenso: 5 victorias en últimos 8", metrica="5 victorias"),
+            InsightTactico(icono="Landmark", texto="Juego ofensivo: promedia 4.3 tiros a puerta", metrica="4.3 tiros"),
         ],
         "ultimos_partidos": [
             PartidoResumen(fecha="2026-07-06", rival="Rubio Ñu", resultado="1-0", formacion="4-3-3"),

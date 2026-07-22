@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { CircleDot } from "lucide-react";
 
 export default function HistorialError({
   error,
@@ -16,7 +17,7 @@ export default function HistorialError({
   return (
     <div className="max-w-6xl mx-auto px-4 py-12 text-center">
       <div className="max-w-md mx-auto bg-bg-secundario/60 rounded-2xl border border-borde-sutil p-8 space-y-5">
-        <div className="text-5xl">⚽</div>
+        <div className="text-5xl flex justify-center"><CircleDot className="w-12 h-12 text-apf-rojo" /></div>
         <h2 className="text-xl font-bold text-white">
           Error en el Historial
         </h2>

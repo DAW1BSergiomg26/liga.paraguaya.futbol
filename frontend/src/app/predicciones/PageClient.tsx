@@ -7,6 +7,7 @@ import { misPredicciones, getLeaderboard, getSavedToken, setAuthToken } from "@/
 import type { PredictionDetail, LeaderboardEntry } from "@/types";
 import Link from "next/link";
 import PageHeader from "@/components/ui/PageHeader";
+import { Trophy } from "lucide-react";
 
 export default function PrediccionesPage() {
   const [loggedIn] = useState(() => {
@@ -96,7 +97,7 @@ export default function PrediccionesPage() {
 
       {/* Leaderboard público (siempre visible) */}
       <section>
-        <h2 className="text-2xl font-bold mb-4">🏆 Leaderboard</h2>
+        <h2 className="text-2xl font-bold mb-4 flex items-center gap-2"><Trophy className="w-6 h-6 text-yellow-400" /> Leaderboard</h2>
         {leaderboard && leaderboard.length > 0 ? (
           <div className="overflow-x-auto rounded-xl border border-borde-sutil bg-bg-secundario/60">
             <table className="w-full text-sm">

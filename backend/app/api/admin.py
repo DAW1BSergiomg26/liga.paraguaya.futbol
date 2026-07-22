@@ -45,7 +45,7 @@ async def actualizar_partido(
         await PushService.enviar_a_partido(
             db,
             partido_id,
-            "⚽ Gol!",
+            "Gol!",
             f"{partido.local.nombre} {partido.goles_local}-{partido.goles_visitante} {partido.visitante.nombre}",
             f"/partidos/{partido_id}",
         )
@@ -69,7 +69,7 @@ async def actualizar_partido(
             await PushService.enviar_a_usuario(
                 db,
                 pred.user_id,
-                "✅ Resultado de tu predicción",
+                "Resultado de tu predicción",
                 f"{partido.local.nombre} {partido.goles_local}-{partido.goles_visitante} {partido.visitante.nombre} — Obtuviste {pred.puntos} pts",
                 f"/predicciones",
             )

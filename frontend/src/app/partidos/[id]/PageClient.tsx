@@ -11,6 +11,7 @@ import { getSavedToken, setAuthToken, misPredicciones } from "@/lib/api";
 import type { PredictionDetail } from "@/types";
 import ChatWidget from "@/components/ChatWidget";
 import { useLiveScore } from "@/hooks/useLiveScore";
+import { Building2, Sparkles } from "lucide-react";
 
 export default function PartidoDetailPage() {
   const params = useParams();
@@ -101,8 +102,8 @@ export default function PartidoDetailPage() {
 
         <div className="grid grid-cols-7 items-center gap-4 mb-8">
           <div className="col-span-3 text-right">
-            <div className="w-16 h-16 rounded-full bg-white/10 mx-auto mb-3 flex items-center justify-center text-2xl">
-              🏟️
+            <div className="w-16 h-16 rounded-full bg-white/10 mx-auto mb-3 flex items-center justify-center">
+              <Building2 className="w-8 h-8 text-apf-azul" />
             </div>
             <h2 className="text-2xl font-bold text-white">{partido.local_nombre}</h2>
           </div>
@@ -123,8 +124,8 @@ export default function PartidoDetailPage() {
           </div>
 
           <div className="col-span-3 text-left">
-            <div className="w-16 h-16 rounded-full bg-white/10 mx-auto mb-3 flex items-center justify-center text-2xl">
-              🏟️
+            <div className="w-16 h-16 rounded-full bg-white/10 mx-auto mb-3 flex items-center justify-center">
+              <Building2 className="w-8 h-8 text-apf-azul" />
             </div>
             <h2 className="text-2xl font-bold text-white">{partido.visitante_nombre}</h2>
           </div>
@@ -155,7 +156,7 @@ export default function PartidoDetailPage() {
 
       {prediction && (
         <section className="mt-10">
-          <h2 className="text-2xl font-bold mb-4">🔮 Tu predicción</h2>
+          <h2 className="text-2xl font-bold mb-4 flex items-center gap-2"><Sparkles className="w-6 h-6 text-purple-400" /> Tu predicción</h2>
           <div className={`p-4 rounded-xl border ${
             prediction.puntos === 3 ? "border-green-500/50 bg-green-900/20" :
             prediction.puntos === 2 ? "border-yellow-500/50 bg-yellow-900/20" :

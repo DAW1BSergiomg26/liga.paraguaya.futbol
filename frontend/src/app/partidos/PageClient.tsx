@@ -13,6 +13,7 @@ import { getSavedToken, setAuthToken } from "@/lib/api";
 import { useQueryClient } from "@tanstack/react-query";
 import PredictionModal from "@/components/PredictionModal";
 import { useLiveScores } from "@/hooks/useLiveScores";
+import { Sparkles } from "lucide-react";
 
 function EstadoBadge({ estado }: { estado: string }) {
   const styles: Record<string, string> = {
@@ -231,7 +232,7 @@ function PartidosContent() {
                           onClick={() => setPredictionPartido(p)}
                           className="text-xs px-2 py-1 rounded-lg bg-bg-terciario border border-borde-sutil text-apf-rojo hover:bg-apf-rojo hover:text-black transition"
                         >
-                          🔮 Predecir
+                          <span className="inline-flex items-center gap-1"><Sparkles className="w-3 h-3" /> Predecir</span>
                         </button>
                       )}
                     </td>

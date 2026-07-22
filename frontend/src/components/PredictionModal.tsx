@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { crearPrediccion } from "@/lib/api";
 import type { Partido } from "@/types";
+import { Sparkles } from "lucide-react";
 
 interface PredictionModalProps {
   partido: Partido;
@@ -50,7 +51,7 @@ export default function PredictionModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
       <div className="bg-bg-secundario border border-borde-sutil rounded-2xl p-8 w-full max-w-md mx-4">
-        <h3 className="text-xl font-bold mb-2">🔮 Tu predicción</h3>
+        <h3 className="text-xl font-bold mb-2 flex items-center gap-2"><Sparkles className="w-5 h-5 text-purple-400" /> Tu predicción</h3>
         <p className="text-sm text-gray-400 mb-6">
           {partido.torneo} · Jornada {partido.jornada}
         </p>
