@@ -122,6 +122,16 @@ def _is_allowed_origin(origin: str) -> bool:
 
 
 @app.middleware("http")
+async def charset_middleware(request: Request, call_next):
+    """Asegura charset=utf-8 en todas las respuestas JSON."""
+    response = await call_next(request)
+    ct = response.headers.get("content-type", "")
+    if ct.startswith("application/json") and "charset" not in ct:
+        response.headers["content-type"] = f"{ct}; charset=utf-8"
+    return response
+
+
+@app.middleware("http")
 async def cors_middleware(request: Request, call_next):
     origin = request.headers.get("origin", "")
     allowed = _is_allowed_origin(origin)
