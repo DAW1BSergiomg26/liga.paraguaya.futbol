@@ -139,7 +139,7 @@ async def cors_middleware(request: Request, call_next):
     return response
 
 
-app.include_router(health.router)
+app.include_router(health.router, prefix="/api/v1")
 app.include_router(clubes.router)
 app.include_router(partidos.router)
 app.include_router(tabla.router)
