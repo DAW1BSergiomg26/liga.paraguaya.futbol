@@ -8,7 +8,7 @@ import { apiFetch } from "@/lib/api";
 import { escudoUrl } from "@/lib/escudos";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import Red2DFallback from "@/components/red3d/Red2DFallback";
-import { MousePointer, Search, Zap } from "lucide-react";
+import { MousePointer, Search, Zap, Pause, Play, Square, Globe, Compass } from "lucide-react";
 
 /* ── Lazy-load del componente 3D (solo se carga bajo demanda) ── */
 const Graph3D = lazy(() => import("@/components/red3d/Graph3D"));
@@ -449,7 +449,7 @@ export default function Red3DPage() {
                     : "bg-bg-secundario/70 border-borde-sutil text-texto-secundario"
                 }`}
               >
-                {autoRotate ? "⏸ Pausar giro" : "▶ Girar"}
+                {autoRotate ? <><Pause className="inline w-3.5 h-3.5" /> Pausar giro</> : <><Play className="inline w-3.5 h-3.5" /> Girar</>}
               </button>
 
               <button
@@ -481,8 +481,8 @@ export default function Red3DPage() {
         {/* Subtítulo del modo */}
         <p className="text-sm text-texto-secundario mb-4">
           {mode === "rivalidades"
-            ? "🟥 Líneas = clásicos y enfrentamientos. Más gruesa = más historia en común."
-            : "🟨 Líneas = fichajes. El grosor indica la inversión movilizada."}
+            ? <><Square className="inline w-3 h-3 text-red-500 fill-red-500" /> Líneas = clásicos y enfrentamientos. Más gruesa = más historia en común.</>
+            : <><Square className="inline w-3 h-3 text-yellow-400 fill-yellow-400" /> Líneas = fichajes. El grosor indica la inversión movilizada.</>}
         </p>
 
         {/* Buscador + contador */}
@@ -523,7 +523,7 @@ export default function Red3DPage() {
                   aria-label="Activar mapa interactivo 3D"
                   className="group flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-[#1a0510] to-[#0d1a2e] border border-apf-rojo/40 text-texto-principal text-sm font-semibold shadow-[0_0_20px_-6px_rgba(204,0,28,0.4)] hover:shadow-[0_0_30px_-4px_rgba(204,0,28,0.6)] hover:border-apf-rojo/60 transition-all duration-300"
                 >
-                  <span className="text-lg">🌐</span>
+                  <span className="text-lg"><Globe className="w-5 h-5 text-apf-rojo" /></span>
                   <span>Activar Mapa Interactivo 3D</span>
                   <span className="text-texto-apagado group-hover:text-apf-rojo transition-colors">→</span>
                 </button>
@@ -618,7 +618,7 @@ export default function Red3DPage() {
                     className="absolute inset-x-3 top-16 mx-auto max-w-md z-20 bg-bg-secundario/95 backdrop-blur-sm border border-apf-dorado/40 rounded-2xl p-5 shadow-2xl ring-1 ring-white/10"
                   >
                     <div className="flex items-start gap-3">
-                      <span className="text-2xl">🧭</span>
+                      <span className="text-2xl"><Compass className="w-7 h-7 text-apf-amarillo" /></span>
                       <div className="flex-1">
                         <h3 className="text-texto-principal font-bold text-base">Cómo explorar la Red 3D</h3>
                         <ul className="mt-2 space-y-1 text-sm text-texto-secundario list-disc list-inside">

@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getGoleadores } from "@/lib/api";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import CountUp from "@/components/ui/CountUp";
+import { Medal } from "lucide-react";
 
 interface Goleador {
   id: string;
@@ -17,9 +18,9 @@ interface Goleador {
 }
 
 const PODIUM_STYLES = [
-  { ring: "ring-amber-300/60", glow: "shadow-[0_0_30px_-6px_rgba(252,211,77,0.5)]", badge: "🥇", label: "text-amber-300" },
-  { ring: "ring-slate-300/50", glow: "shadow-[0_0_24px_-8px_rgba(203,213,225,0.4)]", badge: "🥈", label: "text-slate-300" },
-  { ring: "ring-orange-400/50", glow: "shadow-[0_0_24px_-8px_rgba(251,146,60,0.4)]", badge: "🥉", label: "text-orange-400" },
+  { ring: "ring-amber-300/60", glow: "shadow-[0_0_30px_-6px_rgba(252,211,77,0.5)]", icon: "text-amber-300", label: "text-amber-300" },
+  { ring: "ring-slate-300/50", glow: "shadow-[0_0_24px_-8px_rgba(203,213,225,0.4)]", icon: "text-slate-300", label: "text-slate-300" },
+  { ring: "ring-orange-400/50", glow: "shadow-[0_0_24px_-8px_rgba(251,146,60,0.4)]", icon: "text-orange-400", label: "text-orange-400" },
 ];
 
 export default function GoleadoresList({ torneo }: { torneo: string }) {
@@ -92,7 +93,7 @@ export default function GoleadoresList({ torneo }: { torneo: string }) {
                 key={g.id}
                 className={`relative flex flex-col items-center text-center p-5 rounded-2xl bg-bg-secundario/50 border border-borde-sutil ${s.ring} ${s.glow}`}
               >
-                <span className="text-3xl mb-1">{s.badge}</span>
+                <span className="text-3xl mb-1"><Medal className={`w-8 h-8 ${s.icon}`} /></span>
                 <p className="font-bold text-texto-principal leading-tight">{g.nombre}</p>
                 <p className="text-xs text-texto-terciario mt-1">{g.club_nombre || g.club_id}</p>
                 <p className={`text-4xl font-black mt-2 tabular-nums ${s.label}`}>

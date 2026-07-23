@@ -8,6 +8,7 @@ import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import ErrorMessage from "@/components/ui/ErrorMessage";
 import PageHeader from "@/components/ui/PageHeader";
 import ScrollReveal from "@/components/ui/ScrollReveal";
+import { Medal } from "lucide-react";
 
 export default function LeaderboardPage() {
   const { data: leaderboard, isLoading, error } = useQuery<LeaderboardEntry[]>({
@@ -51,11 +52,11 @@ export default function LeaderboardPage() {
                 >
                   <td className="p-3 sm:p-4 font-bold">
                     {i === 0 ? (
-                      <span className="text-apf-amarillo">🥇 1</span>
+                      <span className="text-apf-amarillo inline-flex items-center gap-1"><Medal className="w-4 h-4" /> 1</span>
                     ) : i === 1 ? (
-                      <span className="text-texto-secundario">🥈 2</span>
+                      <span className="text-texto-secundario inline-flex items-center gap-1"><Medal className="w-4 h-4" /> 2</span>
                     ) : i === 2 ? (
-                      <span className="text-apf-rojo">🥉 3</span>
+                      <span className="text-apf-rojo inline-flex items-center gap-1"><Medal className="w-4 h-4" /> 3</span>
                     ) : (
                       <span className="text-texto-apagado">{i + 1}</span>
                     )}

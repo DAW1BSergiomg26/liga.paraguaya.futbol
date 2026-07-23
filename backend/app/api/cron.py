@@ -17,7 +17,7 @@ async def enviar_recordatorios(
         await PushService.enviar_a_partido(
             db,
             partido.id,
-            "🔔 Recordatorio de predicción",
+            "Recordatorio de predicción",
             f"{partido.local.nombre} vs {partido.visitante.nombre} comienza en 30 min!",
             f"/partidos/{partido.id}",
         )
