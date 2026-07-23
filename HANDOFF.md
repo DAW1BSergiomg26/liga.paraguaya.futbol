@@ -209,14 +209,45 @@ b1c336e fix: corregir renderizado 3D del balón
 fea5d8f feat: reemplazar icono por balón 3D realista
 ```
 
-## 8. Próximos Pasos Sugeridos
+## 8. PR #18 — Seed Noticias (Completado)
 
-1. **Push + merge PR #14** — ESLint fixes (16→0 errors) + noticias filter bug fix. CI should pass.
-2. **Cambiar default branch a `main`** en GitHub + actualizar Vercel config.
-3. **Dominio propio:** Configurar `NEXT_PUBLIC_SITE_URL` en Vercel con el dominio definitivo antes de que Google indexe URLs de preview
-4. **Red3D tests:** Resolver issue de hidratación React 19 + Three.js en tests de `red3d/page.test.tsx`
-5. **OG Images verificación:** Usar Rich Results Test de Google y Facebook Debugger para confirmar que los schemas y previews se renderizan correctamente
-6. **Clean ESLint warnings** — 23 warnings preexistentes (unused vars, exhaustive-deps)
+**Branch:** `feat/noticias-seed-rich` → `feature/frontend-react-v1`  
+**PR:** https://github.com/DAW1BSergiomg26/liga.paraguaya.futbol/pull/18  
+**Status:** MERGED (2026-07-23)
+
+### Contenido
+- **12 noticias sembradas** en `backend/data/liga.db` (SQLite)
+  - 6 editoriales (Liga Paraguaya): Olimpia, Cerro Porteño, Guaraní, Rubio Ñú, Selección, Sportivo Luqueño
+  - 6 RSS: ABC Color, ESPN, Telefuturo, La Nación, Popular, 1000 Noticias
+- **Imágenes Unsplash** via `_img.format(photo_id=...)` — 12 URLs de photos reales
+- **Contenido HTML rico** (h2, p, strong) — no más resumen plano
+- **Fechas variadas** (8-21 julio 2026) con horas específicas
+- **Upseed idempotente** — re-ejecutar no duplica (upsert por `titulo`)
+- **Fix seed_transferencias** — `fecha` strings → `date` objects via `datetime.date.fromisoformat()`
+
+### Archivos modificados
+- `backend/app/scripts/seed.py` — seed + 12 noticias + date fix
+- `frontend/next.config.ts` — `images.unsplash.com` en `remotePatterns`
+- `frontend/src/app/noticias/PageClient.tsx` — Grid + filtros + paginación
+- `frontend/src/app/noticias/[id]/PageClient.tsx` — Detalle con `NoticiasRelacionadas`
+- `frontend/src/components/noticia/NoticiaCard.tsx` — Card con SmartImage + fallback
+- `frontend/src/components/noticia/NoticiasRelacionadas.tsx` — Sidebar related
+- `frontend/src/components/noticia/fallbackImages.ts` — SVG fallbacks por origen
+- `frontend/src/lib/api.ts` — `getNoticias`, `getNoticia`, `getNoticiasRelacionadas`
+
+### Verificación
+- ✅ Backend tests: 203/203 pass
+- ✅ Frontend build: clean
+- ✅ Seed ejecutado en SQLite: 6 secciones OK
+- ✅ Merge conflictos resueltos (6 blocks en seed.py)
+
+## 9. Próximos Pasos Sugeridos
+
+1. **Verificar noticias en browser** — Navegar a `/noticias` y `/noticias/[id]` para confirmar imágenes y contenido renderizan correctamente
+2. **Deploy** — `git push origin feature/frontend-react-v1` para trigger automático en Vercel + Render
+3. **Dominio propio:** Configurar `NEXT_PUBLIC_SITE_URL` en Vercel con el dominio definitivo
+4. **OG Images verificación:** Usar Rich Results Test de Google y Facebook Debugger
+5. **Clean ESLint warnings** — 23 warnings preexistentes (unused vars, exhaustive-deps)
 
 ## 9. Comandos de Referencia
 
