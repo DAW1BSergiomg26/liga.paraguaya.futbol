@@ -140,7 +140,7 @@ Cada página sigue el patrón:
 
 | Suite | Framework | Tests | Estado |
 |-------|-----------|-------|--------|
-| Backend | pytest | 212 | ✅ 207 pasan (5 preexistentes) |
+| Backend | pytest | 214 | ✅ 214 pasan |
 | Frontend unit | Vitest | 45 | ✅ Pasan |
 | Frontend e2e | Playwright | — | ⚠️ Requieren dev server |
 
@@ -211,11 +211,12 @@ fea5d8f feat: reemplazar icono por balón 3D realista
 
 ## 8. Próximos Pasos Sugeridos
 
-1. **Dominio propio:** Configurar `NEXT_PUBLIC_SITE_URL` en Vercel con el dominio definitivo antes de que Google indexe URLs de preview
-2. **Red3D tests:** Resolver issue de hidratación React 19 + Three.js en tests de `red3d/page.test.tsx`
-3. **OG Images verificación:** Usar Rich Results Test de Google y Facebook Debugger para confirmar que los schemas y previews se renderizan correctamente
-4. **PWA:** `manifest.json` y `/apple-touch-icon.png` ya existen en metadata; considerar service worker offline
-5. **Analytics:** Integrar Vercel Analytics o similar para métricas de uso
+1. **Push + merge PR #14** — ESLint fixes (16→0 errors) + noticias filter bug fix. CI should pass.
+2. **Cambiar default branch a `main`** en GitHub + actualizar Vercel config.
+3. **Dominio propio:** Configurar `NEXT_PUBLIC_SITE_URL` en Vercel con el dominio definitivo antes de que Google indexe URLs de preview
+4. **Red3D tests:** Resolver issue de hidratación React 19 + Three.js en tests de `red3d/page.test.tsx`
+5. **OG Images verificación:** Usar Rich Results Test de Google y Facebook Debugger para confirmar que los schemas y previews se renderizan correctamente
+6. **Clean ESLint warnings** — 23 warnings preexistentes (unused vars, exhaustive-deps)
 
 ## 9. Comandos de Referencia
 
@@ -226,7 +227,7 @@ cd frontend && npm run build        # Build de producción
 cd frontend && npx vitest run       # Tests unitarios
 
 # Backend
-python -m pytest backend/tests/ -v  # Todos los tests (202)
+python -m pytest backend/tests/ -v  # Todos los tests (214)
 
 # Deploy
 git push origin main                # Trigger automático en Vercel + Render
