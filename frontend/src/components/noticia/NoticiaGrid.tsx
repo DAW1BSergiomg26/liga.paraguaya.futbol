@@ -24,8 +24,8 @@ export default function NoticiaGrid({ noticias }: NoticiaGridProps) {
           <NoticiaCard
             key={noticia.id}
             noticia={noticia}
-            variant={i === 0 ? "featured" : i < 3 ? "normal" : "compact"}
-            priority={i === 0}
+            variant={i === 0 ? "featured" : i < 5 ? "normal" : "compact"}
+            priority={i < 3}
           />
         ))}
       </div>
