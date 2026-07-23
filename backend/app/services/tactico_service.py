@@ -273,7 +273,7 @@ EQUIPOS_MOCK = {
         ],
         "stats": EstadisticasEquipo(xg=1.08, posesion=43.2, tiros_puerta=3.2, pases_completados=71.5, duelos_ganados=49.2, corners=3.5),
         "tendencias": [
-            InsightTactico(icono="🌟", texto="Santiago Salcedo: ídolo con 150+ goles en su carrera", metrica="150+ goles"),
+            InsightTactico(icono="Star", texto="Santiago Salcedo: ídolo con 150+ goles en su carrera", metrica="150+ goles"),
             InsightTactico(icono="BarChart3", texto="Promedio más bajo de la liga: 1.08 xG", metrica="1.08 xG"),
             InsightTactico(icono="Dumbbell", texto="Lucha por la permanencia: 3 victorias en últimos 10", metrica="3 victorias"),
         ],
@@ -333,7 +333,7 @@ EQUIPOS_MOCK = {
         ],
         "stats": EstadisticasEquipo(xg=1.25, posesion=47.5, tiros_puerta=4.0, pases_completados=75.2, duelos_ganados=52.8, corners=4.3),
         "tendencias": [
-            InsightTactico(icono="🌟", texto="Juan Iturbe: ex-Paraguay con calidad sudamericana", metrica="7.2 rating"),
+            InsightTactico(icono="Star", texto="Juan Iturbe: ex-Paraguay con calidad sudamericana", metrica="7.2 rating"),
             InsightTactico(icono="Zap", texto="Juego ofensivo: promedia 4.0 tiros a puerta", metrica="4.0 tiros"),
             InsightTactico(icono="BarChart3", texto="Mejor porcentaje de posesión vs rivales directos", metrica="48.5%"),
         ],
@@ -483,7 +483,7 @@ EQUIPOS_MOCK = {
         ],
         "stats": EstadisticasEquipo(xg=0.95, posesion=41.2, tiros_puerta=2.8, pases_completados=68.5, duelos_ganados=47.3, corners=2.9),
         "tendencias": [
-            InsightTactico(icono="📉", texto="Último en la tabla: 15 puntos en 22 partidos", metrica="16to"),
+            InsightTactico(icono="TrendingDown", texto="Último en la tabla: 15 puntos en 22 partidos", metrica="16to"),
             InsightTactico(icono="Shield", texto="Defensa débil: promedia 1.9 goles recibidos", metrica="1.9 goles"),
             InsightTactico(icono="Zap", texto="Poca capacidad ofensiva: solo 0.95 xG promedio", metrica="0.95 xG"),
         ],

@@ -9,11 +9,12 @@ import { TableSkeleton } from "@/components/ui/Skeleton";
 import ErrorMessage from "@/components/ui/ErrorMessage";
 import PageHeader from "@/components/ui/PageHeader";
 import Sidebar from "@/components/sidebar/Sidebar";
+import { Medal } from "lucide-react";
 
 function Medalla({ pos }: { pos: number }) {
-  if (pos === 1) return <span className="mr-1">🥇</span>;
-  if (pos === 2) return <span className="mr-1">🥈</span>;
-  if (pos === 3) return <span className="mr-1">🥉</span>;
+  if (pos === 1) return <span className="mr-1"><Medal className="w-4 h-4 text-apf-amarillo inline" /></span>;
+  if (pos === 2) return <span className="mr-1"><Medal className="w-4 h-4 text-gray-300 inline" /></span>;
+  if (pos === 3) return <span className="mr-1"><Medal className="w-4 h-4 text-orange-400 inline" /></span>;
   return null;
 }
 

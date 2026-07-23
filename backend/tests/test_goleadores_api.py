@@ -6,7 +6,7 @@ from tests.conftest import seed_test_data
 
 @pytest.mark.asyncio
 async def test_get_goleadores(client):
-    response = await client.get("/api/v1/goleadores")
+    response = await client.get("/api/v1/goleadores?torneo=Apertura+2026")
     assert response.status_code == 200
     data = response.json()
     assert "goleadores" in data

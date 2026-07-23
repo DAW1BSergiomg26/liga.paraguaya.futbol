@@ -4,6 +4,7 @@
 import Image from "next/image";
 import { useMemo, useState } from "react";
 import { escudoUrl } from "@/lib/escudos";
+import { Square } from "lucide-react";
 
 /* ── Interfaces ───────────────────────────────────────────── */
 
@@ -148,7 +149,7 @@ export default function Red2DFallback({
               : "text-texto-secundario hover:text-texto-principal"
           }`}
         >
-          🟥 Rivalidades
+          <Square className="inline w-3 h-3 text-red-500 fill-red-500" /> Rivalidades
         </button>
         <button
           onClick={() => setActiveTab("fichajes")}
@@ -158,7 +159,7 @@ export default function Red2DFallback({
               : "text-texto-secundario hover:text-texto-principal"
           }`}
         >
-          🟨 Mercado de Fichajes
+          <Square className="inline w-3 h-3 text-yellow-400 fill-yellow-400" /> Mercado de Fichajes
         </button>
       </div>
 
