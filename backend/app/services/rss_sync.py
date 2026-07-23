@@ -96,7 +96,7 @@ class RssSyncService:
                 "titulo": entry.get("title", ""),
                 "fuente": nombre,
                 "url_original": entry.get("link", ""),
-                "pub_date": pub_date or datetime.now(timezone.utc),
+                "pub_date": pub_date or datetime.utcnow(),
                 "resumen": _html_to_plain(summary_raw),
                 "contenido": _clean_html(content_raw),
                 "imagen_url": imagen_url,
@@ -135,7 +135,7 @@ class RssSyncService:
         return {"new": total_new, "skipped": total_skipped}
 
     async def cleanup_old(self) -> int:
-        cutoff = datetime.now(timezone.utc) - timedelta(days=RSS_MAX_AGE_DAYS)
+        cutoff = datetime.utcnow() - timedelta(days=RSS_MAX_AGE_DAYS)
         result = await self.db.execute(
             select(Noticia).where(
                 Noticia.origen == "rss",

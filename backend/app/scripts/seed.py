@@ -475,7 +475,7 @@ async def seed_noticias(db: AsyncSession):
     inserta si no existe. Idempotente — correrlo de nuevo no duplica.
     """
     from ..models.noticia import Noticia
-    from datetime import datetime, timezone
+    from datetime import datetime
 
     _img = "https://images.unsplash.com/photo-{photo_id}?w=800&h=600&fit=crop&auto=format"
 
@@ -492,7 +492,7 @@ async def seed_noticias(db: AsyncSession):
 <p>El proximo compromiso sera contra Sportivo Luqueno en la fecha 15, un partido que el equipo blancorrojo espera resolver con la misma contundencia que lo ha caracterizado durante toda la temporada. El entrenador ha confirmado que no habra rotaciones importantes.</p>""",
             "fuente": "Liga Paraguaya",
             "origen": "editorial",
-            "pub_date": datetime(2026, 7, 20, 14, 0, tzinfo=timezone.utc),
+            "pub_date": datetime(2026, 7, 20, 14, 0),
             "imagen_url": _img.format(photo_id="1574629810914-9e590e708vae"),
         },
         {
@@ -506,7 +506,7 @@ async def seed_noticias(db: AsyncSession):
 <p>El cuerpo tecnico se muestra optimista con los nuevos incorporados, quienes ya se han entrenado con el grupo y muestran una adaptacion rapida al estilo de juego del equipo. Se esperan debuts oficiales en las proximas fechas del torneo local.</p>""",
             "fuente": "Liga Paraguaya",
             "origen": "editorial",
-            "pub_date": datetime(2026, 7, 18, 10, 30, tzinfo=timezone.utc),
+            "pub_date": datetime(2026, 7, 18, 10, 30),
             "imagen_url": _img.format(photo_id="1522778119319-2c3ba4d48a10"),
         },
         {
@@ -520,7 +520,7 @@ async def seed_noticias(db: AsyncSession):
 <p>Los delanteros guaranitas han sido determinantes en la racha positiva, combinando experiencia juvenil con goles oportunos. El equipo busca consolidar su proyecto deportivo que incluye la formacion de jugadores locales.</p>""",
             "fuente": "Liga Paraguaya",
             "origen": "editorial",
-            "pub_date": datetime(2026, 7, 15, 16, 0, tzinfo=timezone.utc),
+            "pub_date": datetime(2026, 7, 15, 16, 0),
             "imagen_url": _img.format(photo_id="1431324155650-1b4475d6560c"),
         },
         {
@@ -534,7 +534,7 @@ async def seed_noticias(db: AsyncSession):
 <p>Rubio Nu busca mantener la racha en las proximas fechas, cuando enfrente a equipos de mayor jerarquia. El plantel se mantiene motivado y con la confianza necesaria para seguir sumando victorias importantes.</p>""",
             "fuente": "Liga Paraguaya",
             "origen": "editorial",
-            "pub_date": datetime(2026, 7, 12, 11, 0, tzinfo=timezone.utc),
+            "pub_date": datetime(2026, 7, 12, 11, 0),
             "imagen_url": _img.format(photo_id="1508098682722-e99c43a406b2"),
         },
         {
@@ -548,7 +548,7 @@ async def seed_noticias(db: AsyncSession):
 <p>A pesar de los malos resultados, la fanaticada luquena se mantiene fiel al equipo. Los hinchas esperan que la visita al Defensores del Chaco sirva para revertir la situacion y empezar a sumar de a tres.</p>""",
             "fuente": "Liga Paraguaya",
             "origen": "editorial",
-            "pub_date": datetime(2026, 7, 10, 9, 0, tzinfo=timezone.utc),
+            "pub_date": datetime(2026, 7, 10, 9, 0),
             "imagen_url": _img.format(photo_id="1553778263-737702704237"),
         },
         {
@@ -562,7 +562,7 @@ async def seed_noticias(db: AsyncSession):
 <p>Paraguay se encuentra en zona de clasificacion directa al Mundial 2026, pero necesita sumar puntos para mantener su posicion. Los proximos dos partidos son fundamentales para el sueño mundialista.</p>""",
             "fuente": "Liga Paraguaya",
             "origen": "editorial",
-            "pub_date": datetime(2026, 7, 8, 15, 0, tzinfo=timezone.utc),
+            "pub_date": datetime(2026, 7, 8, 15, 0),
             "imagen_url": _img.format(photo_id="1579952363873-27f3bade9f55"),
         },
         # ── 6 RSS (origen="rss", distintas fuentes) ──
@@ -577,7 +577,7 @@ async def seed_noticias(db: AsyncSession):
 <p>Con este resultado, Olimpia acumula 39 puntos en 15 partidos, manteniendo una ventaja de 7 puntos sobre el segundo clasificado. El equipo ha convertido 38 goles y solo ha recibido 12, mostrando un balance extraordinario.</p>""",
             "fuente": "ABC Color",
             "origen": "rss",
-            "pub_date": datetime(2026, 7, 21, 22, 0, tzinfo=timezone.utc),
+            "pub_date": datetime(2026, 7, 21, 22, 0),
             "imagen_url": _img.format(photo_id="1517466787188-cf91b740d3f6"),
             "url_original": "https://www.abc.com.py/deportes/olimpia-nacional-3-0",
         },
@@ -592,7 +592,7 @@ async def seed_noticias(db: AsyncSession):
 <p>El empate beneficia a Olimpia, que aumenta su ventaja en la tabla. Libertad se mantiene segundo con 32 puntos, mientras que Guarani suma 29 y se consolida en zona de clasificacion internacional.</p>""",
             "fuente": "ESPN Paraguay",
             "origen": "rss",
-            "pub_date": datetime(2026, 7, 19, 20, 30, tzinfo=timezone.utc),
+            "pub_date": datetime(2026, 7, 19, 20, 30),
             "imagen_url": _img.format(photo_id="1560272618-493d3ea477f8"),
             "url_original": "https://www.espn.com.py/futbol/nota/_/id/libertad-guarani-1-1",
         },
@@ -607,7 +607,7 @@ async def seed_noticias(db: AsyncSession):
 <p>Con este triunfo, Cerro Porteno se mantiene en el segundo puesto con 33 puntos, a 6 de Olimpia. El equipo busca mantener la presion sobre el lider y esperar cualquier tropiezo en las ultimas fechas.</p>""",
             "fuente": "Telefuturo",
             "origen": "rss",
-            "pub_date": datetime(2026, 7, 17, 18, 0, tzinfo=timezone.utc),
+            "pub_date": datetime(2026, 7, 17, 18, 0),
             "imagen_url": _img.format(photo_id="1551958325-38adb9e48dbb"),
             "url_original": "https://www.telefuturo.com.py/deportes/cerro-trinidense-2-1",
         },
@@ -622,7 +622,7 @@ async def seed_noticias(db: AsyncSession):
 <p>En esta racha, Rubio Nu ha convertido 14 goles y solo ha recibido 3. El equipo ha promediado el 67% de posesión en cada partido, mostrando un dominio absoluto en cada compromiso.</p>""",
             "fuente": "La Nación",
             "origen": "rss",
-            "pub_date": datetime(2026, 7, 14, 17, 0, tzinfo=timezone.utc),
+            "pub_date": datetime(2026, 7, 14, 17, 0),
             "imagen_url": _img.format(photo_id="1517841905240-472689e1170e"),
             "url_original": "https://www.lanacion.com.py/deportes/rubio-nu-12-octubre-2-0",
         },
@@ -637,7 +637,7 @@ async def seed_noticias(db: AsyncSession):
 <p>El próximo rival será Sol de América, un equipo accesible que podría servir para que Nacional retome el camino de las victorias y recupere la confianza perdida.</p>""",
             "fuente": "Popular",
             "origen": "rss",
-            "pub_date": datetime(2026, 7, 11, 14, 0, tzinfo=timezone.utc),
+            "pub_date": datetime(2026, 7, 11, 14, 0),
             "imagen_url": _img.format(photo_id="1556056612-9a3b42d1f3e6"),
             "url_original": "https://www.popular.com.py/deportes/nacional-crisis",
         },
@@ -652,7 +652,7 @@ async def seed_noticias(db: AsyncSession):
 <p>Participarán Olimpia, Cerro Porteño, Guarani, Libertad, Nacional, Sportivo Luqueño, Rubio Ñú, 3 de Febrero, General Díaz, Deportivo Capiatá, Fernando de la Mora y Sportivo Trinidense. El torneo arrancará el próximo fin de semana.</p>""",
             "fuente": "1000 Noticias",
             "origen": "rss",
-            "pub_date": datetime(2026, 7, 9, 12, 0, tzinfo=timezone.utc),
+            "pub_date": datetime(2026, 7, 9, 12, 0),
             "imagen_url": _img.format(photo_id="1431324155650-1b4475d6560c"),
             "url_original": "https://www.1000noticias.com.py/deportes/bsub-17",
         },
