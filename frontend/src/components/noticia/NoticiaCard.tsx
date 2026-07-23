@@ -56,35 +56,49 @@ export default function NoticiaCard({ noticia, variant = "normal", priority = fa
   return (
     <Link
       href={`/noticias/${noticia.id}`}
-      className={`group block rounded-xl border border-white/[0.06] bg-bg-secundario/80 backdrop-blur-sm overflow-hidden transition-all duration-300 hover:border-apf-rojo/40 hover:shadow-[0_8px_32px_rgba(204,0,28,0.12)] ${
+      className={`group block rounded-xl border border-white/[0.06] bg-bg-secundario overflow-hidden transition-all duration-300 hover:border-apf-rojo/30 hover:shadow-[0_8px_32px_rgba(204,0,28,0.1)] ${
         isFeatured ? "md:col-span-2 md:row-span-2" : ""
       }`}
     >
-      <div className={`relative overflow-hidden ${isFeatured ? "h-72" : isCompact ? "h-32" : "h-48"}`}>
+      {/* Image zone — fixed height, clean container */}
+      <div className={`relative overflow-hidden ${isFeatured ? "h-56 md:h-64" : isCompact ? "h-36" : "h-44"}`}>
         <SmartImage
           src={imagenSrc}
           alt={noticia.titulo}
           fill
           sizes={isFeatured ? "(max-width: 768px) 100vw, 66vw" : "(max-width: 768px) 100vw, 33vw"}
           priority={priority}
-          className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+          className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
           fallback={
-            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-apf-azul/10 to-apf-rojo/10">
-              <svg className={`text-apf-rojo/30 ${isFeatured ? "w-16 h-16" : "w-10 h-10"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
-              </svg>
+            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-bg-terciario to-bg-secundario">
+              <div className="flex flex-col items-center gap-2">
+                <div className="w-12 h-12 rounded-full bg-white/[0.04] flex items-center justify-center">
+                  <svg className="w-6 h-6 text-apf-rojo/25" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                  </svg>
+                </div>
+                <span className="text-[10px] text-texto-apagado/50 uppercase tracking-wider">Sin imagen</span>
+              </div>
             </div>
           }
         />
 
+        {/* Persistent overlay — badges always readable on any image */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-transparent pointer-events-none" />
+
+        {/* Bottom fade — smooth transition to text body */}
+        <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-bg-secundario to-transparent pointer-events-none" />
+
+        {/* Category badge — top-left */}
         {categoria && (
-          <span className={`absolute top-3 left-3 text-[11px] px-2.5 py-1 rounded-md font-medium backdrop-blur-sm ${categoria.color}`}>
+          <span className={`absolute top-3 left-3 text-[11px] px-2.5 py-1 rounded-md font-medium shadow-sm ${categoria.color}`}>
             {categoria.label}
           </span>
         )}
 
+        {/* Video play button */}
         {noticia.video_url && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <div className="absolute inset-0 flex items-center justify-center bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
             <div className="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center shadow-lg">
               <svg className="w-6 h-6 text-apf-rojo ml-0.5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M8 5v14l11-7z" />
@@ -92,11 +106,10 @@ export default function NoticiaCard({ noticia, variant = "normal", priority = fa
             </div>
           </div>
         )}
-
-        <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
       </div>
 
-      <div className={`${isFeatured ? "p-6" : isCompact ? "p-3" : "p-4"}`}>
+      {/* Text body — clean, independent from image */}
+      <div className={`${isFeatured ? "p-5 md:p-6" : isCompact ? "p-3" : "p-4"}`}>
         <div className="flex items-center gap-2 mb-2">
           <FuenteBadge fuente={noticia.fuente} />
           <span className="text-[11px] text-texto-apagado">{formatearFecha(noticia.pub_date)}</span>
@@ -107,8 +120,8 @@ export default function NoticiaCard({ noticia, variant = "normal", priority = fa
             </span>
           )}
         </div>
-        <h3 className={`font-bold text-texto-principal group-hover:text-apf-rojo transition-colors duration-200 leading-tight ${
-          isFeatured ? "text-xl" : isCompact ? "text-sm" : "text-[15px]"
+        <h3 className={`font-bold text-texto-principal group-hover:text-apf-rojo transition-colors duration-200 leading-snug ${
+          isFeatured ? "text-lg md:text-xl" : isCompact ? "text-sm" : "text-[15px]"
         }`}>
           {noticia.titulo}
         </h3>

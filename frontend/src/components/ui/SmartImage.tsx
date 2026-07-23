@@ -3,6 +3,15 @@
 import Image from "next/image";
 import { useState, type ReactNode } from "react";
 
+function isExternalUrl(src: string): boolean {
+  try {
+    const url = new URL(src);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return src.startsWith("/") || src.startsWith("./");
+  }
+}
+
 interface SmartImageProps {
   src?: string | null;
   alt: string;
@@ -28,7 +37,7 @@ export default function SmartImage({
 }: SmartImageProps) {
   const [failed, setFailed] = useState(false);
 
-  if (!src || failed) {
+  if (!src || failed || !isExternalUrl(src)) {
     return <>{fallback ?? null}</>;
   }
 

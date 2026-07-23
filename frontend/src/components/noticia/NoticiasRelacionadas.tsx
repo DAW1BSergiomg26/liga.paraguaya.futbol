@@ -17,7 +17,7 @@ function MiniCard({ noticia }: { noticia: Noticia }) {
   return (
     <Link
       href={`/noticias/${noticia.id}`}
-      className="group flex gap-3 p-3 rounded-xl border border-white/[0.06] bg-bg-secundario/60 backdrop-blur-sm hover:border-apf-rojo/40 hover:bg-white/[0.04] transition-all duration-300"
+      className="group flex gap-3 p-3 rounded-xl border border-white/[0.06] bg-bg-secundario hover:border-apf-rojo/30 hover:bg-white/[0.03] transition-all duration-300"
     >
       <div className="relative w-24 h-20 shrink-0 rounded-lg overflow-hidden">
         <SmartImage
@@ -25,13 +25,14 @@ function MiniCard({ noticia }: { noticia: Noticia }) {
           alt={noticia.titulo}
           fill
           sizes="96px"
-          className="object-cover transition-transform duration-500 group-hover:scale-110"
+          className="object-cover transition-transform duration-500 group-hover:scale-105"
           fallback={
-            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-apf-azul/10 to-apf-rojo/10">
-              <Newspaper className="w-5 h-5 text-apf-rojo/30" />
+            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-bg-terciario to-bg-secundario">
+              <Newspaper className="w-5 h-5 text-apf-rojo/20" />
             </div>
           }
         />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-transparent pointer-events-none" />
       </div>
       <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
         <h4 className="text-sm font-semibold text-texto-principal group-hover:text-apf-rojo transition-colors duration-200 line-clamp-2 leading-tight">
