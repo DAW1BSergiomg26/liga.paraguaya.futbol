@@ -333,6 +333,10 @@ async def seed_transferencias(db: AsyncSession):
 
                 if k != "id":
 
+                    if k == "fecha" and isinstance(v, str):
+
+                        v = __import__("datetime").date.fromisoformat(v)
+
                     setattr(t, k, v)
 
             count_upd += 1
@@ -465,82 +469,240 @@ async def seed_tabla_historico(db: AsyncSession):
 
 
 async def seed_noticias(db: AsyncSession):
-    """Semilla inicial de noticias editoriales sobre la liga paraguaya."""
+    """Semilla de 12 noticias con imágenes Unsplash y contenido HTML rico.
+
+    Usa upsert por titulo: actualiza imagen_url/contenido si ya existe,
+    inserta si no existe. Idempotente — correrlo de nuevo no duplica.
+    """
     from ..models.noticia import Noticia
     from datetime import datetime, timezone
 
-    existing = await db.execute(select(Noticia.id))
-    if existing.first():
-        print("  Noticias: ya existen, omitiendo seed")
-        return 0
+    _img = "https://images.unsplash.com/photo-{photo_id}?w=800&h=600&fit=crop&auto=format"
 
     noticias = [
+        # ── 6 editoriales (origen="editorial", fuente="Liga Paraguaya") ──
         {
-            "titulo": "Olimpia busca mantener el liderazgo en la fecha 15",
-            "resumen": "El Decano quiere consolidar su posicion en la cima del Torneo Apertura 2026.",
-            "contenido": "Club Olimpia llega a la fecha 15 del Torneo Apertura 2026 como lider invicto. Con 11 victorias y 3 empates, el equipo busca consolidar su ventaja.",
+            "titulo": "Olimpia domina el Torneo Apertura con racha invicta de 14 fechas",
+            "resumen": "El Decano acumula 11 victorias y 3 empates, liderando la tabla con 36 puntos.",
+            "contenido": """<h2>Un campeonato dominante</h2>
+<p>Club Olimpia llega a la fecha 15 del <strong>Torneo Apertura 2026</strong> como lider indiscutido. Con 11 victorias y solo 3 empates en 14 partidos, el equipo acumula 36 puntos y mantiene una diferencia de goles de +18 que habla de su solidez tanto en ataque como en defensa.</p>
+<h2>El factor Defensores del Chaco</h2>
+<p>El <strong>Defensores del Chaco</strong> se ha convertido en una fortaleza infranqueable. Olimpia no ha perdido en su estadio en todo el torneo, acumulando 6 victorias y 1 empate como local. La fanaticada ha respondido con asistencias historicas que elevan el rendimiento del plantel.</p>
+<h2>Proximo desafio</h2>
+<p>El proximo compromiso sera contra Sportivo Luqueno en la fecha 15, un partido que el equipo blancorrojo espera resolver con la misma contundencia que lo ha caracterizado durante toda la temporada. El entrenador ha confirmado que no habra rotaciones importantes.</p>""",
             "fuente": "Liga Paraguaya",
             "origen": "editorial",
-            "imagen_url": "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=800&h=500&fit=crop",
-            "pub_date": datetime(2026, 7, 20, tzinfo=timezone.utc),
+            "pub_date": datetime(2026, 7, 20, 14, 0, tzinfo=timezone.utc),
+            "imagen_url": _img.format(photo_id="1574629810914-9e590e708vae"),
         },
         {
-            "titulo": "Cerro Porteno refuerza su plantel para la Copa Libertadores",
-            "resumen": "El Abad del Sur incorpora dos jugadores para la fase de grupos continental.",
-            "contenido": "Club Cerro Porteno anuncio la incorporacion de dos refuerzos de cara a la Copa Libertadores 2026.",
+            "titulo": "Cerro Porteno se prepara para la Copa Libertadores con refuerzos estrella",
+            "resumen": "El Abad del Sur incorpora dos jugadores de primer nivel para la fase de grupos continental.",
+            "contenido": """<h2>Refuerzos de impacto inmediato</h2>
+<p>Club Cerro Porteno ha concretado la incorporacion de dos futbolistas de jerarquia de cara a la <strong>Copa Libertadores 2026</strong>. Los nuevos refuerzos llegan para reforzar las lineas que mostraron debilidades en la fase anterior del torneo continental.</p>
+<h2>El proyecto deportivo</h2>
+<p>La dirigencia cerrenha ha invertido fuertemente en este plantel, entendiendo que la Copa Libertadores representa la maxima aspiracion del club. Con un presupuesto historico para refuerzos, Cerro apunta a superar la fase de grupos y llegar al menos a cuartos de final.</p>
+<h2>La opinion del technical staff</h2>
+<p>El cuerpo tecnico se muestra optimista con los nuevos incorporados, quienes ya se han entrenado con el grupo y muestran una adaptacion rapida al estilo de juego del equipo. Se esperan debuts oficiales en las proximas fechas del torneo local.</p>""",
             "fuente": "Liga Paraguaya",
             "origen": "editorial",
-            "imagen_url": "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=500&fit=crop",
-            "pub_date": datetime(2026, 7, 18, tzinfo=timezone.utc),
+            "pub_date": datetime(2026, 7, 18, 10, 30, tzinfo=timezone.utc),
+            "imagen_url": _img.format(photo_id="1522778119319-2c3ba4d48a10"),
         },
         {
-            "titulo": "Guarani apunta a la clasificacion a copas internacionales",
-            "resumen": "El Aborigen necesita sumar puntos para asegurar su lugar continental.",
-            "contenido": "Club Guarani se encuentra en zona de clasificacion a copas internacionales tras las ultimas fechas.",
+            "titulo": "Guarani apunta firme a la clasificacion a copas internacionales",
+            "resumen": "El Aborigen necesita sumar en las ultimas fechas para asegurar su lugar en la zona continental.",
+            "contenido": """<h2>Una temporada de altibajos</h2>
+<p>Club Guarani ha tenido un Torneo Apertura irregular, pero las ultimas 5 fechas muestran una tendencia ascendente con 4 victorias y 1 empate. El equipo se encuentra en el 4to puesto con 28 puntos, justo en la zona de clasificacion a copas internacionales.</p>
+<h2>El desafio de las ultimas fechas</h2>
+<p>Con solo 4 partidos restantes, Guarani enfrenta un calendario exigente que incluye duelos directos contra equipos como Libertad y Nacional. Cada punto sera valioso para asegurar la clasificacion a la Copa Sudamericana 2026.</p>
+<h2>Jugadores clave</h2>
+<p>Los delanteros guaranitas han sido determinantes en la racha positiva, combinando experiencia juvenil con goles oportunos. El equipo busca consolidar su proyecto deportivo que incluye la formacion de jugadores locales.</p>""",
             "fuente": "Liga Paraguaya",
             "origen": "editorial",
-            "imagen_url": "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=800&h=500&fit=crop",
-            "pub_date": datetime(2026, 7, 15, tzinfo=timezone.utc),
+            "pub_date": datetime(2026, 7, 15, 16, 0, tzinfo=timezone.utc),
+            "imagen_url": _img.format(photo_id="1431324155650-1b4475d6560c"),
         },
         {
-            "titulo": "Rubio Nu sorprende con buena campana en el Torneo Apertura",
-            "resumen": "El equipo del cerro esta entre los primeros puestos tras una racha positiva.",
-            "contenido": "Club Rubio Nu se ha convertido en la revelacion del Torneo Apertura 2026 con 5 victorias consecutivas.",
+            "titulo": "Rubio Nu, la revelacion del Torneo Apertura 2026",
+            "resumen": "El equipo del cerro suma 5 victorias consecutivas y asciende a positions de privilegio.",
+            "contenido": """<h2>La racha que asombra</h2>
+<p>Club Rubio Nu se ha convertido en la <strong>revelacion del Torneo Apertura 2026</strong>. Con 5 victorias consecutivas y un fútbol ofensivo que ha enamorado a su fanaticada, el equipo del cerro ha escalado posiciones hasta situarse en el 5to lugar de la tabla.</p>
+<h2>El merito del cuerpo tecnico</h2>
+<p>El entrenador ha logrado cohesionar un plantel joven con piezas experimentadas, creando un sistema de juego que aprovecha la velocidad de sus extremos y la contundencia de su delantero centro. El trabajo tactico ha sido clave en esta racha historica.</p>
+<h2>Los proximos compromisos</h2>
+<p>Rubio Nu busca mantener la racha en las proximas fechas, cuando enfrente a equipos de mayor jerarquia. El plantel se mantiene motivado y con la confianza necesaria para seguir sumando victorias importantes.</p>""",
             "fuente": "Liga Paraguaya",
             "origen": "editorial",
-            "imagen_url": "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=800&h=500&fit=crop",
-            "pub_date": datetime(2026, 7, 12, tzinfo=timezone.utc),
+            "pub_date": datetime(2026, 7, 12, 11, 0, tzinfo=timezone.utc),
+            "imagen_url": _img.format(photo_id="1508098682722-e99c43a406b2"),
         },
         {
-            "titulo": "Sportivo Luqueno busca reencontrarse con la victoria",
-            "resumen": "El club de Luque necesita sumar para alejarse de los ultimos puestos.",
-            "contenido": "Sportivo Luqueno atraviesa un momento complicado en el Torneo Apertura 2026.",
+            "titulo": "Sportivo Luqueno busca reencontrarse con la victoria en el Defensores del Chaco",
+            "resumen": "El club de Luque necesita sumar puntos urgentemente para alejarse de los ultimos puestos.",
+            "contenido": """<h2>Un momento complicado</h2>
+<p>Sportivo Luqueno atraviesa un<strong> momento complicado</strong> en el Torneo Apertura 2026. Con solo 1 victoria en los ultimos 6 partidos, el equipo se encuentra en zona peligrosa con 16 puntos, a solo 3 puntos del ultimo puesto.</p>
+<h2>La urgencia de sumar</h2>
+<p>El plantel es consciente de la situacion critica y cada partido se convierte en una final. El entrenador ha reforzado los entrenamientos tácticos y ha做出 cambios en la alineacion para buscar la mejor combinacion posible.</p>
+<h2>El apoyo de la fanaticada</h2>
+<p>A pesar de los malos resultados, la fanaticada luquena se mantiene fiel al equipo. Los hinchas esperan que la visita al Defensores del Chaco sirva para revertir la situacion y empezar a sumar de a tres.</p>""",
             "fuente": "Liga Paraguaya",
             "origen": "editorial",
-            "imagen_url": "https://images.unsplash.com/photo-1553778263-73a83bab9b0c?w=800&h=500&fit=crop",
-            "pub_date": datetime(2026, 7, 10, tzinfo=timezone.utc),
+            "pub_date": datetime(2026, 7, 10, 9, 0, tzinfo=timezone.utc),
+            "imagen_url": _img.format(photo_id="1553778263-737702704237"),
+        },
+        {
+            "titulo": "La Seleccion Paraguaya convoca a sus figuras para las Eliminatorias Sudamericanas",
+            "resumen": "El Trebol convoca a 23 jugadores para los compromisos de septiembre contra Brasil y Venezuela.",
+            "contenido": """<h2>La lista definitiva</h2>
+<p>El director tecnico de la <strong>Seleccion Paraguaya</strong> ha dado a conocer la lista de 23 convocados para las proximas fechas de las Eliminatorias Sudamericanas 2026. Los compromisos seran contra Brasil en Asuncion y Venezuela en Puerto La Cruz.</p>
+<h2>Las novedades</h2>
+<p>Entre las novedades destacan el回归 de figuras que estuvieron ausentes en la fecha anterior, asi como el debut de jovenes talentos del futbol local. La inclusion de jugadores de Olimpia, Cerro Porteno y Guarani refuerza el compromiso de la liga con la seleccion.</p>
+<h2>El objetivo clasificatorio</h2>
+<p>Paraguay se encuentra en zona de clasificacion directa al Mundial 2026, pero necesita sumar puntos para mantener su posicion. Los proximos dos partidos son fundamentales para el sueño mundialista.</p>""",
+            "fuente": "Liga Paraguaya",
+            "origen": "editorial",
+            "pub_date": datetime(2026, 7, 8, 15, 0, tzinfo=timezone.utc),
+            "imagen_url": _img.format(photo_id="1579952363873-27f3bade9f55"),
+        },
+        # ── 6 RSS (origen="rss", distintas fuentes) ──
+        {
+            "titulo": "Olimpia golea a Nacional y se consolida como lider del Apertura",
+            "resumen": "El Decano venció 3-0 en el Defensores del Chaco con goles de Amaral, Benitez y Espinola.",
+            "contenido": """<h2>Un triunfo contundente</h2>
+<p>Club Olimpia goleo 3-0 a Nacional en el <strong>Defensores del Chaco</strong>, en un partido donde el equipo blancorrojo domino de principio a fin. Los goles fueron obra de Amaral (minuto 23), Benitez (minuto 56) y Espinola (minuto 78).</p>
+<h2>El partido</h2>
+<p>Olimpia salio con la intencion clara de sentenciar el partido desde el inicio. La presion alta del equipo no le permitio a Nacional generar peligro, y a los 23 minutos Amaral abrió el marcador tras una jugada colectiva magistral.</p>
+<h2>Las cifras</h2>
+<p>Con este resultado, Olimpia acumula 39 puntos en 15 partidos, manteniendo una ventaja de 7 puntos sobre el segundo clasificado. El equipo ha convertido 38 goles y solo ha recibido 12, mostrando un balance extraordinario.</p>""",
+            "fuente": "ABC Color",
+            "origen": "rss",
+            "pub_date": datetime(2026, 7, 21, 22, 0, tzinfo=timezone.utc),
+            "imagen_url": _img.format(photo_id="1517466787188-cf91b740d3f6"),
+            "url_original": "https://www.abc.com.py/deportes/olimpia-nacional-3-0",
+        },
+        {
+            "titulo": "Libertad y Guarani empatan 1-1 en el clásico del bairro Sacramento",
+            "resumen": "Empate justo en un clásico donde ambos equipos tuvieron chances de victoria.",
+            "contenido": """<h2>Un clásico intenso</h2>
+<p>El clásico del bairro Sacramento entre Libertad y Guarani finalizó con un empate 1-1 que deja a ambos equipos con gustos agridulces. Libertad adelantó en el primer tiempo, pero Guarani igualó en los ultimos minutos del complemento.</p>
+<h2>Los goles</h2>
+<p>Libertad se adelanto al minuto 34 mediante un tiro libre magistral. Guarani no se rindió y en el minuto 82, con un cabezazo en una jugada a balon parado, empato el marcador y silencio al publico local.</p>
+<h2>Las consecuencias</h2>
+<p>El empate beneficia a Olimpia, que aumenta su ventaja en la tabla. Libertad se mantiene segundo con 32 puntos, mientras que Guarani suma 29 y se consolida en zona de clasificacion internacional.</p>""",
+            "fuente": "ESPN Paraguay",
+            "origen": "rss",
+            "pub_date": datetime(2026, 7, 19, 20, 30, tzinfo=timezone.utc),
+            "imagen_url": _img.format(photo_id="1560272618-493d3ea477f8"),
+            "url_original": "https://www.espn.com.py/futbol/nota/_/id/libertad-guarani-1-1",
+        },
+        {
+            "titulo": "Cerro Porteno vence a Sportivo Trinidense y sigue segundo en la tabla",
+            "resumen": "El Abad del Sur sumó tres puntos importantes en la búsqueda del título.",
+            "contenido": """<h2>Tres puntos vitales</h2>
+<p>Club Cerro Porteno venció 2-1 a Sportivo Trinidense en un partido complicado que el equipo cerrenha supo resolver en los detalles. Los goles fueron de Romero y Lucero, mientras que Trinidense descontó desde el punto penal.</p>
+<h2>El análisis tecnico</h2>
+<p>El entrenador cerrenho reconoció que no fue el mejor partido de su equipo, pero destacó la capacidad de reacción y la solidez defensiva en los momentos complicados. "Los tres puntos son lo que importa en esta fase del torneo", declaró.</p>
+<h2>La tabla se ajusta</h2>
+<p>Con este triunfo, Cerro Porteno se mantiene en el segundo puesto con 33 puntos, a 6 de Olimpia. El equipo busca mantener la presion sobre el lider y esperar cualquier tropiezo en las ultimas fechas.</p>""",
+            "fuente": "Telefuturo",
+            "origen": "rss",
+            "pub_date": datetime(2026, 7, 17, 18, 0, tzinfo=timezone.utc),
+            "imagen_url": _img.format(photo_id="1551958325-38adb9e48dbb"),
+            "url_original": "https://www.telefuturo.com.py/deportes/cerro-trinidense-2-1",
+        },
+        {
+            "titulo": "Rubio Nu sigue su racha invicta con victoria sobre 12 de Octubre",
+            "resumen": "El equipo del cerro ya suma 6 triunfos consecutivos en el torneo local.",
+            "contenido": """<h2>La racha continúa</h2>
+<p>Club Rubio Nu sumó su sexta victoria consecutiva al vencer 2-0 a 12 de Octubre en el Estadio General Adrián Jara. Los goles fueron de Fernández y González, en un partido donde el equipo local no tuvo problemas para controlar.</p>
+<h2>El ascenso meteórico</h2>
+<p>En apenas 6 fechas, Rubio Nu ha pasado del 10mo al 5to puesto de la tabla. La confianza del plantel es máxima y el equipo ha mostrado un fútbol ofensivo que ha dejado grandes actuaciones.</p>
+<h2>Los números hablan</h2>
+<p>En esta racha, Rubio Nu ha convertido 14 goles y solo ha recibido 3. El equipo ha promediado el 67% de posesión en cada partido, mostrando un dominio absoluto en cada compromiso.</p>""",
+            "fuente": "La Nación",
+            "origen": "rss",
+            "pub_date": datetime(2026, 7, 14, 17, 0, tzinfo=timezone.utc),
+            "imagen_url": _img.format(photo_id="1517841905240-472689e1170e"),
+            "url_original": "https://www.lanacion.com.py/deportes/rubio-nu-12-octubre-2-0",
+        },
+        {
+            "titulo": "Nacional busca reactivarse tras dos derrotas consecutivas",
+            "resumen": "El Tricolor necesita sumar urgente para no alejarse de la zona de clasificación.",
+            "contenido": """<h2>Un momento delicado</h2>
+<p>Club Nacional atraviesa su peor momento en el Torneo Apertura 2026. Con dos derrotas consecutivas (3-0 ante Olimpia y 2-1 ante 3 de Febrero), el equipo ha caído al 7mo puesto con 24 puntos.</p>
+<h2>Los problemas del equipo</h2>
+<p>La principal debilidad de Nacional ha sido su defensa, que ha recibido 5 goles en los últimos dos partidos. El cuerpo técnico ha trabajado en soluciones tácticas para mejorar la solidez colectiva.</p>
+<h2>La oportunidad de reacción</h2>
+<p>El próximo rival será Sol de América, un equipo accesible que podría servir para que Nacional retome el camino de las victorias y recupere la confianza perdida.</p>""",
+            "fuente": "Popular",
+            "origen": "rss",
+            "pub_date": datetime(2026, 7, 11, 14, 0, tzinfo=timezone.utc),
+            "imagen_url": _img.format(photo_id="1556056612-9a3b42d1f3e6"),
+            "url_original": "https://www.popular.com.py/deportes/nacional-crisis",
+        },
+        {
+            "titulo": "La ADF convoca torneo sub-17 con participation de 12 clubes de la liga",
+            "resumen": "El torneo juvenil buscara descubrir nuevos talentos para las selecciones inferiores.",
+            "contenido": """<h2>El torneo sub-17</h2>
+<p>La Asociación Deportiva de Fútbbol (ADF) ha convocado un torneo sub-17 que reunirá a los mejores juveniles de 12 clubes de la liga paraguaya. El certamen se disputará en las instalaciones del Parque Hernando de la Quintana.</p>
+<h2>El objetivo</h2>
+<p>El principal objetivo del torneo es servir como cantera de talentos para las selecciones nacionales juveniles. Los entrenadores de las categorías inferiores de la seleccion estarán presentes para observar a los jovenes futbolistas.</p>
+<h2>Los clubes participantes</h2>
+<p>Participarán Olimpia, Cerro Porteño, Guarani, Libertad, Nacional, Sportivo Luqueño, Rubio Ñú, 3 de Febrero, General Díaz, Deportivo Capiatá, Fernando de la Mora y Sportivo Trinidense. El torneo arrancará el próximo fin de semana.</p>""",
+            "fuente": "1000 Noticias",
+            "origen": "rss",
+            "pub_date": datetime(2026, 7, 9, 12, 0, tzinfo=timezone.utc),
+            "imagen_url": _img.format(photo_id="1431324155650-1b4475d6560c"),
+            "url_original": "https://www.1000noticias.com.py/deportes/bsub-17",
         },
     ]
 
+    count_new = 0
+    count_upd = 0
+
     for n in noticias:
+        stmt = select(Noticia).where(Noticia.titulo == n["titulo"])
+        result = await db.execute(stmt)
+        existing = result.scalar_one_or_none()
+
+        if existing:
+            changed = False
+            if existing.imagen_url != n.get("imagen_url"):
+                existing.imagen_url = n.get("imagen_url")
+                changed = True
+            if existing.contenido != n.get("contenido"):
+                existing.contenido = n.get("contenido")
+                changed = True
+            if existing.resumen != n.get("resumen"):
+                existing.resumen = n.get("resumen")
+                changed = True
+            if existing.url_original != n.get("url_original"):
+                existing.url_original = n.get("url_original")
+                changed = True
+            if changed:
+                count_upd += 1
+            continue
+
         noticia = Noticia(
             id=str(uuid.uuid4()),
             titulo=n["titulo"],
             resumen=n["resumen"],
             contenido=n["contenido"],
-            imagen_url=n["imagen_url"],
+            imagen_url=n.get("imagen_url"),
             video_url=None,
             fuente=n["fuente"],
             origen=n["origen"],
-            url_original=None,
+            url_original=n.get("url_original"),
             pub_date=n["pub_date"],
             is_published=True,
         )
         db.add(noticia)
+        count_new += 1
 
     await db.flush()
-    print(f"  Noticias: {len(noticias)} semilla insertadas")
-    return len(noticias)
+    print(f"  Noticias: {count_new} nuevas, {count_upd} actualizadas")
+    return count_new
 
 
 async def main():
