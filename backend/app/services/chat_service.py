@@ -20,7 +20,7 @@ class ChatService:
             partido_id=partido_id,
             user_id=user_id,
             mensaje=data.contenido,
-            created_at=datetime.now(timezone.utc),
+            created_at=datetime.utcnow(),
         )
         db.add(msg)
         await db.flush()

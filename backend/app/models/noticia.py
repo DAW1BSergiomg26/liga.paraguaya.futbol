@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime
 
 from sqlalchemy import Boolean, DateTime, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
@@ -20,7 +20,7 @@ class Noticia(Base):
     origen: Mapped[str] = mapped_column(String(20), nullable=False, default="editorial")
     url_original: Mapped[str | None] = mapped_column(String(1000), nullable=True)
     pub_date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     is_published: Mapped[bool] = mapped_column(Boolean, default=True)
 
     def to_dict(self):

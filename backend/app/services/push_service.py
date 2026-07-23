@@ -34,7 +34,7 @@ class PushService:
             endpoint=data.endpoint,
             p256dh=data.keys.p256dh,
             auth=data.keys.auth,
-            created_at=datetime.now(timezone.utc),
+            created_at=datetime.utcnow(),
         )
         db.add(sub)
         await db.flush()
@@ -108,7 +108,7 @@ class PushService:
     @staticmethod
     async def obtener_recordatorios(db: AsyncSession):
         from datetime import timedelta
-        ahora = datetime.now(timezone.utc)
+        ahora = datetime.utcnow()
         ventana = ahora + timedelta(minutes=30)
         result = await db.execute(
             select(Partido).where(

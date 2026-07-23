@@ -1,6 +1,6 @@
 import time
 from collections import defaultdict
-from datetime import datetime, timezone
+from datetime import datetime
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -54,7 +54,7 @@ async def _rate_limit_impl(db: AsyncSession, x_api_key: str) -> dict:
         )
 
     api_key.requests_count += 1
-    api_key.last_used_at = datetime.now(timezone.utc)
+    api_key.last_used_at = datetime.utcnow()
     await db.commit()
 
     return {"ok": True, "remaining": remaining, "reset_in": reset_in}

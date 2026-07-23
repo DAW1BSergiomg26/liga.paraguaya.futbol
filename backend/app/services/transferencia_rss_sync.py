@@ -116,7 +116,7 @@ class TransferenciaRssSync:
             jugador_posicion=None,
             club_origen_id=club_origen,
             club_destino_id=club_destino,
-            fecha=datetime.now(timezone.utc).date(),
+            fecha=datetime.utcnow().date(),
             tipo=tipo,
             estado="rumor",
             monto=None,

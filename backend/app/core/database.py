@@ -158,20 +158,23 @@ async def _ensure_columns_exist():
 
 
 async def _ensure_schema_postgres():
-    """Add missing columns to existing tables for Postgres.
+    """Ensure all tables exist, then add missing columns for Postgres.
 
-    TODO (tarea de seguimiento): Reemplazar esta función con `alembic upgrade head`
-    real contra Postgres. Este parche existe porque las migraciones de Alembic
-    nunca se ejecutaron en Neon y `init_db()` fue removida del lifespan en un
-    commit anterior, dejando tablas con esquemas incompletos.
-
-    create_all() NO modifica columnas de tablas que ya existen — solo crea
-    tablas nuevas. Esta función se encarga de las columnas faltantes en tablas
-    viejas (clubes, partidos, users).
+    First runs create_all() so tables exist, then adds columns that
+    create_all() won't add to existing tables.
     """
     import time
     t0 = time.monotonic()
 
+    # 1) Create any missing tables first (safe — no-op for existing tables)
+    from backend.app import models  # noqa: F401
+    from ..models import goleador  # noqa: F401
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    sys.stderr.write("  Base.metadata.create_all completed\n")
+    sys.stderr.flush()
+
+    # 2) Now add any columns that create_all() can't add to existing tables
     missing_columns = {
         "clubes": [
             ("sitio_web", "VARCHAR(500) NOT NULL DEFAULT ''"),
