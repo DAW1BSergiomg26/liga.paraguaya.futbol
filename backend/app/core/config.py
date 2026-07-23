@@ -5,7 +5,9 @@ from pathlib import Path
 from pydantic_settings import BaseSettings
 from pydantic import Field
 
-_DEFAULT_DB_PATH = Path(__file__).resolve().parent.parent.parent / "data" / "liga.db"
+_DEFAULT_DB_DIR = Path(__file__).resolve().parent.parent.parent / "data"
+_DEFAULT_DB_DIR.mkdir(parents=True, exist_ok=True)
+_DEFAULT_DB_PATH = _DEFAULT_DB_DIR / "liga.db"
 
 
 class Settings(BaseSettings):
@@ -14,11 +16,14 @@ class Settings(BaseSettings):
     debug: bool = True
 
     database_url: str = f"sqlite+aiosqlite:///{_DEFAULT_DB_PATH.as_posix()}"
-    cors_origins: str = "http://localhost:3000,http://localhost:5173,https://frontend-ten-swart-85.vercel.app"
+    cors_origins: str = "http://localhost:3000,http://localhost:5173,https://ligaparaguayafutbol-qq067uc6x-daw1bsergiomg26s-projects.vercel.app"
 
     api_football_key: str = ""
 
-    admin_api_key: str = "Rufi141414%$"
+    # En produccion (Render) se setea via variable de entorno ADMIN_API_KEY.
+    # Si no se setea, queda vacia y las rutas admin quedan bloqueadas hasta
+    # configurarla. No hay default inseguro hardcodeado.
+    admin_api_key: str = ""
 
     # En produccion (Koyeb) se debe setear JWT_SECRET via variable de entorno.
     # Si no se setea, se genera un secreto efimero por arranque (los tokens

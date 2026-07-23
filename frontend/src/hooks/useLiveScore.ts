@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { apiFetch } from "@/lib/api";
 
 interface LiveScore {
   goles_local: number | null;
@@ -20,11 +21,9 @@ export function useLiveScore(partidoId: string): LiveScore {
 
     async function poll() {
       try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/partidos/${partidoId}/marcador`
+        const data = await apiFetch<{ goles_local: number | null; goles_visitante: number | null; minuto: number | null }>(
+          `/api/v1/partidos/${partidoId}/marcador`
         );
-        if (!res.ok) return;
-        const data = await res.json();
         if (!cancelled) {
           setScore({
             goles_local: data.goles_local ?? null,

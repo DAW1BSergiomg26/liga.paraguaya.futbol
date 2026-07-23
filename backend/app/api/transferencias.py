@@ -4,16 +4,16 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.core.dependencies import get_current_admin, get_db
-from backend.app.schemas.transferencia import (
+from ..core.dependencies import get_current_admin, get_db
+from ..schemas.transferencia import (
     EstadisticasTransferencias,
     TransferenciaCreate,
     TransferenciaOut,
     TransferenciaUpdate,
     TransferenciasPaginatedResponse,
 )
-from backend.app.services.transferencia_service import TransferenciaService
-from backend.app.services.transferencia_rss_sync import TransferenciaRssSync
+from ..services.transferencia_service import TransferenciaService
+from ..services.transferencia_rss_sync import TransferenciaRssSync
 
 router = APIRouter(prefix="/api/v1/transferencias", tags=["transferencias"])
 

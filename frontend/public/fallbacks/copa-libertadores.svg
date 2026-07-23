@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0A0E1A"/>
+      <stop offset="50%" stop-color="#1A1500"/>
+      <stop offset="100%" stop-color="#0A0E1A"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFCC00" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#D4AF37" stop-opacity="0.05"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#g1)"/>
+  <polygon points="600,120 640,220 740,220 660,280 690,380 600,320 510,380 540,280 460,220 560,220" fill="url(#gold)" stroke="#FFCC00" stroke-width="1" opacity="0.3"/>
+  <circle cx="600" cy="250" r="60" fill="none" stroke="#FFCC00" stroke-width="0.5" opacity="0.15"/>
+  <text x="600" y="460" font-family="sans-serif" font-weight="700" font-size="18" fill="#FFCC00" opacity="0.15" text-anchor="middle" letter-spacing="8">LIBERTADORES</text>
+</svg>

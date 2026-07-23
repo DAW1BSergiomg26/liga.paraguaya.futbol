@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import type { Club } from "@/types";
 import { useRouter } from "next/navigation";
 
@@ -27,9 +28,11 @@ export default function ClubCard({ club }: { club: Club }) {
         {/* FRENTE */}
         <div className="carta-club-cara">
           {club.escudo && (
-            <img
+            <Image
               src={club.escudo}
               alt={club.nombre}
+              width={80}
+              height={80}
               loading="lazy"
               className="w-20 h-20 object-contain mb-3 drop-shadow-lg"
             />

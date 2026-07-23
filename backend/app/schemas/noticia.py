@@ -46,3 +46,5 @@ class NoticiasPaginatedResponse(BaseModel):
     total: int
     page: int
     total_pages: int
+    fuentes: list[str] = []
+    actualizado: str | None = None

@@ -1,17 +1,30 @@
-# Progress Ledger - Transferencias
+# Progress Ledger - Fase 3B Voronoi Táctico
 
-| Task | Status | Commits | Review |
-|------|--------|---------|--------|
-| Task 1: Transferencia Model + Migration | ✅ done | b399cfd | clean |
-| Task 2: Pydantic Schemas | ✅ done | 846275d | clean |
-| Task 3: TransferenciaService CRUD | ✅ done | c9c1b56 | clean |
-| Task 4: API Endpoints | ✅ done | d7b17a1 | clean |
-| Task 5: Backend Tests | ✅ done | 7a986d2 | clean |
-| Task 6: RSS Sync Service | ✅ done | dd212ab | clean |
-| Task 7: Frontend Types + Navbar | ✅ done | 341fcef | clean |
-| Task 8: TransferCard Component | ✅ done | cbd07ec | clean |
-| Task 9: Listado Principal Page | ✅ done | 4e443cb | clean |
-| Task 10: Detalle Page | pending | | |
-| Task 11: Mercado + Historial + Estadísticas Pages | pending | | |
-| Task 12: GSAP Animations | pending | | |
-| Task 13: Final Verification + Handoff | pending | | |
+## ✅ ALL 8 TASKS DONE
+
+| Task | Status | Commits | Build |
+|------|--------|---------|-------|
+| Task 1+2: Voronoi computation tests + implementation | DONE | feba5c1, f6e22f4, 223301a | ✅ |
+| Task 3: SVG overlay + toggle state | DONE | 5592a4c | ✅ |
+| Task 4: GSAP animation on formation change | DONE | 4138d79 | ✅ |
+| Task 5: Disclaimer + teamIndex | DONE | 03c4ef0 | ✅ |
+| Task 6: colorEquipo integration | DONE | 67bbdb5 | ✅ |
+| Task 7: E2E Playwright tests | DONE | d2cc4a5 | ✅ |
+| Task 8: Final verification | DONE | (no commit) | ✅ |
+
+## Final Verification (Task 8)
+- Backend: 181 tests passed ✅
+- Frontend vitest: 21 passed (4 pre-existing failures unrelated to voronoi) ✅
+- Frontend build: Clean, 26+ routes built ✅
+- Git: All changes committed ✅
+
+## Summary
+- **Voronoi overlay:** Toggle button "Zonas de cobertura" with d3-delaunay cells
+- **Animation:** GSAP `attr` tween (0.4s) on formation change
+- **Colors:** Derived from `colorEquipo` prop
+- **Disclaimer:** "Distribución teórica según formación — no representa el movimiento real de un partido."
+- **teamIndex:** team 0 = first 11 cells, team 1 = rest
+
+## Resume Instructions
+- Fase 3B is COMPLETE
+- Plan at `docs/superpowers/plans/2026-07-20-fase3b-voronoi-tactico.md`

@@ -39,3 +39,31 @@ async def test_get_goleadores_historial_agrupa_por_jugador(client, db_session):
     assert goleadores[0]["nombre"] == "Derlis Gonzalez"
     assert goleadores[0]["torneo"] == "2 torneo(s)"
 
+
+@pytest.mark.asyncio
+async def test_get_goleadores_torneos_returns_only_torneos_with_data(client, db_session):
+    """El endpoint /goleadores/torneos solo debe retornar torneos que tengan goleadores."""
+    await seed_test_data(db_session)
+    db_session.add(Goleador(id="g1", nombre="Player A", club_id="olimpia", goles=5, asistencias=1, torneo="Apertura 2026", temporada="2026"))
+    db_session.add(Goleador(id="g2", nombre="Player B", club_id="cerro-porteno", goles=3, asistencias=0, torneo="Apertura 2026", temporada="2026"))
+    # Noinsertamos goleadores para "Clausura 2025" — ese torneo NO debe aparecer
+    await db_session.commit()
+
+    response = await client.get("/api/v1/goleadores/torneos")
+    assert response.status_code == 200
+    data = response.json()
+    torneos = data["torneos"]
+    assert isinstance(torneos, list)
+    assert "Apertura 2026" in torneos
+    # Torneos sin goleadores no deben aparecer
+    assert "Clausura 2025" not in torneos
+
+
+@pytest.mark.asyncio
+async def test_get_goleadores_torneos_empty_when_no_goleadores(client):
+    """Sin goleadores en la DB, la lista de torneos debe estar vacía."""
+    response = await client.get("/api/v1/goleadores/torneos")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["torneos"] == []
+

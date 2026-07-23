@@ -1,8 +1,34 @@
-import { getClubes, getPartidos, getTabla, getTorneos } from "@/lib/api";
+export const dynamic = 'force-dynamic';
+
+import Image from "next/image";
+import { getClubes, getPartidos, getTabla, getTorneos, getGlobalStats } from "@/lib/api";
 import type { PartidoPage } from "@/types";
 import Link from "next/link";
 import HeroStats from "@/components/HeroStats";
 import CinematicHero from "@/components/hero/CinematicHero";
+import { SITE_NAME, SITE_SHORT, SITE_URL } from "@/lib/config";
+import type { Metadata } from "next";
+import JsonLd from "@/components/JsonLd";
+import { buildWebSiteSchema } from "@/lib/jsonLd";
+
+export const metadata: Metadata = {
+  title: `${SITE_SHORT} — Fútbol Paraguayo en Tiempo Real`,
+  description:
+    `Portal oficial de datos y estadísticas del fútbol paraguayo. Clubes, partidos en vivo, tabla de posiciones, goleadores, transferencias y análisis táctico de la Primera División. ${SITE_NAME}.`,
+  openGraph: {
+    title: `${SITE_SHORT} — Fútbol Paraguayo en Tiempo Real`,
+    description:
+      `Datos, estadísticas y partidos en vivo del fútbol paraguayo. ${SITE_NAME}.`,
+    type: "website",
+    images: [{ url: `${SITE_URL}/api/og/home`, width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${SITE_SHORT} — Fútbol Paraguayo en Tiempo Real`,
+    description: `Datos, estadísticas y partidos en vivo del fútbol paraguayo. ${SITE_NAME}.`,
+    images: [`${SITE_URL}/api/og/home`],
+  },
+};
 
 async function safeFetch<T>(fn: () => Promise<T>, fallback: T): Promise<[T, string | null]> {
   try {
@@ -30,10 +56,11 @@ function torneoActual(torneos: string[]): string | null {
 }
 
 export default async function HomePage() {
-  const [[clubes, errClubes], [partidosData, errPartidos], [torneos, errTorneos]] = await Promise.all([
+  const [[clubes, errClubes], [partidosData, errPartidos], [torneos, errTorneos], [stats, errStats]] = await Promise.all([
     safeFetch(() => getClubes(), []),
     safeFetch(() => getPartidos(), { data: [], total: 0, page: 1, per_page: 25, total_pages: 1 } satisfies PartidoPage),
     safeFetch(() => getTorneos(), []),
+    safeFetch(() => getGlobalStats(), { total_partidos: 348, total_goles: 892, total_clubes: 19 }),
   ]);
 
   const torneo = errTorneos ? null : torneoActual(torneos);
@@ -41,11 +68,18 @@ export default async function HomePage() {
     safeFetch(() => getTabla(torneo ?? undefined), []),
   ]);
 
-  const hasErrors = errClubes || errPartidos || errTabla;
+  const hasErrors = errClubes || errPartidos || errTabla || errStats;
 
   return (
     <>
-      <CinematicHero />
+      <JsonLd data={buildWebSiteSchema({ description: "Portal oficial de datos y estadísticas del fútbol paraguayo." })} />
+      <CinematicHero
+        stats={{
+          partidos: stats?.total_partidos ?? 348,
+          goles: stats?.total_goles ?? 892,
+          clubes: stats?.total_clubes ?? 19,
+        }}
+      />
       <div className="max-w-6xl mx-auto px-4 py-12">
       <HeroStats
         clubesCount={clubes.length}
@@ -83,7 +117,7 @@ export default async function HomePage() {
                     <td className="p-4">
                       <div className="flex items-center gap-2">
                         {row.escudo && (
-                          <img src={row.escudo} alt="" className="w-5 h-5 object-contain shrink-0 rounded-sm shadow-[0_1px_3px_rgba(0,0,0,0.3)]" />
+                          <Image src={row.escudo} alt="" width={20} height={20} loading="lazy" className="w-5 h-5 object-contain shrink-0 rounded-sm shadow-[0_1px_3px_rgba(0,0,0,0.3)]" />
                         )}
                         {row.club}
                       </div>

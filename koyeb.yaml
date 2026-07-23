@@ -37,8 +37,10 @@ services:
       # SECRETO: setear en dashboard de Koyeb como secret (no en este archivo).
       - key: ADMIN_API_KEY
         value: ""
+      # IMPORTANTE: reemplazar por la URL REAL de tu frontend en Vercel
+      # (la que arreglaste en el dashboard, dominio liga.paraguaya.futbol).
       - key: CORS_ORIGINS
-        value: http://localhost:3000,https://frontend-ten-swart-85.vercel.app
+        value: http://localhost:3000,https://liga.paraguaya.futbol
       - key: FOOTBALL_DATA_API_KEY
         value: ""
       # OBLIGATORIA para produccion real: connection string de Neon Postgres.

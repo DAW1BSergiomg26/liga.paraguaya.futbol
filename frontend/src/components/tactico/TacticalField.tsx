@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
+import { initGSAP, gsap } from "@/lib/gsap";
+import { computeVoronoiPaths } from "@/lib/voronoi";
 import PlayerDot from "./PlayerDot";
 import FormationSelector from "./FormationSelector";
 import type { JugadorTactico } from "@/types";
@@ -103,24 +105,91 @@ export default function TacticalField({
 }: TacticalFieldProps) {
   const [formacion, setFormacion] = useState(formacionPrincipal);
   const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
+  const [showVoronoi, setShowVoronoi] = useState(false);
+  const voronoiGroupRef = useRef<SVGGElement>(null);
 
   const posiciones = FORMACIONES_POSICIONES[formacion] || FORMACIONES_POSICIONES["4-3-3"];
 
-  const jugadoresConPosicion = jugadores.map((j, i) => ({
-    ...j,
-    x: posiciones[i]?.x ?? j.x,
-    y: posiciones[i]?.y ?? j.y,
-  }));
+  const jugadoresConPosicion = (jugadores || [])
+    .filter((j) => j && typeof j.x === "number" && typeof j.y === "number" && isFinite(j.x) && isFinite(j.y))
+    .map((j, i) => ({
+      ...j,
+      x: posiciones[i]?.x ?? j.x,
+      y: posiciones[i]?.y ?? j.y,
+    }));
+
+  const FIELD_BOUNDS = { xmin: 0, ymin: 0, xmax: 100, ymax: 150 };
+
+  const voronoiPaths = useMemo(() => {
+    if (!showVoronoi || jugadoresConPosicion.length < 2) return [];
+    const validPoints = jugadoresConPosicion
+      .map((j) => ({ x: j.x * 100, y: j.y * 150 }))
+      .filter((p) => isFinite(p.x) && isFinite(p.y));
+    if (validPoints.length < 2) return [];
+    return computeVoronoiPaths(validPoints, FIELD_BOUNDS);
+  }, [showVoronoi, jugadoresConPosicion]);
+
+  const voronoiFill = colorEquipo === "#D52B1E" || colorEquipo === "#CC001C"
+    ? "rgba(204, 0, 28, 0.20)"
+    : "rgba(0, 97, 158, 0.20)";
+  const voronoiStroke = colorEquipo === "#D52B1E" || colorEquipo === "#CC001C"
+    ? "rgba(204, 0, 28, 0.6)"
+    : "rgba(0, 97, 158, 0.6)";
+
+  useEffect(() => {
+    if (!showVoronoi || !voronoiGroupRef.current) return;
+    initGSAP();
+
+    const paths = voronoiGroupRef.current.querySelectorAll("path");
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    paths.forEach((path, i) => {
+      const targetD = voronoiPaths[i]?.d;
+      if (!targetD) return;
+      if (prefersReduced) {
+        gsap.set(path, { attr: { d: targetD } });
+      } else {
+        gsap.to(path, {
+          attr: { d: targetD },
+          duration: 0.4,
+          ease: "power2.out",
+        });
+      }
+    });
+  }, [voronoiPaths, showVoronoi]);
 
   return (
     <div className="w-full">
+      {jugadoresConPosicion.length === 0 ? (
+        <>
+          {titulo && <h3 className="text-lg font-bold text-white mb-4">{titulo}</h3>}
+          <div className="relative w-full aspect-[2/3] bg-[#2d5a27] rounded-xl border-4 border-white/20 flex items-center justify-center">
+            <p className="text-white/60 text-sm text-center px-4">
+              No hay datos de jugadores disponibles para mostrar la formación táctica.
+            </p>
+          </div>
+        </>
+      ) : (
+        <>
       <div className="flex items-center justify-between mb-4">
         {titulo && <h3 className="text-lg font-bold text-white">{titulo}</h3>}
-        <FormationSelector
-          formaciones={formacionesDisponibles}
-          actual={formacion}
-          onChange={setFormacion}
-        />
+        <div className="flex items-center gap-3">
+          <FormationSelector
+            formaciones={formacionesDisponibles}
+            actual={formacion}
+            onChange={setFormacion}
+          />
+          <button
+            onClick={() => setShowVoronoi(!showVoronoi)}
+            className={`px-3 py-2 rounded-lg text-xs font-medium transition border ${
+              showVoronoi
+                ? "bg-apf-dorado/20 border-apf-dorado text-apf-dorado"
+                : "bg-bg-terciario border-borde-sutil text-texto-secundario hover:text-texto-principal"
+            }`}
+          >
+            {showVoronoi ? "Ocultar zonas" : "Zonas de cobertura"}
+          </button>
+        </div>
       </div>
 
       <div className="relative w-full aspect-[2/3] bg-[#2d5a27] rounded-xl border-4 border-white/20 overflow-hidden shadow-2xl">
@@ -148,7 +217,34 @@ export default function TacticalField({
             onClick={setSelectedPlayer}
           />
         ))}
+
+        {showVoronoi && voronoiPaths.length > 0 && (
+          <svg
+            viewBox="0 0 100 150"
+            className="absolute inset-0 w-full h-full pointer-events-none"
+            preserveAspectRatio="none"
+          >
+            <g ref={voronoiGroupRef}>
+              {voronoiPaths.map((cell) => (
+                <path
+                  key={cell.cellIndex}
+                  d={cell.d}
+                  fill={voronoiFill}
+                  stroke={voronoiStroke}
+                  strokeWidth="0.3"
+                />
+              ))}
+            </g>
+          </svg>
+        )}
+
       </div>
+
+      {showVoronoi && (
+        <p className="text-xs text-texto-secundario italic text-center mt-3 px-4">
+          Distribución teórica según formación — no representa el movimiento real de un partido.
+        </p>
+      )}
 
       <div className="mt-4 flex flex-wrap gap-2 justify-center">
         {["POR", "DFC", "LD", "LI", "MC", "MCD", "MCO", "MD", "MI", "ED", "EI", "DC"].map((pos) => (
@@ -157,6 +253,8 @@ export default function TacticalField({
           </span>
         ))}
       </div>
+        </>
+      )}
     </div>
   );
 }

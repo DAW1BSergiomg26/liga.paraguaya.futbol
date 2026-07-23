@@ -20,15 +20,16 @@ services:
     healthCheckPath: /health
     envVars:
       # La completás en el dashboard con la connection string de Neon (postgresql://...)
+      # SIN parametros de sslmode (asyncpg no los acepta en el query string).
       - key: DATABASE_URL
         sync: false
       - key: SECRET_KEY
         generateValue: true
       - key: JWT_SECRET
         generateValue: true
-      - key: ADMIN_API_KEY
-        value: Rufi141414%$
+      # ADMIN_API_KEY y JWT_SECRET ya estan seteados en el dashboard de Render
+      # como secretos. NO se hardcodean aca.
       - key: CORS_ORIGINS
-        value: http://localhost:3000,https://frontend-ten-swart-85.vercel.app
+        value: http://localhost:3000,https://ligaparaguayafutbol-qq067uc6x-daw1bsergiomg26s-projects.vercel.app
       - key: FOOTBALL_DATA_API_KEY
         value: ""

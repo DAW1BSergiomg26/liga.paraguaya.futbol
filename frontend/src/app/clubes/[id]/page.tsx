@@ -1,263 +1,103 @@
-"use client";
+import type { Metadata } from "next";
+import ClubDetailPageClient from "./PageClient";
+import { getClub, getTabla, getPartidos } from "@/lib/api";
+import { SITE_NAME, SITE_URL } from "@/lib/config";
+import type { TablaRow, Partido } from "@/types";
+import JsonLd from "@/components/JsonLd";
+import { buildSportsClub } from "@/lib/jsonLd";
 
-import { useEffect, useRef, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { getClub, getPartidos, getTabla, getTorneos } from "@/lib/api";
-import type { Club, ClubDetail, Partido, PartidoPage, TablaRow } from "@/types";
-import { useParams } from "next/navigation";
-import Link from "next/link";
-import ErrorMessage from "@/components/ui/ErrorMessage";
+type Props = { params: Promise<{ id: string }> };
 
-function torneoActual(torneos: string[]): string | null {
-  if (torneos.length === 0) return null;
-  const yearRegex = /\b(20\d{2})\b/;
-  const conAnio = torneos.filter(t => yearRegex.test(t));
-  if (conAnio.length === 0) return torneos[0];
-  return conAnio.sort((a, b) => {
-    const yearA = parseInt(a.match(yearRegex)![1]);
-    const yearB = parseInt(b.match(yearRegex)![1]);
-    if (yearA !== yearB) return yearB - yearA;
-    const apertura = /apertura/i;
-    const aIsApertura = apertura.test(a) ? 0 : 1;
-    const bIsApertura = apertura.test(b) ? 0 : 1;
-    return aIsApertura - bIsApertura;
-  })[0];
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params;
+  try {
+    const club = await getClub(id);
+
+    let posicionInfo = "";
+    let ultimosResultados = "";
+    try {
+      const [tabla, partidosPage] = await Promise.all([
+        getTabla().catch(() => null as TablaRow[] | null),
+        getPartidos(undefined, "finalizado", undefined, 100).catch(() => null),
+      ]);
+      if (tabla) {
+        const row = tabla.find(
+          (r) =>
+            r.club_id === id ||
+            r.club.toLowerCase().includes(club.nombre.toLowerCase()),
+        );
+        if (row) posicionInfo = `. Posición #${row.posicion} en tabla (${row.puntos} puntos)`;
+      }
+      if (partidosPage?.data) {
+        const recientes = partidosPage.data
+          .filter((p) => p.local_id === id || p.visitante_id === id)
+          .slice(0, 5);
+        if (recientes.length > 0) {
+          const resultados = recientes.map((p) => {
+            const esLocal = p.local_id === id;
+            const golesFavor = esLocal ? p.goles_local : p.goles_visitante;
+            const golesContra = esLocal ? p.goles_visitante : p.goles_local;
+            if (golesFavor === null || golesContra === null) return null;
+            const r = golesFavor > golesContra ? "V" : golesFavor < golesContra ? "D" : "E";
+            return r;
+          }).filter(Boolean);
+          if (resultados.length > 0) {
+            ultimosResultados = `. Últimos resultados: ${resultados.join(", ")}`;
+          }
+        }
+      }
+    } catch {
+      // Si falla tabla/partidos, el metadata仍 es útil sin esa data
+    }
+
+    const description = `${club.nombre} (${club.apodo}) — ${club.ciudad}, Estadio ${club.estadio}. ${club.titulos_liga} títulos de liga.${posicionInfo}${ultimosResultados} Datos, partidos y estadísticas en ${SITE_NAME}.`;
+
+    const ogImageUrl = `${SITE_URL}/api/og/club?id=${id}`;
+
+    return {
+      title: `${club.nombre} — ${SITE_NAME}`,
+      description,
+      openGraph: {
+        title: `${club.nombre} | Liga PY`,
+        description,
+        type: "profile",
+        images: [{ url: ogImageUrl, width: 1200, height: 630 }],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: `${club.nombre} | Liga PY`,
+        description,
+        images: [ogImageUrl],
+      },
+    };
+  } catch {
+    return { title: "Club no encontrado" };
+  }
 }
 
-export default function ClubDetailPage() {
-  const params = useParams();
-  const id = params.id as string;
-  const [visible, setVisible] = useState(false);
-  const partidosRef = useRef<HTMLDivElement>(null);
+export default async function ClubDetailPage({ params }: Props) {
+  const { id } = await params;
 
-  useEffect(() => {
-    const el = partidosRef.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) { setVisible(true); obs.unobserve(el); }
-      },
-      { threshold: 0.08 }
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
-
-  const { data: club, isLoading, error } = useQuery<ClubDetail>({
-    queryKey: ["club", id],
-    queryFn: () => getClub(id),
-  });
-
-  const { data: partidosPage } = useQuery<PartidoPage>({
-    queryKey: ["partidos"],
-    queryFn: () => getPartidos(),
-  });
-  const partidos = partidosPage?.data;
-
-  const { data: torneos } = useQuery<string[]>({
-    queryKey: ["torneos"],
-    queryFn: () => getTorneos(),
-    staleTime: 300_000,
-  });
-  const torneo = torneos ? torneoActual(torneos) : null;
-
-  const { data: tabla } = useQuery<TablaRow[]>({
-    queryKey: ["tabla", torneo ?? ""],
-    queryFn: () => getTabla(torneo ?? undefined),
-    enabled: !!torneo,
-    staleTime: 60_000,
-  });
-
-  const posClub = tabla?.find((r) => r.club_id === id || r.club?.toLowerCase().includes(
-    (club?.nombre || "").toLowerCase()
-  ));
-
-  if (isLoading) return (
-    <div className="max-w-6xl mx-auto px-4 py-12">
-      <div className="h-4 bg-white/10 rounded animate-pulse w-24 mb-8" />
-      <div className="p-8 rounded-2xl border border-borde-sutil bg-bg-secundario/80">
-        <div className="flex items-start gap-6 mb-6">
-          <div className="w-20 h-20 rounded-full bg-white/10 animate-pulse shrink-0" />
-          <div className="flex-1 space-y-3">
-            <div className="h-8 bg-white/10 rounded animate-pulse w-64" />
-            <div className="h-5 bg-white/5 rounded animate-pulse w-32" />
-          </div>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i}>
-              <div className="h-3 bg-white/5 rounded animate-pulse w-16 mb-1" />
-              <div className="h-5 bg-white/10 rounded animate-pulse w-32" />
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-
-  if (error) return <ErrorMessage message="Error al cargar el club" />;
-
-  if (!club) {
-    return (
-      <div className="max-w-6xl mx-auto px-4 py-12">
-        <Link href="/clubes" className="text-sm text-apf-rojo hover:underline mb-6 inline-block">
-          ← Volver a clubes
-        </Link>
-        <div className="text-center py-16 text-gray-400">
-          <p>Club no encontrado.</p>
-        </div>
-      </div>
-    );
+  let jsonLdData: object | null = null;
+  try {
+    const club = await getClub(id);
+    jsonLdData = buildSportsClub({
+      nombre: club.nombre,
+      descripcion: club.descripcion,
+      escudo: club.escudo,
+      fundacion: club.fundacion,
+      estadio: club.estadio,
+      ciudad: club.ciudad,
+      sitio_web: club.sitio_web,
+    });
+  } catch {
+    // Si falla, renderizamos sin JSON-LD
   }
 
-  const clubPartidos = (partidos || []).filter(
-    (p) => p.local_id === club.id || p.visitante_id === club.id
-  );
-
   return (
-    <div className="max-w-6xl mx-auto px-4 py-12">
-      <Link href="/clubes" className="text-sm text-apf-rojo hover:underline mb-6 inline-block">
-        ← Volver a clubes
-      </Link>
-
-      <div className="p-8 rounded-2xl border border-borde-sutil bg-bg-secundario/80 shadow-xl">
-          <div className="flex items-start gap-6 mb-6">
-          {club.escudo && (
-            <img src={club.escudo} alt={club.nombre} className="w-20 h-20 object-contain shrink-0" />
-          )}
-          <div className="flex-1">
-            <div className="flex items-center gap-4 flex-wrap">
-              <h1 className="text-3xl font-bold text-gradient-shine">{club.nombre}</h1>
-              {posClub && (
-                <span className="px-3 py-1 rounded-full text-sm font-bold border border-apf-amarillo/40 text-apf-amarillo bg-apf-amarillo/10">
-                  #{posClub.posicion} en tabla
-                </span>
-              )}
-              <div className="flex gap-1.5">
-                {(club.colores || []).map((color, i) => (
-                  <span
-                    key={i}
-                    className="w-6 h-6 rounded-full border border-white/20 inline-block"
-                    style={{ backgroundColor: color }}
-                    title={color}
-                  />
-                ))}
-              </div>
-            </div>
-            <p className="text-gray-400 text-lg mt-1">{club.apodo}</p>
-          </div>
-        </div>
-
-        {club.descripcion && (
-          <p className="text-gray-400 text-sm leading-relaxed mb-6 border-t border-borde-sutil pt-6">
-            {club.descripcion}
-          </p>
-        )}
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div>
-            <span className="text-gray-500 text-sm block">Ciudad</span>
-            <span className="text-white font-medium">{club.ciudad}</span>
-          </div>
-          <div>
-            <span className="text-gray-500 text-sm block">Fundación</span>
-            <span className="text-white font-medium">{club.fundacion}</span>
-          </div>
-          <div>
-            <span className="text-gray-500 text-sm block">Estadio</span>
-            <span className="text-white font-medium">{club.estadio}</span>
-          </div>
-          <div>
-            <span className="text-gray-500 text-sm block">Capacidad</span>
-            <span className="text-white font-medium">{club.capacidad.toLocaleString()} espectadores</span>
-          </div>
-          <div>
-            <span className="text-gray-500 text-sm block">Dirección</span>
-            <span className="text-white font-medium">{club.direccion}</span>
-          </div>
-          <div>
-            <span className="text-gray-500 text-sm block">Títulos de Liga</span>
-            <span className="text-white font-bold text-lg">{club.titulos_liga}</span>
-            {club.titulos_info?.length > 0 && (
-              <div className="mt-1 space-y-0.5">
-                {club.titulos_info.map((t, i) => (
-                  <p key={i} className="text-gray-400 text-xs">{t.torneo}: {t.cantidad}</p>
-                ))}
-              </div>
-            )}
-          </div>
-          {club.sitio_web && (
-            <div>
-              <span className="text-gray-500 text-sm block">Sitio web</span>
-              <a href={club.sitio_web} target="_blank" rel="noopener noreferrer"
-                className="text-apf-rojo hover:underline text-sm font-medium">
-                {club.sitio_web.replace(/^https?:\/\//, "")} ↗
-              </a>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {club.titulos_internacionales?.length > 0 && (
-        <div className="mt-6 p-6 rounded-xl border border-yellow-500/30 bg-yellow-500/5">
-          <h3 className="text-lg font-bold text-yellow-300 mb-3">Títulos Internacionales</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {club.titulos_internacionales.map((t, i) => (
-              <div key={i} className="flex items-center gap-3">
-                <span className="text-yellow-400 text-2xl">🏆</span>
-                <div>
-                  <p className="text-white font-medium">{t.torneo}</p>
-                  <p className="text-yellow-300 text-2xl font-bold">{t.cantidad}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      <section className="mt-10" ref={partidosRef}>
-        <h2 className="text-2xl font-bold mb-4 text-gradient-shine">Partidos</h2>
-        {clubPartidos.length > 0 ? (
-          <div className="grid gap-4">
-            {clubPartidos.map((p, i) => (
-              <Link
-                key={p.id}
-                href={`/partidos/${p.id}`}
-                className={`p-4 rounded-xl border border-borde-sutil bg-bg-secundario/60 hover:bg-bg-secundario transition block ${visible ? "animate-row-enter" : "opacity-0"}`}
-                style={{ animationDelay: visible ? `${i * 40}ms` : "0ms" }}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-400">
-                      {p.torneo} · Jornada {p.jornada}
-                    </p>
-                    <p className="text-white font-medium mt-1">
-                      {p.local_id === club.id ? "Local" : "Visitante"} vs{" "}
-                      {p.local_id === club.id ? p.visitante_id : p.local_id}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm text-gray-500">
-                      {new Date(p.fecha).toLocaleDateString("es-PY")}
-                    </p>
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${
-                      p.estado === "finalizado"
-                        ? "bg-green-900/30 text-green-300"
-                        : "bg-yellow-900/30 text-yellow-300"
-                    }`}>
-                      {p.estado}
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        ) : (
-          <div className="p-8 rounded-xl border border-borde-sutil bg-bg-secundario/60 text-center">
-            <p className="text-gray-500">No hay partidos registrados para este club.</p>
-          </div>
-        )}
-      </section>
-    </div>
+    <>
+      {jsonLdData && <JsonLd data={jsonLdData} />}
+      <ClubDetailPageClient />
+    </>
   );
 }

@@ -1,14 +1,34 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://backend-production-0b7d.up.railway.app";
+const _rawUrl = process.env.NEXT_PUBLIC_API_URL;
+const _isProd = process.env.NODE_ENV === "production" || process.env.VERCEL_ENV === "production";
+const _isLocalhost = !!_rawUrl && /localhost|127\.0\.0\.1/.test(_rawUrl);
+
+if (_isProd && _isLocalhost) {
+  console.warn(
+    `[api.ts] NEXT_PUBLIC_API_URL="${_rawUrl}" apunta a localhost en producción. ` +
+    `Forzando fallback a https://liga-paraguaya-futbol.onrender.com`
+  );
+}
+
+export const API_URL =
+  !_rawUrl || (_isProd && _isLocalhost)
+    ? "https://liga-paraguaya-futbol.onrender.com"
+    : _rawUrl;
 
 export async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`${API_URL}${path}`, options);
+  const url = `${API_URL}${path}`;
+  const res = await fetch(url, options);
   if (!res.ok) {
-    throw new Error(`API error: ${res.status} ${res.statusText}`);
+    if (res.status === 401) {
+      if (typeof window !== "undefined") localStorage.removeItem("user_token");
+      authToken = null;
+    }
+    const err = await res.json().catch(() => ({ detail: `${res.status} ${res.statusText}` }));
+    throw new Error(err.detail || `Error ${res.status}`);
   }
   return res.json();
 }
 
-import type { Club, ClubDetail, Partido, PartidoDetail, PartidoPage, TablaRow, User, PredictionCreate, PredictionDetail, LeaderboardEntry, Noticia, NoticiasPaginatedResponse, H2HResponse, EquipoTactico, AnalisisPartido, EquipoResumenTactico, AuthUser, TokenResponse, CampeonHistorico, RankingClubHistorico, ClubTemporadaHistorica, EstadisticasTransferencias } from "@/types";
+import type { Club, ClubDetail, Partido, PartidoDetail, PartidoPage, TablaRow, User, PredictionCreate, PredictionDetail, LeaderboardEntry, Noticia, NoticiasPaginatedResponse, H2HResponse, EquipoTactico, AnalisisPartido, EquipoResumenTactico, AuthUser, TokenResponse, CampeonHistorico, RankingClubHistorico, ClubTemporadaHistorica, EstadisticasTransferencias, SimulationInput, SimulationResultOut, ComparacionClubesResponse } from "@/types";
 
 export async function getClubes(ciudad?: string): Promise<Club[]> {
   const params = ciudad ? `?ciudad=${encodeURIComponent(ciudad)}` : "";
@@ -47,10 +67,23 @@ export async function getTorneos(): Promise<string[]> {
   return apiFetch<string[]>("/api/v1/tabla/torneos");
 }
 
+export async function getGlobalStats(): Promise<{
+  total_partidos: number;
+  total_goles: number;
+  total_clubes: number;
+}> {
+  return apiFetch<{
+    total_partidos: number;
+    total_goles: number;
+    total_clubes: number;
+  }>("/api/v1/stats/global");
+}
+
 let authToken: string | null = null;
 
 export function setAuthToken(token: string | null) {
   authToken = token;
+  if (typeof window === "undefined") return;
   if (token) localStorage.setItem("user_token", token);
   else localStorage.removeItem("user_token");
 }
@@ -69,7 +102,7 @@ async function authFetchJSON<T>(path: string, options?: RequestInit): Promise<T>
   const res = await fetch(`${API_URL}${path}`, { ...options, headers });
   if (!res.ok) {
     if (res.status === 401) {
-      localStorage.removeItem("user_token");
+      if (typeof window !== "undefined") localStorage.removeItem("user_token");
       authToken = null;
     }
     const err = await res.json().catch(() => ({ detail: "Error desconocido" }));
@@ -151,6 +184,16 @@ export async function getNoticia(id: string): Promise<Noticia> {
   return apiFetch<Noticia>(`/api/v1/noticias/${id}`);
 }
 
+export async function getNoticiasRelacionadas(
+  fuente: string,
+  excludeId: string,
+  limit = 3
+): Promise<NoticiasPaginatedResponse> {
+  return apiFetch<NoticiasPaginatedResponse>(
+    `/api/v1/noticias?limit=${limit}&fuente=${encodeURIComponent(fuente)}&exclude_id=${encodeURIComponent(excludeId)}`
+  );
+}
+
 export async function getH2H(clubA: string, clubB: string): Promise<H2HResponse> {
   const res = await apiFetch<H2HResponse>(
     `/api/v1/partidos/h2h?club_a=${encodeURIComponent(clubA)}&club_b=${encodeURIComponent(clubB)}`
@@ -217,9 +260,13 @@ export async function getTacticoPartido(partidoId: string): Promise<AnalisisPart
   return apiFetch<AnalisisPartido>(`/api/v1/tactico/partido/${partidoId}`);
 }
 
-export async function getGoleadores(torneo?: string): Promise<{ goleadores: Goleador[]; total: number }> {
-  const params = torneo ? `?torneo=${encodeURIComponent(torneo)}` : "";
+export async function getGoleadores(torneo: string): Promise<{ goleadores: Goleador[]; total: number }> {
+  const params = `?torneo=${encodeURIComponent(torneo)}`;
   return apiFetch(`/api/v1/goleadores${params}`);
+}
+
+export async function getGoleadoresTorneos(): Promise<{ torneos: string[] }> {
+  return apiFetch("/api/v1/goleadores/torneos");
 }
 
 export async function getGoleadoresHistorial(): Promise<{ goleadores: Goleador[]; total: number }> {
@@ -249,6 +296,20 @@ export async function getClubHistorial(clubId: string): Promise<ClubTemporadaHis
   return apiFetch<ClubTemporadaHistorica[]>(`/api/v1/historial/club/${clubId}`);
 }
 
+export async function getComparacionClubes(clubA: string, clubB: string): Promise<ComparacionClubesResponse> {
+  return apiFetch<ComparacionClubesResponse>(
+    `/api/v1/historial/comparar?club_a=${encodeURIComponent(clubA)}&club_b=${encodeURIComponent(clubB)}`
+  );
+}
+
 export async function getEstadisticasTransferencias(): Promise<EstadisticasTransferencias> {
   return apiFetch<EstadisticasTransferencias>("/api/v1/transferencias/estadisticas");
+}
+
+export async function predecirPartido(data: SimulationInput): Promise<SimulationResultOut> {
+  return apiFetch<SimulationResultOut>("/api/v1/simulador/prediccion", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
 }

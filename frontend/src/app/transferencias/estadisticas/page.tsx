@@ -1,32 +1,13 @@
-"use client";
+import type { Metadata } from "next";
+import EstadisticasPageClient from "./PageClient";
+import { SITE_NAME } from "@/lib/config";
 
-import { useQuery } from "@tanstack/react-query";
-import { apiFetch } from "@/lib/api";
-import type { EstadisticasTransferencias } from "@/types";
-import EstadisticasDashboard from "@/components/transferencia/EstadisticasDashboard";
+export const metadata: Metadata = {
+  title: "Estadísticas del Mercado",
+  description:
+    `Análisis estadístico del mercado de transferencias de la Primera División del fútbol paraguayo: montos, duración y tipos de fichajes. ${SITE_NAME}.`,
+};
 
 export default function EstadisticasPage() {
-  const { data: stats, isLoading } = useQuery<EstadisticasTransferencias>({
-    queryKey: ["estadisticas-transferencias"],
-    queryFn: () => apiFetch("/api/v1/transferencias/estadisticas"),
-  });
-
-  return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-texto-principal mb-2">Estadísticas del Mercado</h1>
-      <p className="text-texto-secundario mb-8">Análisis de transferencias de la temporada</p>
-
-      {isLoading ? (
-        <div className="space-y-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-40 bg-bg-secundario rounded-xl animate-pulse" />
-          ))}
-        </div>
-      ) : stats ? (
-        <EstadisticasDashboard stats={stats} />
-      ) : (
-        <p className="text-texto-secundario text-center py-12">Sin datos disponibles</p>
-      )}
-    </div>
-  );
+  return <EstadisticasPageClient />;
 }

@@ -4,8 +4,8 @@ from datetime import datetime, timezone
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.models.mensaje_chat import MensajeChat
-from backend.app.schemas.chat import MensajeChatCreate, MensajeChatOut
+from ..models.mensaje_chat import MensajeChat
+from ..schemas.chat import MensajeChatCreate, MensajeChatOut
 
 
 class ChatService:

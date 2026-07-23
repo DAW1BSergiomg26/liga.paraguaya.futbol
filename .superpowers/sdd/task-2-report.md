@@ -1,23 +1,32 @@
-# Task 2: Pydantic Schemas — Completion Report
+# Task 2: Backend Tests TDD (RED phase) — Complete
 
-## Status: ✅ COMPLETED
+## Status
+✅ Done
 
-## Commits
-- `846275d` — feat: add Transferencia Pydantic schemas
+## Command Executed
+```bash
+cd /path/to/repo && python -m pytest backend/tests/test_historial_comparar.py -v
+```
 
-## Test Summary
-- Import test: `from backend.app.schemas.transferencia import *` → OK
-- All 6 schemas verified: TransferenciaCreate, TransferenciaUpdate, TransferenciaOut, TransferenciasPaginatedResponse, GastoPorClub, EstadisticasTransferencias
+## Result: 7 FAILED (all expected)
 
-## Implementation Details
-- Created `backend/app/schemas/transferencia.py` with exact code from plan
-- Pydantic v2 style with `model_config` and `Field` validators
-- Pattern validation for `tipo` and `estado` fields
-- `TransferenciaOut` includes optional club name/escudo fields for enrichment
-- `from_attributes = True` for SQLAlchemy model conversion
+| Test | Failure Reason | Expected |
+|------|----------------|----------|
+| test_comparar_clubes_normalizacion | `AttributeError: 'HistorialService' object has no attribute 'comparar_clubes'` | Yes |
+| test_comparar_clubes_diferentes | `AttributeError: 'HistorialService' object has no attribute 'comparar_clubes'` | Yes |
+| test_comparar_clubes_palmares | `AttributeError: 'HistorialService' object has no attribute 'comparar_clubes'` | Yes |
+| test_comparar_clubes_sin_goleadores | `AttributeError: 'HistorialService' object has no attribute 'comparar_clubes'` | Yes |
+| test_comparar_clubes_pj_zero | `AttributeError: 'HistorialService' object has no attribute 'comparar_clubes'` | Yes |
+| test_comparar_clubes_endpoint | `assert 404 == 200` — route /comparar doesn't exist | Yes |
+| test_comparar_clubes_missing_param | `assert 404 == 422` — route doesn't exist | Yes |
 
-## Concerns
-- None — implementation matches plan exactly
+## TDD RED Phase Confirmation
+All 7 tests fail because the service method `comprar` does not exist on `HistorialService` and the `/comparar` endpoint route is not defined in the API router. This is the correct starting state for TDD.
 
-## Report Path
-`.superpowers/sdd/task-2-report.md`
+## Next Actions
+- Implement `comparar_clubes` method in `HistorialService`
+- Add `/comparar` route to `backend/app/api/historial.py`
+- Run same tests to achieve GREEN phase
+
+## Commit
+`aa63bfa` — test(backend): add failing tests for historial comparar endpoint

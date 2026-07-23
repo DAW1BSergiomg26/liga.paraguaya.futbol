@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./branding.css";
 
 @theme {
   /* Colores primarios - Bandera y camiseta */
@@ -7,6 +8,13 @@
   --color-py-azul: #0038A8;
   --color-py-azul-oscuro: #001F5C;
   --color-py-blanco: #FFFFFF;
+
+  /* Marca APF (alias usados en toda la app) */
+  --color-apf-rojo: #CC001C;
+  --color-apf-rojo-oscuro: #9E0015;
+  --color-apf-azul: #00619E;
+  --color-apf-dorado: #FFCC00;
+  --color-apf-amarillo: #D4AF37;
 
   /* Fondo base */
   --color-bg-primario: #0A0E1A;
@@ -33,6 +41,9 @@
 
   /* Tipografía */
   --font-barlow: var(--font-barlow-condensed);
+
+  /* Animaciones logo */
+  --animate-spin-3d: spin3d 8s linear infinite;
 }
 
 body {
@@ -46,11 +57,29 @@ h1, h2, h3, .titulo-modulo {
   font-family: var(--font-barlow-condensed), sans-serif;
   letter-spacing: 0.02em;
   text-transform: uppercase;
+  scroll-margin-top: 5rem;
 }
 
 /* Alineación tabular para números en columnas */
 table, .dato-numerico {
   font-variant-numeric: tabular-nums;
+}
+
+/* Skeleton shimmer */
+.skeleton-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.skeleton-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+}
+@keyframes skeleton-shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }
 
 /* Transiciones globales suaves */
@@ -152,6 +181,13 @@ a, button, tr {
 
 .animate-row-enter {
   animation: row-enter 0.5s ease-out forwards;
+}
+
+/* Logo animado 3D — keyframes */
+@keyframes spin3d {
+  0%   { transform: rotate(0deg) scale(1); }
+  50%  { transform: rotate(180deg) scale(1.08); filter: drop-shadow(0 0 12px rgba(56,189,248,0.8)); }
+  100% { transform: rotate(360deg) scale(1); }
 }
 
 /* Navbar glassmorphism */

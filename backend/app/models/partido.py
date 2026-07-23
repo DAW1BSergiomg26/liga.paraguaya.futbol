@@ -4,7 +4,7 @@ from typing import Optional
 from sqlalchemy import Date, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from backend.app.core.database import Base
+from ..core.database import Base
 
 
 class Partido(Base):

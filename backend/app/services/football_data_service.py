@@ -2,8 +2,8 @@ import logging
 from datetime import datetime
 from typing import Optional
 import httpx
-from backend.app.services.football_config import API_BASE_URL, ENDPOINTS, TEAM_MAP, get_api_key
-from backend.app.services.football_mapper import FootballMapper
+from ..services.football_config import API_BASE_URL, ENDPOINTS, TEAM_MAP, get_api_key
+from ..services.football_mapper import FootballMapper
 
 logger = logging.getLogger(__name__)
 

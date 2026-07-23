@@ -19,13 +19,13 @@ export default function NoticiaGrid({ noticias }: NoticiaGridProps) {
 
   return (
     <ScrollReveal variant="from-bottom" stagger={0.06}>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
         {noticias.map((noticia, i) => (
           <NoticiaCard
             key={noticia.id}
             noticia={noticia}
-            variant={i === 0 ? "featured" : i < 3 ? "normal" : "compact"}
-            priority={i === 0}
+            variant={i === 0 ? "featured" : i < 5 ? "normal" : "compact"}
+            priority={i < 3}
           />
         ))}
       </div>

@@ -5,8 +5,8 @@ from datetime import datetime, timezone
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.models.noticia import Noticia
-from backend.app.schemas.noticia import NoticiaCreate, NoticiaUpdate
+from ..models.noticia import Noticia
+from ..schemas.noticia import NoticiaCreate, NoticiaUpdate
 
 
 class NoticiaService:
@@ -42,6 +42,7 @@ class NoticiaService:
         limit: int = 12,
         fuente: str | None = None,
         search: str | None = None,
+        exclude_id: str | None = None,
     ) -> dict:
         query = select(Noticia).where(Noticia.is_published == True)
 
@@ -49,6 +50,8 @@ class NoticiaService:
             query = query.where(Noticia.fuente == fuente)
         if search:
             query = query.where(Noticia.titulo.ilike(f"%{search}%"))
+        if exclude_id:
+            query = query.where(Noticia.id != exclude_id)
 
         # Count total
         count_query = select(func.count()).select_from(query.subquery())
