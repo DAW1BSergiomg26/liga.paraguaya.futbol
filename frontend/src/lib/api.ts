@@ -184,6 +184,16 @@ export async function getNoticia(id: string): Promise<Noticia> {
   return apiFetch<Noticia>(`/api/v1/noticias/${id}`);
 }
 
+export async function getNoticiasRelacionadas(
+  fuente: string,
+  excludeId: string,
+  limit = 3
+): Promise<NoticiasPaginatedResponse> {
+  return apiFetch<NoticiasPaginatedResponse>(
+    `/api/v1/noticias?limit=${limit}&fuente=${encodeURIComponent(fuente)}&exclude_id=${encodeURIComponent(excludeId)}`
+  );
+}
+
 export async function getH2H(clubA: string, clubB: string): Promise<H2HResponse> {
   const res = await apiFetch<H2HResponse>(
     `/api/v1/partidos/h2h?club_a=${encodeURIComponent(clubA)}&club_b=${encodeURIComponent(clubB)}`

@@ -17,10 +17,11 @@ async def list_noticias(
     limit: int = Query(12, ge=1, le=50),
     fuente: str | None = Query(None),
     search: str | None = Query(None),
+    exclude_id: str | None = Query(None),
     db: AsyncSession = Depends(get_db),
 ):
     svc = NoticiaService(db)
-    result = await svc.list_noticias(page=page, limit=limit, fuente=fuente, search=search)
+    result = await svc.list_noticias(page=page, limit=limit, fuente=fuente, search=search, exclude_id=exclude_id)
     fuentes = sorted({n.fuente for n in result["noticias"]})
     return NoticiasPaginatedResponse(
         noticias=[NoticiaOut.model_validate(n) for n in result["noticias"]],

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0A0E1A"/>
+      <stop offset="50%" stop-color="#1A0A10"/>
+      <stop offset="100%" stop-color="#CC001C" stop-opacity="0.3"/>
+    </linearGradient>
+    <linearGradient id="g2" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#CC001C" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#00619E" stop-opacity="0.1"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#g1)"/>
+  <rect width="1200" height="630" fill="url(#g2)"/>
+  <rect x="0" y="0" width="8" height="630" fill="#CC001C" opacity="0.6"/>
+  <rect x="60" y="80" width="300" height="3" fill="#CC001C" opacity="0.4"/>
+  <rect x="60" y="100" width="200" height="3" fill="#FFCC00" opacity="0.3"/>
+  <circle cx="1000" cy="300" r="200" fill="none" stroke="#CC001C" stroke-width="1" opacity="0.15"/>
+  <circle cx="1000" cy="300" r="150" fill="none" stroke="#FFCC00" stroke-width="0.5" opacity="0.1"/>
+  <text x="60" y="320" font-family="sans-serif" font-weight="800" font-size="72" fill="#F5F6FA" opacity="0.08">APF</text>
+  <text x="60" y="560" font-family="sans-serif" font-size="14" fill="#9AA3C0" opacity="0.3">LIGA PARAGUAYA DE FUTBOL</text>
+</svg>

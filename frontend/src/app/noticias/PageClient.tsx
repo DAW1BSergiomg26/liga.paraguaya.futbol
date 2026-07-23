@@ -6,6 +6,7 @@ import { getNoticias } from "@/lib/api";
 import PageHeader from "@/components/ui/PageHeader";
 import NoticiaGrid from "@/components/noticia/NoticiaGrid";
 import FiltrosNoticias from "@/components/noticia/FiltrosNoticias";
+import { NoticiaSkeletonGrid } from "@/components/noticia/NoticiaSkeleton";
 
 export default function NoticiasPage() {
   const [page, setPage] = useState(1);
@@ -31,18 +32,7 @@ export default function NoticiasPage() {
         onBusquedaChange={(b) => { setBusqueda(b); setPage(1); }}
       />
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="animate-pulse rounded-xl border border-borde-sutil overflow-hidden">
-              <div className="h-48 bg-texto-principal/5" />
-              <div className="p-4 space-y-2">
-                <div className="h-3 bg-texto-principal/5 rounded w-1/3" />
-                <div className="h-4 bg-texto-principal/5 rounded w-full" />
-                <div className="h-3 bg-texto-principal/5 rounded w-2/3" />
-              </div>
-            </div>
-          ))}
-        </div>
+        <NoticiaSkeletonGrid count={6} />
       ) : (
         <>
           <NoticiaGrid noticias={data?.noticias ?? []} />
@@ -53,17 +43,17 @@ export default function NoticiasPage() {
                 disabled={page === 1}
                 className="px-4 py-2 rounded-lg bg-bg-terciario border border-borde-sutil text-texto-secundario hover:text-white disabled:opacity-40 transition"
               >
-                ← Anterior
+                Anterior
               </button>
               <span className="px-4 py-2 text-texto-secundario text-sm">
-                Página {data.page} de {data.total_pages}
+                Pagina {data.page} de {data.total_pages}
               </span>
               <button
                 onClick={() => setPage((p) => Math.min(data.total_pages, p + 1))}
                 disabled={page === data.total_pages}
                 className="px-4 py-2 rounded-lg bg-bg-terciario border border-borde-sutil text-texto-secundario hover:text-white disabled:opacity-40 transition"
               >
-                Siguiente →
+                Siguiente
               </button>
             </div>
           )}
