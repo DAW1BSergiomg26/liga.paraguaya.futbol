@@ -333,6 +333,10 @@ async def seed_transferencias(db: AsyncSession):
 
                 if k != "id":
 
+                    if k == "fecha" and isinstance(v, str):
+
+                        v = __import__("datetime").date.fromisoformat(v)
+
                     setattr(t, k, v)
 
             count_upd += 1
