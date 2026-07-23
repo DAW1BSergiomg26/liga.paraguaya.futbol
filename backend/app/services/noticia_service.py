@@ -41,13 +41,16 @@ class NoticiaService:
         page: int = 1,
         limit: int = 12,
         fuente: str | None = None,
+        origen: str | None = None,
         search: str | None = None,
         exclude_id: str | None = None,
     ) -> dict:
         query = select(Noticia).where(Noticia.is_published == True)
 
-        if fuente:
-            query = query.where(Noticia.fuente == fuente)
+        if origen:
+            query = query.where(Noticia.origen == origen.lower().strip())
+        elif fuente:
+            query = query.where(Noticia.fuente.ilike(f"%{fuente.strip()}%"))
         if search:
             query = query.where(Noticia.titulo.ilike(f"%{search}%"))
         if exclude_id:
