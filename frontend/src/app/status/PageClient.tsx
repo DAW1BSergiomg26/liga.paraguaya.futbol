@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { API_URL } from "@/lib/api";
+import { CircleCheck, AlertTriangle, RotateCw, CircleX, Clock } from "lucide-react";
 
 interface CheckResult {
   name: string;
@@ -19,11 +20,11 @@ const INITIAL: CheckResult[] = [
 ];
 
 function statusIcon(s: CheckResult["status"]) {
-  if (s === "ok") return "✅";
-  if (s === "slow") return "⚠️";
-  if (s === "waking") return "🔄";
-  if (s === "error") return "❌";
-  return "⏳";
+  if (s === "ok") return <CircleCheck className="w-5 h-5 text-[#16C784]" />;
+  if (s === "slow") return <AlertTriangle className="w-5 h-5 text-yellow-400" />;
+  if (s === "waking") return <RotateCw className="w-5 h-5 text-blue-400 animate-spin" />;
+  if (s === "error") return <CircleX className="w-5 h-5 text-[#E5484D]" />;
+  return <Clock className="w-5 h-5 text-gray-400" />;
 }
 
 function statusLabel(s: CheckResult["status"]) {
@@ -182,7 +183,7 @@ export default function StatusPage() {
           ? "bg-[#16C784]/15 text-[#16C784] border border-[#16C784]/30"
           : "bg-[#E5484D]/15 text-[#E5484D] border border-[#E5484D]/30"
       }`}>
-        {allOk ? "✅ Todos los servicios operativos" : "⚠️ Algún servicio con problemas"}
+        {allOk ? "Todos los servicios operativos" : "Algún servicio con problemas"}
       </div>
 
       {/* Service cards */}
@@ -193,7 +194,7 @@ export default function StatusPage() {
             className="flex items-center justify-between p-4 rounded-xl bg-bg-secundario border border-borde-sutil"
           >
             <div className="flex items-center gap-3">
-              <span className="text-lg">{statusIcon(c.status)}</span>
+              <span className="text-lg flex items-center">{statusIcon(c.status)}</span>
               <div>
                 <p className="text-sm font-semibold text-texto-principal">{c.name}</p>
                 <p className="text-xs text-texto-secundario">{c.message}</p>

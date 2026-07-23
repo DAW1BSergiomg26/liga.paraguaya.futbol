@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import { Building2 } from "lucide-react";
 
 export default function NotFound() {
   return (
     <section className="flex flex-col items-center justify-center min-h-[60vh] px-4 text-center">
       <div className="max-w-md w-full bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-8 space-y-6">
-        <div className="text-6xl">🏟️</div>
+        <div className="text-6xl flex justify-center"><Building2 className="w-16 h-16 text-apf-rojo" /></div>
         <h2 className="text-2xl font-bold text-white font-[family-name:var(--font-barlow-condensed)]">
           Cancha no encontrada
         </h2>

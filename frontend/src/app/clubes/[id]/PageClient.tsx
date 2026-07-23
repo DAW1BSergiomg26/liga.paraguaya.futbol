@@ -8,6 +8,7 @@ import type { Club, ClubDetail, Partido, PartidoPage, TablaRow } from "@/types";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import ErrorMessage from "@/components/ui/ErrorMessage";
+import { Trophy } from "lucide-react";
 
 function torneoActual(torneos: string[]): string | null {
   if (torneos.length === 0) return null;
@@ -205,7 +206,7 @@ export default function ClubDetailPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {club.titulos_internacionales.map((t, i) => (
               <div key={i} className="flex items-center gap-3">
-                <span className="text-yellow-400 text-2xl">🏆</span>
+                <span className="text-yellow-400"><Trophy className="w-6 h-6" /></span>
                 <div>
                   <p className="text-white font-medium">{t.torneo}</p>
                   <p className="text-yellow-300 text-2xl font-bold">{t.cantidad}</p>

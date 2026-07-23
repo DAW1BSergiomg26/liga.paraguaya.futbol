@@ -8,6 +8,7 @@ import { apiFetch } from "@/lib/api";
 import { escudoUrl } from "@/lib/escudos";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import Red2DFallback from "@/components/red3d/Red2DFallback";
+import { MousePointer, Search, Zap } from "lucide-react";
 
 /* ── Lazy-load del componente 3D (solo se carga bajo demanda) ── */
 const Graph3D = lazy(() => import("@/components/red3d/Graph3D"));
@@ -593,9 +594,9 @@ export default function Red3DPage() {
                 )}
 
                 <div className="absolute top-3 left-3 flex flex-wrap gap-3 text-[11px] text-texto-secundario bg-bg-noche/70 backdrop-blur px-3 py-2 rounded-lg border border-borde-sutil">
-                  <span>🖱 Arrastrá para rotar</span>
-                  <span>🔍 Scroll para zoom</span>
-                  <span>⚡ Click en un club para acercarte</span>
+                  <span className="inline-flex items-center gap-1"><MousePointer className="w-3 h-3" /> Arrastrá para rotar</span>
+                  <span className="inline-flex items-center gap-1"><Search className="w-3 h-3" /> Scroll para zoom</span>
+                  <span className="inline-flex items-center gap-1"><Zap className="w-3 h-3" /> Click en un club para acercarte</span>
                 </div>
 
                 {/* Botón flotante Reset View / Centrar todo */}

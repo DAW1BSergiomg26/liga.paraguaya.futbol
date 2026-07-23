@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { CircleDot } from "lucide-react";
 
 export default function GlobalError({
   error,
@@ -16,7 +17,7 @@ export default function GlobalError({
   return (
     <section className="flex flex-col items-center justify-center min-h-[60vh] px-4 text-center">
       <div className="max-w-md w-full bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-8 space-y-6">
-        <div className="text-6xl">⚽</div>
+        <div className="text-6xl flex justify-center"><CircleDot className="w-16 h-16 text-apf-rojo" /></div>
         <h2 className="text-2xl font-bold text-white font-[family-name:var(--font-barlow-condensed)]">
           Ups, algo salió mal
         </h2>
