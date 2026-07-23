@@ -1,14 +1,14 @@
 export function NoticiaSkeletonGrid({ count = 6 }: { count?: number }) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
       {Array.from({ length: count }).map((_, i) => (
         <div
           key={i}
-          className={`rounded-xl border border-borde-sutil bg-bg-secundario/60 overflow-hidden ${
+          className={`rounded-xl border border-white/[0.06] bg-bg-secundario overflow-hidden ${
             i === 0 ? "md:col-span-2 md:row-span-2" : ""
           }`}
         >
-          <div className={`bg-white/[0.03] animate-pulse ${i === 0 ? "h-72" : "h-48"}`} />
+          <div className={`bg-white/[0.03] animate-pulse ${i === 0 ? "h-56 md:h-64" : "h-44"}`} />
           <div className="p-4 space-y-3">
             <div className="flex items-center gap-2">
               <div className="h-5 w-16 bg-white/[0.06] rounded-full animate-pulse" />
@@ -59,7 +59,7 @@ export function NoticiaRelacionadasSkeleton() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
       {Array.from({ length: 3 }).map((_, i) => (
-        <div key={i} className="rounded-xl border border-borde-sutil bg-bg-secundario/60 overflow-hidden animate-pulse">
+        <div key={i} className="rounded-xl border border-white/[0.06] bg-bg-secundario overflow-hidden animate-pulse">
           <div className="h-32 bg-white/[0.03]" />
           <div className="p-3 space-y-2">
             <div className="h-3 bg-white/[0.06] rounded w-16" />

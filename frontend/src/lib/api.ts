@@ -169,12 +169,14 @@ export async function getNoticias(params?: {
   page?: number;
   limit?: number;
   fuente?: string;
+  origen?: string;
   search?: string;
 }): Promise<NoticiasPaginatedResponse> {
   const searchParams = new URLSearchParams();
   if (params?.page) searchParams.set("page", params.page.toString());
   if (params?.limit) searchParams.set("limit", params.limit.toString());
-  if (params?.fuente) searchParams.set("fuente", params.fuente);
+  if (params?.origen) searchParams.set("origen", params.origen);
+  else if (params?.fuente) searchParams.set("fuente", params.fuente);
   if (params?.search) searchParams.set("search", params.search);
   const qs = searchParams.toString();
   return apiFetch<NoticiasPaginatedResponse>(`/api/v1/noticias${qs ? `?${qs}` : ""}`);
