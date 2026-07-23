@@ -481,6 +481,7 @@ async def seed_noticias(db: AsyncSession):
             "contenido": "Club Olimpia llega a la fecha 15 del Torneo Apertura 2026 como lider invicto. Con 11 victorias y 3 empates, el equipo busca consolidar su ventaja.",
             "fuente": "Liga Paraguaya",
             "origen": "editorial",
+            "imagen_url": "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=800&h=500&fit=crop",
             "pub_date": datetime(2026, 7, 20, tzinfo=timezone.utc),
         },
         {
@@ -489,6 +490,7 @@ async def seed_noticias(db: AsyncSession):
             "contenido": "Club Cerro Porteno anuncio la incorporacion de dos refuerzos de cara a la Copa Libertadores 2026.",
             "fuente": "Liga Paraguaya",
             "origen": "editorial",
+            "imagen_url": "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=500&fit=crop",
             "pub_date": datetime(2026, 7, 18, tzinfo=timezone.utc),
         },
         {
@@ -497,6 +499,7 @@ async def seed_noticias(db: AsyncSession):
             "contenido": "Club Guarani se encuentra en zona de clasificacion a copas internacionales tras las ultimas fechas.",
             "fuente": "Liga Paraguaya",
             "origen": "editorial",
+            "imagen_url": "https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?w=800&h=500&fit=crop",
             "pub_date": datetime(2026, 7, 15, tzinfo=timezone.utc),
         },
         {
@@ -505,6 +508,7 @@ async def seed_noticias(db: AsyncSession):
             "contenido": "Club Rubio Nu se ha convertido en la revelacion del Torneo Apertura 2026 con 5 victorias consecutivas.",
             "fuente": "Liga Paraguaya",
             "origen": "editorial",
+            "imagen_url": "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=800&h=500&fit=crop",
             "pub_date": datetime(2026, 7, 12, tzinfo=timezone.utc),
         },
         {
@@ -513,6 +517,7 @@ async def seed_noticias(db: AsyncSession):
             "contenido": "Sportivo Luqueno atraviesa un momento complicado en el Torneo Apertura 2026.",
             "fuente": "Liga Paraguaya",
             "origen": "editorial",
+            "imagen_url": "https://images.unsplash.com/photo-1553778263-73a83bab9b0c?w=800&h=500&fit=crop",
             "pub_date": datetime(2026, 7, 10, tzinfo=timezone.utc),
         },
     ]
@@ -523,7 +528,7 @@ async def seed_noticias(db: AsyncSession):
             titulo=n["titulo"],
             resumen=n["resumen"],
             contenido=n["contenido"],
-            imagen_url=None,
+            imagen_url=n["imagen_url"],
             video_url=None,
             fuente=n["fuente"],
             origen=n["origen"],

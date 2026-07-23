@@ -233,6 +233,8 @@ export interface NoticiasPaginatedResponse {
   total: number;
   page: number;
   total_pages: number;
+  fuentes: string[];
+  actualizado: string | null;
 }
 
 export type StructuredData = ClubDetailData | MatchFormData | H2HData | MiniTableData | ComparisonData | NextMatchData | PredictionData | { type: "greeting" | "unknown" };
